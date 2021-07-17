@@ -1,5 +1,5 @@
 ---
-title: 标签 
-type: "tags" 
-layout: "tags" 
+title: 标签
+type: "tags"
+layout: "tags"
 ---
