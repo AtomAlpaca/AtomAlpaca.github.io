@@ -10,6 +10,7 @@
   clear: both;
 }
 #article-toc {
+  list-style: none;
   display: block;
   position: fixed;
   top: 0;
