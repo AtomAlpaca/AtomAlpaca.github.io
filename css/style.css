@@ -688,6 +688,7 @@ figure.highlight table .line.marked {
   background: #d6d6d6;
 }
 pre {
+  tab-size: 4;
   font-size: 16px;
 }
 pre .comment,
