@@ -111,7 +111,7 @@ nav,
 body,
 html {
   width: 100%;
-  font-size: 21px;
+  font-size: 18px;
   color: #4d4d4d;
 }
 p {
@@ -867,7 +867,6 @@ td {
   clear: both;
 }
 #article-toc {
-  list-style: none;
   display: block;
   position: fixed;
   top: 0;
@@ -893,10 +892,19 @@ td {
   margin: 0;
 }
 #article-toc-inner .toc-item {
-  height: 2em;
   line-height: 2em;
   padding: 0;
   margin: 0;
+}
+#article-toc-inner .toc-child {
+  padding: 0;
+  margin-left: 1em;
+  line-height: 2em;
+}
+#article-toc-inner .toc-child .toc-item {
+  margin: 0;
+  padding: 0;
+  list-style-type: square;
 }
 #article-toc-inner .toc-link {
   color: #4d4d4d;
