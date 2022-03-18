@@ -139,24 +139,6 @@
                     <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                         <!-- Disqus Comments -->
 
-  <div id="disqus_thread" class="comment"></div>
-  <script>
-    var disqus_shortname = 'atal';
-    var disqus_website = 'https://atal.moe';
-    var disqus_config = function () {
-      this.page.url = disqus_website;
-      this.page.identifier = disqus_shortname;
-    };
-    (function () {
-      var d = document, s = d.createElement('script');
-      s.src = 'https://' + disqus_shortname + '.disqus.com/embed.js';
-      s.setAttribute('data-timestamp', +new Date());
-      (d.head || d.body).appendChild(s);
-    })();
-  </script>
-  <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="https://disqus.com/?ref_noscript">comments powered by
-      Disqus.</a></noscript>
-
 
                     </div>
                 </div>
@@ -166,41 +148,14 @@
 
 <!-- Image viewer-->
 
-    <!-- Custom picture view-->
-    <link href="/css/viewer.min.css" rel="stylesheet" />
-    <script
-      src="/js/viewer.min.js"
-      type="text/javascript"
-      charset="utf-8"
-    ></script>
     
-    <script type="text/javascript">
-      // set image viewer
-      Viewer.setDefaults({
-        zoomRatio: [0.5],
-        navbar: false,
-        toolbar: false,
-        button: false,
-        title: [2, (image, imageData) => `${image.alt}`],
-        show: function() {
-          this.viewer.zoomTo(0.5);
-        }
-      });
-      var imageList = document.getElementsByTagName("img");
-      Array.prototype.forEach.call(imageList, element => {
-        var viewer = new Viewer(element);
-      });
-    </script>
 
-    
 
 <!-- TOC -->
 
     <!-- Scripts -->
-    <script type="text/javascript">
-    console.log("© zchen9 🙋 2015-" + new Date().getFullYear());
-</script>
-  
+      
+
     <!-- Google Analytics -->
     
 
