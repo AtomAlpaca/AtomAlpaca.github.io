@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang = "zh_cn">
+
+<head>
+	<meta charset = "utf-8"/>
+		<meta name = "author" content = "AtomAlpaca">
+		<title>「题解」 P2022 有趣的数</title>
+	<link rel = "stylesheet" href = "./style.css" type = "text/css"/>
+</head>
+
+<body>
+	<header>
+				<p>
+			<h1>
+				「题解」 P2022 有趣的数
+			</h1>
+		</p>
+		<p style = "text-align: center">
+						AtomAlpaca
+								</p>
+				
+			</header>
+		<h2>
+		Table of contents
+	</h2>
+	<ul>
+<li><a href="#题目" id="toc-题目">题目</a></li>
+<li><a href="#分析" id="toc-分析">分析</a></li>
+<li><a href="#代码" id="toc-代码">代码</a></li>
+</ul>
+	
+	<p>逝去的从容逝去，重温的依然重温，在沧桑的枝叶间，折取一朵明媚，簪进岁月肌里，让它疼痛又甜蜜，让它流去又流回。
+——汪曾祺《人间草木》</p>
+<h2 id="题目">题目</h2>
+<p><a href="https://www.luogu.com.cn/problem/P2022">link</a></p>
+<h2 id="分析">分析</h2>
+<p>这道题目要求我们做这样几件事:</p>
+<ol>
+<li><p>判断是否存在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
+使得
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>N</mi><mo>,</mo><mi>K</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>M</mi></mrow><annotation encoding="application/x-tex">Q \left( N,K \right)=M</annotation></semantics></math>;</p></li>
+<li><p>如果存在，求出
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
+的最小值;</p></li>
+<li><p>如果不存在，输出
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0</mn><annotation encoding="application/x-tex">0</annotation></semantics></math>.</p></li>
+</ol>
+<p>通过分析 <a href="https://zh.wikipedia.org/zh-cn/字典序">字典序</a>
+的定义,我们知道:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>I</mi><mo>,</mo><mi>K</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>≥</mo><mi>Q</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>N</mi><mo>,</mo><mi>K</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo><mi>I</mi><mo>&gt;</mo><mi>N</mi></mrow><annotation encoding="application/x-tex">Q \left( I, K \right) \ge Q \left( N, K \right), I &gt; N</annotation></semantics></math></p>
+<p>这是显然的, 因为随着
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>I</mi><annotation encoding="application/x-tex">I</annotation></semantics></math>
+的增大,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+字典序前面的数字绝对不会跑到它后面去. 对于不是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>10</mn><mi>n</mi></msup><annotation encoding="application/x-tex">10^n</annotation></semantics></math>
+的形式的数字, 它前面的数字显然会可能增加. 这就意味着,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+一定时, 随着
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math>
+的增大,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>M</mi><mo>,</mo><mi>K</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">Q \left( M, K \right)</annotation></semantics></math>
+单调递增.</p>
+<p>由于
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+必须要出现在字典序列中,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math>
+的最小值为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>.
+此时<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>M</mi><mo>,</mo><mi>K</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">Q \left( M, K \right)</annotation></semantics></math>也最小.
+因此我们知道:</p>
+<ol>
+<li><p>如果
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>K</mi><mo>,</mo><mi>K</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>&gt;</mo><mi>M</mi></mrow><annotation encoding="application/x-tex">Q \left( K, K \right) &gt; M</annotation></semantics></math>
+, 那么一定不存在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
+使
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>N</mi><mo>,</mo><mi>K</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>M</mi></mrow><annotation encoding="application/x-tex">Q \left( N, K \right)=M</annotation></semantics></math>;</p></li>
+<li><p>如果
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>K</mi><mo>,</mo><mi>K</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>M</mi></mrow><annotation encoding="application/x-tex">Q \left( K, K \right) = M</annotation></semantics></math>
+, 那么所求
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>=</mo><mi>K</mi></mrow><annotation encoding="application/x-tex">N = K</annotation></semantics></math>.</p></li>
+</ol>
+<p>对于形如
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mn>10</mn><mi>n</mi></msup><annotation encoding="application/x-tex">10 ^ {n}</annotation></semantics></math>
+的
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>,
+显然
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>K</mi><mo>,</mo><mi>K</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>n</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">Q \left( K, K \right) = n + 1</annotation></semantics></math>.
+但对于一般数字, 我们首先需要设法求
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>K</mi><mo>,</mo><mi>K</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">Q \left( K, K \right)</annotation></semantics></math></p>
+<p>如果我们求出在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+前的数字的数量，加
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>
+便是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>K</mi><mo>,</mo><mi>K</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">Q \left( K, K \right)</annotation></semantics></math>.
+我们从位数从小到大的角度讨论在其字典序前的数字.</p>
+<p>根据字典序的定义, 对于位数为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>l</mi><mi>n</mi></msub><annotation encoding="application/x-tex">l_n</annotation></semantics></math>
+的数字
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>,
+我们只需要与
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+的前
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>l</mi><mi>n</mi></msub><annotation encoding="application/x-tex">l_n</annotation></semantics></math>
+位进行比较. 我们预先处理出
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+的前
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>l</mi><annotation encoding="application/x-tex">l</annotation></semantics></math>
+位
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>K</mi><mi>l</mi></msub><annotation encoding="application/x-tex">K_l</annotation></semantics></math>,
+此时不难发现当且仅当
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>≤</mo><msub><mi>K</mi><mi>l</mi></msub></mrow><annotation encoding="application/x-tex">n \le K_l</annotation></semantics></math>
+时,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+前, 或
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+就是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+本身. 又考虑到任意数字开头不为零, 因此, 在所有位数为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>l</mi><annotation encoding="application/x-tex">l</annotation></semantics></math>
+的数字中, 排在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+前或与
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+相等的有
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>K</mi><mi>l</mi></msub><mo>−</mo><msup><mn>10</mn><mrow><mi>l</mi><mo>−</mo><mn>1</mn></mrow></msup><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">K_{l} - 10 ^ {l - 1} + 1</annotation></semantics></math>
+个.</p>
+<p>因此我们得到:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>K</mi><mo>,</mo><mi>K</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><munderover><mo>∑</mo><mrow><mi>l</mi><mo>=</mo><mn>1</mn></mrow><mi>L</mi></munderover><mrow><msub><mi>K</mi><mi>l</mi></msub><mo>−</mo><msup><mn>10</mn><mrow><mi>l</mi><mo>−</mo><mn>1</mn></mrow></msup><mo>+</mo><mn>1</mn></mrow></mrow><annotation encoding="application/x-tex">Q \left( K, K \right) = \sum_{ l = 1 } ^ { L }  {{K_l} - 10 ^ {l - 1} + 1}</annotation></semantics></math>
+其中
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>L</mi><annotation encoding="application/x-tex">L</annotation></semantics></math>
+是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+的位数.</p>
+<p>注意这里其实算进来了一个等于
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+的数, 但是因为最后要加
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>,
+所以二者可相互抵消.</p>
+<p>当
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>K</mi><mo>,</mo><mi>K</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>&lt;</mo><mi>M</mi></mrow><annotation encoding="application/x-tex">Q \left( K, K \right) &lt; M</annotation></semantics></math>
+时, 我们还要求出
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
+令
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Q</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>N</mi><mo>,</mo><mi>K</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>M</mi></mrow><annotation encoding="application/x-tex">Q \left( N, K \right) = M</annotation></semantics></math>.
+考虑到对于任意
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>L</mi><annotation encoding="application/x-tex">L</annotation></semantics></math>
+位数
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>,
+若
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>&gt;</mo><mi>K</mi></mrow><annotation encoding="application/x-tex">n &gt; K</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+一定排在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+的字典序后, 因此我们直接讨论
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">L + 1</annotation></semantics></math>位数.</p>
+<p>我们发现，所有小于
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+的
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>L</mi><annotation encoding="application/x-tex">L</annotation></semantics></math>
+位数, 在后面加上一个数字后, 得到的数字的字典序一定还在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+的字典序之后,因此每增加一位,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+字典序前的数字增加的量就等于上一位数
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+字典序前的数字增加的量的
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>10</mn><annotation encoding="application/x-tex">10</annotation></semantics></math>
+倍. 由此我们得到, 将序列增加到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>L</mi><mo>+</mo><mi>i</mi></mrow><annotation encoding="application/x-tex">L + i</annotation></semantics></math>
+位数时,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+字典序前的数字会增加
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>K</mi><mi>l</mi></msub><mo>×</mo><msup><mn>10</mn><mi>i</mi></msup><mo>−</mo><msup><mn>10</mn><mrow><mi>l</mi><mo>+</mo><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msup></mrow><annotation encoding="application/x-tex">K_{l} \times 10 ^ {i} - 10 ^ {l + i - 1}</annotation></semantics></math>
+个.</p>
+<p>令
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo>=</mo><mi>M</mi><mo>−</mo><mi>Q</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>K</mi><mo>,</mo><mi>K</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">P = M - Q \left( K, K \right)</annotation></semantics></math>，
+我们不断枚举
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+，让
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>P</mi><annotation encoding="application/x-tex">P</annotation></semantics></math>
+每次减
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>K</mi><mi>l</mi></msub><mo>×</mo><msup><mn>10</mn><mi>i</mi></msup><mo>−</mo><msup><mn>10</mn><mrow><mi>l</mi><mo>+</mo><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msup></mrow><annotation encoding="application/x-tex">K_{l} \times 10 ^ {i} - 10 ^ {l + i - 1}</annotation></semantics></math>,
+当第
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>
+次减去后
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo>&lt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">P &lt; 0</annotation></semantics></math>
+时, 记录
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">r - 1</annotation></semantics></math>
+及当时的
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>P</mi><annotation encoding="application/x-tex">P</annotation></semantics></math>,
+则答案为
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mn>10</mn><mrow><mi>r</mi><mo>−</mo><mn>1</mn></mrow></msup><mo>+</mo><mi>P</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">10^{r - 1} + P - 1</annotation></semantics></math></p>
+<p>这是因为, 当枚举到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">r - 1</annotation></semantics></math>
+时, 我们距离目标
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>M</mi><annotation encoding="application/x-tex">M</annotation></semantics></math>
+还有
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>P</mi><annotation encoding="application/x-tex">P</annotation></semantics></math>
+个数字, 这时我们加上这
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>P</mi><annotation encoding="application/x-tex">P</annotation></semantics></math>
+个
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>
+位数, 在减去与
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>K</mi><annotation encoding="application/x-tex">K</annotation></semantics></math>
+相等的那个数, 我们就能得到答案.</p>
+<h2 id="代码">代码</h2>
+<pre><code>#include &lt;iostream&gt;
+
+using std::cin;
+using std::cout;
+
+long long k, m, min, now, len;
+long long power[20],  nums[20];
+int main()
+{
+    cin &gt;&gt; k &gt;&gt; m;
+    power[0] = 1;
+
+    for (int i = 1; i &lt;= 20; ++i)
+    {
+        power[i] = power[i - 1] * 10;
+    }
+
+    for (int i = 0; i &lt;= 20; ++i)
+    {
+        if (k == power[i] and m != i + 1)
+        {
+            cout &lt;&lt; 0;
+            return 0;
+        }
+    }
+
+    std::string str;
+    str = std::to_string(k);
+    len = str.length();
+
+    for (int i = 1; i &lt; len; ++i)
+    {
+        nums[i] = k / power[(len - i)];
+    }
+
+    nums[0] = 0;
+    nums[len] = k;
+
+    for (int i = 1; i &lt; 11; ++i)
+    {
+        if (k &lt; power[i - 1])
+        {
+            break;
+        }
+        min += nums[i] - power[i - 1] + 1;
+    }
+
+    if (min &gt; m)
+    {
+        cout &lt;&lt; 0;
+    }
+    else if (min == m)
+    {
+        cout &lt;&lt; k;
+    }
+    else
+    {
+        m -= min;
+        long long ans = power[len];
+        int i = 1;
+        while (true)
+        {
+            long long tmp = k * power[i] - power[len + i - 1];
+            if (m &gt; tmp)
+            {
+                m -= tmp;
+                ans *= 10;
+                ++i;
+            }
+            else
+            {
+                break;
+            }
+        }
+        ans += m - 1;
+        cout &lt;&lt; ans;
+    }
+    return 0;
+}</code></pre>
+</body>
