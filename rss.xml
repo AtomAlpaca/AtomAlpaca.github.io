@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+<channel>
+	<title>AtomAlpaca's Blog</title>
+	<link>https://blog.atal.moe/</link>
+	<description>AtomAlpaca's Blog</description>
+	<item>
+		<title>2021</title>
+		<link>https://blog.atal.moe/post/2021</link>
+	</item>
+	<item>
+		<title>「题解」Loj 6807 最小公倍树</title>
+		<link>https://blog.atal.moe/post/6807-solution</link>
+	</item>
+	<item>
+		<title>「题解」 P2022 有趣的数</title>
+		<link>https://blog.atal.moe/post/P2022-solution</link>
+	</item>
+	<item>
+		<title>「题解」 P7813 有趣的数</title>
+		<link>https://blog.atal.moe/post/P7813-solution</link>
+	</item>
+</channel>
+</rss>
