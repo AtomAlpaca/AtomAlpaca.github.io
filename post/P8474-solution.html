@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang = "zh_cn">
+
+<head>
+	<meta charset = "utf-8"/>
+		<meta name = "author" content = "AtomAlpaca">
+		<title>「题解」 P8474 立春</title>
+	<link rel = "stylesheet" href = "./style.css" type = "text/css"/>
+	<link rel="stylesheet"
+      href="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/panda-syntax-dark.min.css">
+	<script src="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/highlight.min.js"></script>
+
+</head>
+
+<body>
+	<header>
+				<p>
+			<h1>
+				「题解」 P8474 立春
+			</h1>
+		</p>
+		<p style = "text-align: center">
+						AtomAlpaca
+								</p>
+				
+			</header>
+	<script>hljs.highlightAll();</script>
+		<h2>
+		Table of contents
+	</h2>
+	<ul>
+<li><a href="#题目" id="toc-题目">题目</a></li>
+<li><a href="#分析" id="toc-分析">分析</a></li>
+<li><a href="#代码" id="toc-代码">代码</a></li>
+</ul>
+	
+	<h1 id="题目">题目</h1>
+<p><a href="https://www.luogu.com.cn/problem/P8474">link</a></p>
+<h1 id="分析">分析</h1>
+<p>首先因为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>≤</mo><msup><mn>10</mn><mn>7</mn></msup></mrow><annotation encoding="application/x-tex">n \le 10^7</annotation></semantics></math>,
+枚举每一种情况求和是不可能的。</p>
+<p>我们枚举一下
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">n = 4</annotation></semantics></math>
+的情况:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right"><munder><mo>∑</mo><mi>σ</mi></munder><msup><mn>2</mn><mrow><mi>τ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>σ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msup></mtd><mtd columnalign="left"><mo>=</mo><msup><mn>2</mn><mrow><mi>τ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mo>&lt;</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo>,</mo><mn>3</mn><mo>,</mo><mn>4</mn><mo>&gt;</mo><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msup></mtd></mtr><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mo>+</mo><msup><mn>2</mn><mrow><mi>τ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mo>&lt;</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo>,</mo><mn>4</mn><mo>,</mo><mn>3</mn><mo>&gt;</mo><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msup></mtd></mtr><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mo>+</mo><msup><mn>2</mn><mrow><mi>τ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mo>&lt;</mo><mn>1</mn><mo>,</mo><mn>3</mn><mo>,</mo><mn>2</mn><mo>,</mo><mn>4</mn><mo>&gt;</mo><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msup></mtd></mtr><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mo>+</mo><msup><mn>2</mn><mrow><mi>τ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mo>&lt;</mo><mn>1</mn><mo>,</mo><mn>3</mn><mo>,</mo><mn>4</mn><mo>,</mo><mn>2</mn><mo>&gt;</mo><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msup></mtd></mtr><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mo>+</mo><msup><mn>2</mn><mrow><mi>τ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mo>&lt;</mo><mn>1</mn><mo>,</mo><mn>4</mn><mo>,</mo><mn>2</mn><mo>,</mo><mn>3</mn><mo>&gt;</mo><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msup></mtd></mtr><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mo>+</mo><msup><mn>2</mn><mrow><mi>τ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mo>&lt;</mo><mn>1</mn><mo>,</mo><mn>4</mn><mo>,</mo><mn>3</mn><mo>,</mo><mn>2</mn><mo>&gt;</mo><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msup></mtd></mtr><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mo>+</mo><msup><mn>2</mn><mrow><mi>τ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mo>&lt;</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo>,</mo><mn>3</mn><mo>,</mo><mn>4</mn><mo>&gt;</mo><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msup></mtd></mtr><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mo>+</mo><mi>⋯</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+            \sum_{\sigma}{2 ^ {\tau \left( \sigma \right)}}
+            &amp;= 2^{\tau \left( &lt; 1, 2, 3, 4 &gt; \right)} \\
+            &amp;+ 2^{\tau \left( &lt; 1, 2, 4, 3 &gt; \right)} \\
+            &amp;+ 2^{\tau \left( &lt; 1, 3, 2, 4 &gt; \right)} \\
+            &amp;+ 2^{\tau \left( &lt; 1, 3, 4, 2 &gt; \right)} \\
+            &amp;+ 2^{\tau \left( &lt; 1, 4, 2, 3 &gt; \right)} \\
+            &amp;+ 2^{\tau \left( &lt; 1, 4, 3, 2 &gt; \right)} \\
+            &amp;+ 2^{\tau \left( &lt; 1, 2, 3, 4 &gt; \right)} \\
+            &amp;+ \cdots
+        \end{aligned}</annotation></semantics></math> 这时我们发现, 将
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">n = 4</annotation></semantics></math>
+的所有序列按照字典序排序后, 将前
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mi>!</mi></mrow><annotation encoding="application/x-tex">\left(n - 1\right)!</annotation></semantics></math>种排列的后三位离散化,
+就是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">n = 3</annotation></semantics></math>
+时的所有情况情况. 假设我们已经知道了
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">n = 3</annotation></semantics></math>
+时的答案, 且知道新增加的数是如何影响逆序对个数的,
+我们就可以用递推解出此题.</p>
+<p>显然的, 在一个序列前添加一个数,
+增加的逆序对的数量是其后方比其小的数的个数. 具体地, 在上面的例子中,
+当这个数是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>
+的时候, 增加的数量为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0</mn><annotation encoding="application/x-tex">0</annotation></semantics></math>;
+当这个数是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>2</mn><annotation encoding="application/x-tex">2</annotation></semantics></math>
+时, 增加的数量为零; 当这个数是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∀</mo><mi>m</mi><mo>∈</mo><mstyle mathvariant="double-struck"><mi>ℕ</mi></mstyle><mo>,</mo><mi>m</mi><mo>≤</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">\forall m \in \mathbb{N}, m \le n</annotation></semantics></math>
+时, 增加是数是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n - 1</annotation></semantics></math>.</p>
+<p>设
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>
+为任意一个长度为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n - 1</annotation></semantics></math>
+的排列,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>δ</mi><annotation encoding="application/x-tex">\delta</annotation></semantics></math>
+为任意一个长度为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+的排列, 则:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><munder><mo>∑</mo><mi>δ</mi></munder><msup><mn>2</mn><mrow><mi>τ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>δ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msup></mtd></mtr><mtr><mtd columnalign="right"><mo>=</mo></mtd><mtd columnalign="left"><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>0</mn></mrow><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow></munderover><mrow><msup><mn>2</mn><mi>i</mi></msup><mo>⋅</mo><munder><mo>∑</mo><mi>σ</mi></munder><msup><mn>2</mn><mrow><mi>τ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>σ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msup></mrow></mtd></mtr><mtr><mtd columnalign="right"><mo>=</mo></mtd><mtd columnalign="left"><munder><mo>∑</mo><mi>σ</mi></munder><msup><mn>2</mn><mrow><mi>τ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>σ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msup><mo>⋅</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>0</mn></mrow><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow></munderover><msup><mn>2</mn><mi>i</mi></msup></mtd></mtr><mtr><mtd columnalign="right"><mo>=</mo></mtd><mtd columnalign="left"><mrow><mo stretchy="true" form="prefix">(</mo><msup><mn>2</mn><mi>n</mi></msup><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><munder><mo>∑</mo><mi>σ</mi></munder><msup><mn>2</mn><mrow><mi>τ</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>σ</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msup></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+            &amp;  \sum_{\delta}{2 ^ {\tau \left( \delta \right)}} \\
+            =&amp; \sum_{i = 0}^{n - 1}{2^{i} \cdot \sum_{\sigma} {2^{\tau\left(\sigma\right)}}} \\
+            =&amp; \sum_{\sigma} {2^{\tau\left( \sigma \right)}} \cdot \sum_{i = 0} ^ {n - 1} {2 ^ {i}} \\
+            =&amp; \left( 2 ^ {n} - 1 \right) \cdot \sum_{\sigma} {2^{\tau\left( \sigma \right)}}
+        \end{aligned}</annotation></semantics></math></p>
+<p>定义
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f\left( x \right)</annotation></semantics></math>
+是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">n = x</annotation></semantics></math>
+时的答案, 则我们知道:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right"><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><mrow><mo stretchy="true" form="prefix">(</mo><msup><mn>2</mn><mi>i</mi></msup><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mi>m</mi><mi>o</mi><mi>d</mi><mi>M</mi><mi>O</mi><mi>D</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+            f \left( x \right) = f\left( x - 1 \right) \cdot ( 2 ^ i - 1) mod MOD
+        \end{aligned}</annotation></semantics></math> 其中
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>M</mi><mi>O</mi><mi>D</mi></mrow><annotation encoding="application/x-tex">MOD</annotation></semantics></math>
+是题目给定的模数. 我们只需要提前处理出
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>2</mn><annotation encoding="application/x-tex">2</annotation></semantics></math>
+的次幂, 就可以快速的得出答案.</p>
+<h1 id="代码">代码</h1>
+<pre><code>#include &lt;iostream&gt;
+
+using std::cin;
+using std::cout;
+
+const long long MOD = 1e9 + 7;
+long long n;
+long long pwr[10000005], f[10000005];
+
+void init()
+{
+    pwr[0] = 1;
+    pwr[1] = 2;
+    for (int i = 2; i &lt;= 10000005; ++i)
+    {
+        pwr[i] = pwr[i - 1] * 2 % MOD;
+    }
+
+    return;
+}
+
+long long solve(int x)
+{
+    f[1] = 1;
+    f[2] = 3;
+    for (int i = 3; i &lt;= x; ++i)
+    {
+        f[i] = f[i - 1] * (pwr[i] - 1) % MOD;
+    }
+    return f[x];
+}
+
+int main()
+{
+    cin.tie(NULL);
+    cout.tie(NULL);
+    std::ios::sync_with_stdio(false);
+
+    init();
+    cin &gt;&gt; n;
+    cout &lt;&lt; solve(n);
+
+    return 0;
+}</code></pre>
+</body>
