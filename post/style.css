@@ -1,4 +1,4 @@
-@import url('https://fonts.proxy.ustclug.org/css2?family=Noto+Serif:wght@200;300;400;500;600;700;900&family=Noto+Serif+SC:wght@200;300;400;500;600;700;900&display=swap');
+@import url('https://fonts.proxy.ustclug.org/css2?family=Noto+Serif:wght@200;300;400;500;600;700;900&family=Noto+Serif+SC:wght@200;300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap');
 body {
  	font-family: 'Noto Serif', 'Noto Serif SC', serif;
 	line-height: 1.8;
@@ -84,4 +84,6 @@ math {
 	font-family: serif;
 }
 
-
+code {
+	font-family: 'JetBrains Mono', monospace;
+}
