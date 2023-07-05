@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang = "zh_cn">
+
+<head>
+	<meta charset = "utf-8"/>
+		<meta name = "author" content = "AtomAlpaca">
+		<title>「数据结构」支配树略解</title>
+	<link rel = "stylesheet" href = "./style.css" type = "text/css"/>
+	<link rel="stylesheet"
+      href="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/panda-syntax-dark.min.css">
+	<script src="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/highlight.min.js"></script>
+
+</head>
+
+<body>
+	<header>
+				<p>
+			<h1>
+				「数据结构」支配树略解
+			</h1>
+		</p>
+		<p style = "text-align: center">
+						AtomAlpaca
+								</p>
+				
+			</header>
+	<script>hljs.highlightAll();</script>
+		<h2>
+		Table of contents
+	</h2>
+	<ul>
+<li><a href="#前言" id="toc-前言">前言</a></li>
+<li><a href="#支配关系" id="toc-支配关系">支配关系</a>
+<ul>
+<li><a href="#引理" id="toc-引理">引理</a></li>
+<li><a href="#求解支配关系" id="toc-求解支配关系">求解支配关系</a>
+<ul>
+<li><a href="#结点删除法" id="toc-结点删除法">结点删除法</a></li>
+<li><a href="#数据流迭代法" id="toc-数据流迭代法">数据流迭代法</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#支配树及其求解" id="toc-支配树及其求解">支配树及其求解</a>
+<ul>
+<li><a href="#根据-dom-求解" id="toc-根据-dom-求解">根据 dom
+求解</a></li>
+<li><a href="#树上的特例" id="toc-树上的特例">树上的特例</a></li>
+<li><a href="#dag-上的特例" id="toc-dag-上的特例">DAG 上的特例</a></li>
+<li><a href="#lengauertarjan算法"
+id="toc-lengauertarjan算法">Lengauer–Tarjan算法</a>
+<ul>
+<li><a href="#约定" id="toc-约定">约定</a></li>
+<li><a href="#半支配点" id="toc-半支配点">半支配点</a></li>
+<li><a href="#求解直接支配点"
+id="toc-求解直接支配点">求解直接支配点</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#例题" id="toc-例题">例题</a>
+<ul>
+<li><a href="#模板" id="toc-模板"><span>模板</span></a></li>
+<li><a href="#zjoi2012-灾难" id="toc-zjoi2012-灾难"><span>ZJOI2012
+灾难</span></a></li>
+</ul></li>
+</ul>
+	
+	<h1 id="前言">前言</h1>
+<p>1959 年，「支配」这一概念由 Reese T. Prosser 在 <a
+href="http://portal.acm.org/ft_gateway.cfm?id=1460314&amp;type=pdf&amp;coll=GUIDE&amp;dl=GUIDE&amp;CFID=79528182&amp;CFTOKEN=33765747">一篇关于网络流的论文</a>
+中提出，但并未提出具体的求解算法；直到 1969 年，Edward S. Lowry 和 C. W.
+Medlock 才首次提出了 <a
+href="http://portal.acm.org/ft_gateway.cfm?id=362838&amp;type=pdf&amp;coll=GUIDE&amp;dl=GUIDE&amp;CFID=79528182&amp;CFTOKEN=33765747">有效的求解算法</a>。而目前使用最为广泛的
+Lengauer–Tarjan 算法则由 Lengauer 和 Tarjan 于 1979 年在 <a
+href="https://www.cs.princeton.edu/courses/archive/fall03/cs528/handouts/a%20fast%20algorithm%20for%20finding.pdf">一篇论文</a>
+中提出。</p>
+<p>在 OI 界中，支配树的概念最早在 <a
+href="https://www.luogu.com.cn/problem/P2597">ZJOI2012 灾难</a>
+中被引入，当时也被称为「灭绝树」；陈孙立也在 2020
+年的国家集训队论文中介绍了这一算法。</p>
+<p>目前支配树在竞赛界并不流行，其相关习题并不多见；但支配树在工业上，尤其是编译器相关领域，已有广泛运用。</p>
+<p>本文将介绍支配树的概念及几种求解方法。</p>
+<h1 id="支配关系">支配关系</h1>
+<p>我们在任意的一个有向图上钦定一个入口结点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>，对于一个结点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>，若从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的每一条路径都经过某一个结点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>，那么我们称
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+<strong>支配</strong>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>，也称
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的一个 <strong>支配点</strong>，记作
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mspace width="0.222em"></mspace><mi>d</mi><mi>o</mi><mi>m</mi><mspace width="0.222em"></mspace><mi>u</mi></mrow><annotation encoding="application/x-tex">v\ dom\ u</annotation></semantics></math>。</p>
+<p>对于从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+出发无法到达的结点，讨论其支配关系是没有意义的，因此在没有特殊说明的情况下，本文默认
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+能到达图上任何一个结点。</p>
+<h2 id="引理">引理</h2>
+<p>在下文的引理中，默认
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mo>,</mo><mi>v</mi><mo>,</mo><mi>w</mi><mo>≠</mo><mi>s</mi></mrow><annotation encoding="application/x-tex">u, v, w\ne s</annotation></semantics></math></p>
+<p><strong>引理 1：</strong>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+是其所有结点的支配点；任意一个结点都是其自身的支配点。</p>
+<p><strong>证明：</strong> 显然任何一条从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的路径都必须经过
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+和
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+这两个结点。</p>
+<p><strong>引理 2：</strong>
+仅考虑简单路径得出的支配关系与考虑所有路径得出的关系相同。</p>
+<p><strong>证明：</strong>
+对于非简单路径，我们设两次经过某个结点之间经过的所有结点的点集为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>S</mi><annotation encoding="application/x-tex">S</annotation></semantics></math>，若将
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>S</mi><annotation encoding="application/x-tex">S</annotation></semantics></math>
+中的结点删去，便能将每个非简单路径与一个简单路径对应。</p>
+<p>在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>S</mi><annotation encoding="application/x-tex">S</annotation></semantics></math>
+中，在非简单路径而不在简单路径上的点一定不可能成为支配点，因为至少有一条
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的简单路径不包括这个点；同时在简单路径和非简单路径上的点只需在简单路径上讨论即可。</p>
+<p>综上，删去非简单路径对支配关系没有影响。</p>
+<p><strong>引理 3：</strong> 如果
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>o</mi><mi>m</mi></mrow><annotation encoding="application/x-tex">dom</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>o</mi><mi>m</mi></mrow><annotation encoding="application/x-tex">dom</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>w</mi><annotation encoding="application/x-tex">w</annotation></semantics></math>，则
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>o</mi><mi>m</mi></mrow><annotation encoding="application/x-tex">dom</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>w</mi><annotation encoding="application/x-tex">w</annotation></semantics></math>。</p>
+<p><strong>证明：</strong> 经过
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>w</mi><annotation encoding="application/x-tex">w</annotation></semantics></math>
+的路径必定经过
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>，经过
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+的路径必定经过
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>，因此经过
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>w</mi><annotation encoding="application/x-tex">w</annotation></semantics></math>
+的路径必定经过
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>，即
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mspace width="0.222em"></mspace><mi>d</mi><mi>o</mi><mi>m</mi><mspace width="0.222em"></mspace><mi>w</mi></mrow><annotation encoding="application/x-tex">u \ dom \ w</annotation></semantics></math>。</p>
+<p><strong>引理 4：</strong> 如果
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mspace width="0.222em"></mspace><mi>d</mi><mi>o</mi><mi>m</mi><mspace width="0.222em"></mspace><mi>v</mi></mrow><annotation encoding="application/x-tex">u \ dom \ v</annotation></semantics></math>，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mspace width="0.222em"></mspace><mi>d</mi><mi>o</mi><mi>m</mi><mspace width="0.222em"></mspace><mi>u</mi></mrow><annotation encoding="application/x-tex">v \ dom\ u</annotation></semantics></math>，则
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mo>=</mo><mi>v</mi></mrow><annotation encoding="application/x-tex">u=v</annotation></semantics></math>。</p>
+<p><strong>证明：</strong> 假设
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mo>≠</mo><mi>v</mi></mrow><annotation encoding="application/x-tex">u \ne v</annotation></semantics></math>，则任意一个到达
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+的路径都已经到达过
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>，同时任意一个到达
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的路径都已经到达过
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>，矛盾。</p>
+<p><strong>引理 5：</strong> 若
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mo>≠</mo><mi>v</mi><mo>≠</mo><mi>w</mi></mrow><annotation encoding="application/x-tex">u \ne v \ne w</annotation></semantics></math>,<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mspace width="0.222em"></mspace><mi>d</mi><mi>o</mi><mi>m</mi><mspace width="0.222em"></mspace><mi>w</mi></mrow><annotation encoding="application/x-tex">u \ dom \ w</annotation></semantics></math>
+且
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mspace width="0.222em"></mspace><mi>d</mi><mi>o</mi><mi>m</mi><mspace width="0.222em"></mspace><mi>w</mi></mrow><annotation encoding="application/x-tex">v \ dom \ w</annotation></semantics></math>，则有
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mspace width="0.222em"></mspace><mi>d</mi><mi>o</mi><mi>m</mi><mspace width="0.222em"></mspace><mi>v</mi></mrow><annotation encoding="application/x-tex">u \ dom \ v</annotation></semantics></math>
+或
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mspace width="0.222em"></mspace><mi>d</mi><mi>o</mi><mi>m</mi><mspace width="0.222em"></mspace><mi>u</mi></mrow><annotation encoding="application/x-tex">v \ dom \ u</annotation></semantics></math>。</p>
+<p><strong>证明：</strong> 考虑一条
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mo>→</mo><mi>…</mi><mo>→</mo><mi>u</mi><mo>→</mo><mi>…</mi><mo>→</mo><mi>v</mi><mo>→</mo><mi>…</mi><mo>→</mo><mi>w</mi></mrow><annotation encoding="application/x-tex">s \rightarrow \dots \rightarrow u \rightarrow \dots \rightarrow v \rightarrow \dots \rightarrow w</annotation></semantics></math>
+的路径，若
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>,<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+不存在支配关系，则一定存在一条不经过
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+的路径，即存在一条
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mo>→</mo><mi>…</mi><mo>→</mo><mi>v</mi><mo>→</mo><mi>…</mi><mo>→</mo><mi>w</mi></mrow><annotation encoding="application/x-tex">s \rightarrow \dots \rightarrow v \rightarrow \dots \rightarrow w</annotation></semantics></math>
+的路径，与
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mspace width="0.222em"></mspace><mi>d</mi><mi>o</mi><mi>m</mi><mspace width="0.222em"></mspace><mi>w</mi></mrow><annotation encoding="application/x-tex">u\ dom\ w</annotation></semantics></math>
+矛盾。</p>
+<h2 id="求解支配关系">求解支配关系</h2>
+<h3 id="结点删除法">结点删除法</h3>
+<p>一个和定义等价的结论：如果我们删去图中的某一个结点后，有一些结点变得不可到达，那么这个被删去的结点支配这些变得不可到达的结点。</p>
+<p>因此我们只要尝试将每一个结点删去后 dfs 即可，代码复杂度为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>n</mi><mn>3</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(n^3)</annotation></semantics></math>。下面给出核心代码。</p>
+<pre data-tabsize="2"><code>// 假设图中有 n 个结点, 起始点 s = 1
+    std::bitset &lt;N&gt; vis;
+    std::vector &lt;int&gt; edge[N];
+    std::vector &lt;int&gt; dom[N];
+    
+    void dfs(int u, int del)
+    {
+        vis[u] = true;
+        for (int v : edge[u])
+        {
+            if (v == del or vis[v]) { continue; }
+            dfs(v, del);
+        }
+    }
+    
+    void getdom()
+    {
+        for (int i = 2; i &lt;= n; ++i)
+        {
+            vis.reset();
+            dfs(1, i);
+            for (int j = 1; j &lt;= n; ++j)
+            {
+                if (!vis[j])
+                {
+                    dom[j].push_back(i);
+                }
+            }
+        }
+    }</code></pre>
+<pre data-tabsize="2"><code></code></pre>
+<h3 id="数据流迭代法">数据流迭代法</h3>
+<p>数据流迭代法也是 OI 中不常见的一个知识点，这里先做简要介绍。</p>
+<p>数据流分析是编译原理中的概念，用于分析数据如何在程序执行路径上的流动；而数据流迭代法是在程序的流程图的结点上列出方程并不断迭代求解，从而求得程序的某些点的数据流值的一种方法。这里我们就是把有向图看成了一个程序流程图。</p>
+<p>这个问题中，方程为：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right"><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mo stretchy="false" form="prefix">{</mo><mi>u</mi><mo stretchy="false" form="postfix">}</mo><mo>∪</mo><mrow><mo stretchy="true" form="prefix">(</mo><munder><mo>⋂</mo><mrow><mi>v</mi><mo>∈</mo><mi>p</mi><mi>r</mi><mi>e</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></munder><mrow><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+dom(u)=\{u\} \cup \left(\bigcap_{v\in pre(u)}{dom(v)}\right)\end{aligned}</annotation></semantics></math>
+其中
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mi>r</mi><mi>e</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">pre(u)</annotation></semantics></math>
+定义为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的前驱结点组成的点集。这个方程可以通过引理 3 得到。</p>
+<p>翻译成人话就是，一个点的支配点的点集为它所有前驱结点的支配点集的交集，再并上它本身。根据这个方程将每个结点上的支配点集不断迭代直至答案不变即可。</p>
+<p>为了提高效率，我们希望每轮迭代时，当前迭代的结点的所有前驱结点尽可能都已经执行完了这次迭代，因此我们要利用深度有限排序得出这个图的逆后序，根据这个顺序进行迭代。</p>
+<p>下面给出核心代码的参考实现。这里需要预先处理每个点的前驱结点集和图的逆后序，但这不是本文讨论的主要内容，故这里不提供参考实现。</p>
+<pre data-tabsize="2"><code>std::vector &lt;int&gt; pre[N]; // 每个结点的前驱结点
+    std::vector &lt;int&gt; ord;    // 图的逆后序
+    std::bitset &lt;N&gt; dom[N];
+    std::vector &lt;int&gt; Dom[N];
+    void getdom()
+    {
+        dom[1][1] = true;
+        flag = true;
+        while (flag)
+        {
+            flag = false;
+            for (int u : ord)
+            {
+                std::bitset &lt;N&gt; tmp;
+                tmp[u] = true;
+                for (int v : pre[u])
+                {
+                    tmp &amp;= dom[v];
+                }
+                if (tmp != dom[u])
+                {
+                    dom[u] = tmp;
+                    flag = true;
+                }
+            }
+        }
+        for (int i = 2; i &lt;= n; ++i)
+        {
+            for (int j = 1; j &lt;= n; ++j)
+            {
+                if (dom[i][j])
+                {
+                    Dom[i].push_back(j);
+                }
+            }
+        }
+    }</code></pre>
+<p>不难看出上述算法的复杂度为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>n</mi><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(n^2)</annotation></semantics></math>。</p>
+<h1 id="支配树及其求解">支配树及其求解</h1>
+<p>上一节我们发现，除
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+外，一个点的支配点至少有两个，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+和其自身。</p>
+<p>我们将任意一个结点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的支配点中，除自身外与自己距离最近的结点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+称作
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的直接支配点，记作
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>v</mi></mrow><annotation encoding="application/x-tex">idom(u) = v</annotation></semantics></math>。显然除了
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+没有直接支配点外，每个结点都有唯一一个直接支配点。</p>
+<p>我们考虑对于除
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+外每一个结点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(u)</annotation></semantics></math>
+向
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+连边，便构成了一个有
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+个结点，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n - 1</annotation></semantics></math>
+条边的有向图。根据引理 3
+和引理4，我们知道支配关系一定不会构成循环，也就是这些边一定不构成环，因此我们得到的图事实上是一棵树。我们称这颗树为原图的
+<strong>支配树</strong>。</p>
+<h2 id="根据-dom-求解">根据 dom 求解</h2>
+<p>不妨考虑某个结点的支配点集
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><msub><mi>s</mi><mn>1</mn></msub><mo>,</mo><msub><mi>s</mi><mn>2</mn></msub><mo>,</mo><mi>…</mi><mo>,</mo><msub><mi>s</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\{s_1, s_2, \dots, s_k\}</annotation></semantics></math>，则一定存在一条路径
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mo>→</mo><mi>…</mi><mo>→</mo><msub><mi>s</mi><mn>1</mn></msub><mo>→</mo><mi>…</mi><mo>→</mo><msub><mi>s</mi><mn>2</mn></msub><mo>→</mo><mi>…</mi><mo>→</mo><mi>…</mi><mo>→</mo><msub><mi>s</mi><mi>k</mi></msub><mo>→</mo><mi>…</mi><mo>→</mo><mi>u</mi></mrow><annotation encoding="application/x-tex">s \rightarrow \dots \rightarrow s_1 \rightarrow \dots \rightarrow s_2 \rightarrow \dots \rightarrow \dots \rightarrow s_k \rightarrow\dots \rightarrow u</annotation></semantics></math>。显然
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的直接支配点为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>s</mi><mi>k</mi></msub><annotation encoding="application/x-tex">s_k</annotation></semantics></math>。因此直接支配点的定义等价于：</p>
+<p>对于一个结点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的支配点集
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>S</mi><annotation encoding="application/x-tex">S</annotation></semantics></math>，若
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo>∈</mo><mi>S</mi></mrow><annotation encoding="application/x-tex">v \in S</annotation></semantics></math>
+满足
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∀</mo><mi>w</mi><mo>∈</mo><mi>S</mi><mo>\</mo><mo stretchy="false" form="prefix">{</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="false" form="postfix">}</mo><mo>,</mo><mi>w</mi><mspace width="0.222em"></mspace><mi>d</mi><mi>o</mi><mi>m</mi><mspace width="0.222em"></mspace><mi>v</mi></mrow><annotation encoding="application/x-tex">\forall w \in S\setminus\{u,v\}, w\ dom \ v</annotation></semantics></math>，则
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>v</mi></mrow><annotation encoding="application/x-tex">idom(u)=v</annotation></semantics></math>。</p>
+<p>因此，利用前文所述的算法得到每个结点的支配点集之后，我们根据上述定义便能很轻松地得到每个点的直接支配点，从而构造出支配树。下面给出参考代码。</p>
+<pre data-tabsize="2"><code>std::bitset &lt;N&gt; dom[N];
+    std::vector &lt;int&gt; Dom[N];
+    int idom[N];
+    void getidom()
+    {
+        for (int u = 2; u &lt;= n; ++u)
+        {
+            for (int v : Dom[u])
+            {
+                std::bitset &lt;N&gt; tmp = (dom[v] &amp; dom[u]) ^ dom[u];
+                if (tmp.count() == 1 and tmp[u])
+                {
+                    idom[u] = v;
+                    break;
+                }
+            }
+        }
+        for (int u = 2; u &lt;= n; ++u)
+        {
+            e[idom[u]].push_back(u);
+        }
+    }</code></pre>
+<h2 id="树上的特例">树上的特例</h2>
+<p>显然树型图的支配树就是它本身。</p>
+<h2 id="dag-上的特例">DAG 上的特例</h2>
+<p>我们发现 DAG
+有一个很好的性质：根据拓扑序求解，先求得的解不会对后续的解产生影响。我们可以利用这个特点快速求得
+DAG 的支配树。</p>
+<p><strong>引理 6：</strong>
+在有向图上，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mspace width="0.222em"></mspace><mi>d</mi><mi>o</mi><mi>m</mi><mspace width="0.222em"></mspace><mi>u</mi></mrow><annotation encoding="application/x-tex">v\ dom\ u</annotation></semantics></math>
+当且仅当
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∀</mo><mi>w</mi><mo>∈</mo><mi>p</mi><mi>r</mi><mi>e</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo><mi>v</mi><mspace width="0.222em"></mspace><mi>d</mi><mi>o</mi><mi>m</mi><mspace width="0.222em"></mspace><mi>w</mi></mrow><annotation encoding="application/x-tex">\forall w \in pre(u), v\ dom \ w</annotation></semantics></math>。</p>
+<p><strong>证明：</strong> 首先来证明充分性。考虑任意一条从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的路径都一定经过一个结点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi><mo>∈</mo><mi>p</mi><mi>r</mi><mi>e</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">w \in pre(u)</annotation></semantics></math>，而
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+支配这个结点，因此任意一条从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的路径都一定经过
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>，因此我们得到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mspace width="0.222em"></mspace><mi>d</mi><mi>o</mi><mi>m</mi><mspace width="0.222em"></mspace><mi>u</mi></mrow><annotation encoding="application/x-tex">v \ dom \ u</annotation></semantics></math>。</p>
+<p>然后是必要性。如果
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∃</mo><mi>w</mi><mo>∈</mo><mi>p</mi><mi>r</mi><mi>e</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">\exists w\in pre(u)</annotation></semantics></math>，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+不支配
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>w</mi><annotation encoding="application/x-tex">w</annotation></semantics></math>，则一定有一条不经过
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+的路径
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mo>→</mo><mi>⋯</mi><mo>→</mo><mi>w</mi><mo>→</mo><mi>⋯</mi><mo>→</mo><mi>u</mi></mrow><annotation encoding="application/x-tex">s \rightarrow \cdots \rightarrow w \rightarrow \cdots \rightarrow u</annotation></semantics></math>，因此
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+不支配
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>。</p>
+<p>我们发现，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的支配点一定是其所有前驱结点在支配树上的公共祖先，那么显然
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的直接支配点是所有前驱结点在支配树上的 LCA。考虑倍增求解 LCA
+可以支持每次添加一个结点，上述算法显然是可行的。</p>
+<p>下面给出参考实现：</p>
+<pre data-tabsize="2"><code>std::stack &lt;int&gt; sta;
+vector &lt;int&gt; e[N], g[N], tree[N]; // g 是原图的反图, tree 是支配树
+int in[N], tpn[N], dep[N], idom[N];
+int fth[N][17];
+
+void topo()
+{
+    for (int i = 1; i &lt;= n; ++i)
+    {
+        if (!in[i])
+        {
+            sta.push(i);
+        }
+    }
+    while (!sta.empty())
+    {
+        int u = sta.top();
+        sta.pop();
+        tpn[++tot] = u;
+        for (int v : e[u])
+        {
+            --in[v];
+            if (!in[v])
+            {
+                s.push(v);
+            }
+        }
+    }
+}
+
+int lca(int u, int v)
+{
+    if (dep[u] &lt; dep[v])
+    {
+        std::swap(u, v);
+    }
+    for (int i = 15; i &gt;= 0; --i)
+    {
+        if (dep[fth[u][i]] &gt;= dep[v])
+        {
+            u = fth[u][i];
+        }
+    }
+    if (u == v)
+    {
+        return u;
+    }
+    for (int i = 15; i &gt;= 0; --i)
+    {
+        if (fth[u][i] != fth[v][i])
+        {
+            u = fth[u][i]; v = fth[v][i];
+        }
+    }
+    return fth[u][0];
+}
+
+void build()
+{
+    topo();
+    for (int i = 1; i &lt;= n; ++i)
+    {
+        int u = tpn[i], v = g[x][0];
+        for (int j = 1, q = g[x].size(); j &lt; q; ++j)
+        {
+            v = lca(v, g[x][j]);
+        }
+        idom[u] = v;
+        tree[v].push_back(u);
+        fth[u][0] = v;
+        dep[u] = dep[v] + 1;
+        for (int i = 1; i &lt;= 15; ++i)
+        {
+            fth[u][i] = fth[fth[u][i - 1]][i - 1];
+        }
+    }
+}</code></pre>
+<h2 id="lengauertarjan算法">Lengauer–Tarjan算法</h2>
+<p>Lengauer–Tarjan 算法是求解支配树最有名的算法之一，可以在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mi>α</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mo>,</mo><mi>m</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(n\alpha(n, m))</annotation></semantics></math>
+的时间复杂度内求出一个有向图的支配树。这一算法引入了
+<strong>半支配点</strong> 的概念，并通过半支配点辅助求得直接支配点。</p>
+<h3 id="约定">约定</h3>
+<p>首先，我们从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+出发对这个有向图进行 dfs，所经过的点和边形成了一颗树
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>。我们称走过的边为树边，其余的为非树边；令
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>f</mi><mi>n</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">dfn(u)</annotation></semantics></math>
+表示结点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+被第几个遍历到；定义
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mo>&lt;</mo><mi>v</mi></mrow><annotation encoding="application/x-tex">u&lt;v</annotation></semantics></math>
+当且仅当
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>f</mi><mi>n</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>&lt;</mo><mi>d</mi><mi>f</mi><mi>n</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">dfn(u) &lt; dfn(v)</annotation></semantics></math>。</p>
+<h3 id="半支配点">半支配点</h3>
+<p>一个结点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的半支配点，是满足从这个结点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+出发有一条路径，路径上除了
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mo>,</mo><mi>v</mi></mrow><annotation encoding="application/x-tex">u, v</annotation></semantics></math>
+之外每个结点都大于
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的结点中最小的那一个。形式化的说，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的半支配点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u)</annotation></semantics></math>
+定义为：</p>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mo>min</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="false" form="prefix">|</mo><mo>∃</mo><mi>v</mi><mo>=</mo><msub><mi>v</mi><mn>0</mn></msub><mo>→</mo><msub><mi>v</mi><mn>1</mn></msub><mo>→</mo><mi>…</mi><mo>→</mo><msub><mi>v</mi><mi>k</mi></msub><mo>=</mo><mi>u</mi><mo>,</mo><mo>∀</mo><mn>1</mn><mo>≤</mo><mi>i</mi><mo>≤</mo><mi>k</mi><mo>−</mo><mn>1</mn><mo>,</mo><msub><mi>v</mi><mi>i</mi></msub><mo>&gt;</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u) = \min(v|\exists v=v_0 \rightarrow v_1 \rightarrow\dots \rightarrow v_k = u, \forall 1\le i\le k - 1, v_i &gt; u)</annotation></semantics></math>
+我们发现半支配点有一些有用的性质：</p>
+<p><strong>引理 7：</strong> 对于任意结点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>&lt;</mo><mi>u</mi></mrow><annotation encoding="application/x-tex">sdom(u) &lt; u</annotation></semantics></math>。</p>
+<p><strong>证明：</strong>
+根据定义不难发现，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
+上的父亲
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">fa(u)</annotation></semantics></math>
+也满足成为半支配点的条件，且
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>&lt;</mo><mi>u</mi></mrow><annotation encoding="application/x-tex">fa(u) &lt; u</annotation></semantics></math>，因此任何大于
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的结点都不可能成为其半支配点。</p>
+<p><strong>引理 8：</strong> 对于任意结点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(u)</annotation></semantics></math>
+是其在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
+上的祖先。</p>
+<p><strong>证明：</strong>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
+上从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的路径对应了原图上的一条路径，则
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(u)</annotation></semantics></math>
+必定在这个路径上。</p>
+<p><strong>引理 9：</strong> 对于任意结点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u)</annotation></semantics></math>
+是其在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
+上的祖先。</p>
+<p><strong>证明：</strong> 假设
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u)</annotation></semantics></math>
+不是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的祖先，那么
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">fa(sdom(u))</annotation></semantics></math>
+也一定满足成为半支配点的条件，且
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mi>a</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>&lt;</mo><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">fa(sdom(u)) &lt; sdom(u)</annotation></semantics></math>，这与
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u)</annotation></semantics></math>
+的定义矛盾。</p>
+<p><strong>引理 10：</strong> 对于任意结点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(u)</annotation></semantics></math>
+是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u)</annotation></semantics></math>
+的祖先。</p>
+<p><strong>证明：</strong> 考虑可以从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u)</annotation></semantics></math>
+再从定义中的路径走到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>。根据定义，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u)</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的路径上的点均不支配
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>，故
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(u)</annotation></semantics></math>
+一定是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u)</annotation></semantics></math>
+的祖先。</p>
+<p><strong>引理 11：</strong> 对于任意结点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi><mo>≠</mo><mi>v</mi></mrow><annotation encoding="application/x-tex">u \ne v</annotation></semantics></math>
+满足
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的祖先，则要么有
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(u)</annotation></semantics></math>
+的祖先，要么
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(u)</annotation></semantics></math>
+是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(v)</annotation></semantics></math>
+的祖先。</p>
+<p><strong>证明：</strong> 对于任意在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+和
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(v)</annotation></semantics></math>
+之间的结点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>w</mi><annotation encoding="application/x-tex">w</annotation></semantics></math>，根据直接支配点的定义，一定存在一条不经过
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>w</mi><annotation encoding="application/x-tex">w</annotation></semantics></math>
+的，从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(v)</annotation></semantics></math>
+再到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+的路径。因此这些结点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>w</mi><annotation encoding="application/x-tex">w</annotation></semantics></math>
+一定不是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(u)</annotation></semantics></math>，因此
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(u)</annotation></semantics></math>
+要么是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+的后代，要么是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(v)</annotation></semantics></math>
+的祖先。</p>
+<p>根据以上引理，我们可以得到以下定理：</p>
+<p><strong>定理 1：</strong> 一个点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的半支配点是其前驱与其支配点在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
+上的，大于
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的所有祖先的半支配点中最小的节点。形式化地说，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mo>min</mo><mrow><mo stretchy="true" form="prefix">(</mo><mo stretchy="false" form="prefix">{</mo><mi>v</mi><mrow><mo stretchy="true" form="prefix">|</mo><mo>∃</mo><mi>v</mi><mo>→</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo>&lt;</mo><mi>u</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">}</mo><mo>∪</mo><mo stretchy="false" form="prefix">{</mo><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>w</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">|</mo></mrow><mi>w</mi><mo>&gt;</mo><mi>u</mi><mspace width="0.222em"></mspace><mi>a</mi><mi>n</mi><mi>d</mi><mspace width="0.222em"></mspace><mo>∃</mo><mi>w</mi><mo>→</mo><mi>…</mi><mo>→</mo><mi>v</mi><mo>→</mo><mi>u</mi><mo stretchy="false" form="postfix">}</mo><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u)=\min(\{v|\exists v \rightarrow u, v &lt; u) \} \cup \{sdom(w) | w &gt; u\ and\ \exists w \rightarrow \dots \rightarrow v \rightarrow u \})</annotation></semantics></math>。</p>
+<p><strong>证明：</strong> 令
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
+等于上式右侧。</p>
+<p>我们首先证明
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>≤</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">sdom(u) \le x</annotation></semantics></math>。根据引理
+7
+我们知道这个命题等价于证明上述的两种都满足成为半支配点的条件。<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
+是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的前驱时的情况是显然的，对于后半部分，我们考虑将半支配点定义中所述路径
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>=</mo><msub><mi>v</mi><mn>0</mn></msub><mo>→</mo><mi>…</mi><mo>→</mo><msub><mi>v</mi><mi>j</mi></msub><mo>=</mo><mi>w</mi></mrow><annotation encoding="application/x-tex">x=v_0\rightarrow\dots\rightarrow v_j=w</annotation></semantics></math>
+和
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
+上的一条满足
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∀</mo><mi>i</mi><mo>∈</mo><mrow><mo stretchy="true" form="prefix">[</mo><mi>j</mi><mo>,</mo><mi>k</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo><msub><mi>v</mi><mi>i</mi></msub><mo>≥</mo><mi>w</mi><mo>&gt;</mo><mi>u</mi></mrow><annotation encoding="application/x-tex">\forall i\in[j, k-1], v_i\ge w &gt; u</annotation></semantics></math>
+的路径
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi><mo>=</mo><msub><mi>v</mi><mi>j</mi></msub><mo>→</mo><mi>…</mi><mo>→</mo><msub><mi>v</mi><mi>k</mi></msub><mo>=</mo><mi>v</mi></mrow><annotation encoding="application/x-tex">w=v_j \rightarrow\dots\rightarrow v_k=v</annotation></semantics></math>
+以及路径
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo>→</mo><mi>u</mi></mrow><annotation encoding="application/x-tex">v \rightarrow u</annotation></semantics></math>
+拼接，从而我们构造出一条满足半支配点定义的路径。</p>
+<p>然后我们证明
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>≥</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">sdom(u)\ge x</annotation></semantics></math>。考虑
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+到其半支配点的定义中所述路径
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>v</mi><mn>0</mn></msub><mo>→</mo><msub><mi>v</mi><mn>1</mn></msub><mo>→</mo><mi>…</mi><mo>→</mo><msub><mi>v</mi><mi>k</mi></msub><mo>=</mo><mi>u</mi></mrow><annotation encoding="application/x-tex">sdom(u)=v_0\rightarrow v_1 \rightarrow\dots\rightarrow v_k=u</annotation></semantics></math>。不难看出
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">k=1</annotation></semantics></math>
+和
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>&gt;</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">k &gt; 1</annotation></semantics></math>
+分别对应了定义中的两个选取方法。若
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">k = 1</annotation></semantics></math>，则存在有向边
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>→</mo><mi>u</mi></mrow><annotation encoding="application/x-tex">sdom(u) \rightarrow u</annotation></semantics></math>，根据引理
+7 即可得证；若
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>&gt;</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">k&gt;1</annotation></semantics></math>，令
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
+是满足 $ j $ 且
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mi>j</mi></msub><annotation encoding="application/x-tex">v_j</annotation></semantics></math>
+是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></msub><annotation encoding="application/x-tex">v_{k-1}</annotation></semantics></math>
+在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
+上祖先的最小数。考虑到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+满足上述条件，这样的
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
+一定存在。</p>
+<p>考虑证明
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mn>0</mn></msub><mo>→</mo><mi>…</mi><mo>→</mo><msub><mi>v</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">v_0 \rightarrow \dots \rightarrow v_j</annotation></semantics></math>
+是满足成为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mi>j</mi></msub><annotation encoding="application/x-tex">v_j</annotation></semantics></math>
+半支配点条件的一条路径，即证明
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∀</mo><mi>i</mi><mo>∈</mo><mo stretchy="false" form="prefix">[</mo><mn>1</mn><mo>,</mo><mi>j</mi><mo stretchy="false" form="postfix">)</mo><mo>,</mo><msub><mi>v</mi><mi>i</mi></msub><mo>&gt;</mo><msub><mi>v</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">\forall i \in [1, j), v_i&gt;v_j</annotation></semantics></math>。若不是，则令
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+为满足
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>v</mi><mi>i</mi></msub><mo>&lt;</mo><msub><mi>v</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">v_i &lt; v_j</annotation></semantics></math>
+中使
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mi>i</mi></msub><annotation encoding="application/x-tex">v_i</annotation></semantics></math>
+最小的数，根据引理 11 我们知道
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mi>i</mi></msub><annotation encoding="application/x-tex">v_i</annotation></semantics></math>
+是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mi>j</mi></msub><annotation encoding="application/x-tex">v_j</annotation></semantics></math>
+的祖先，这和
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
+的定义矛盾。于是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>v</mi><mi>j</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>≤</mo><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(v_j)\le sdom(u)</annotation></semantics></math>。综上
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>≤</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">sdom(u) \le x</annotation></semantics></math>，故
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>=</mo><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">x=sdom(u)</annotation></semantics></math>。</p>
+<p>根据定理 1
+我们便可以求出每个点的半支配点了。不难发现计算半支配点的复杂度瓶颈在第二种情况上，我们考虑利用带权并查集优化，每次路径压缩时更新最小值即可。</p>
+<pre data-tabsize="2"><code>void dfs(int u)
+{
+    dfn[u] = ++dfc;
+    pos[dfc] = u;
+    for (int i = h[0][u]; i; i = e[i].x)
+    {
+        int v = e[i].v;
+        if (!dfn[v])
+        {
+            dfs(v);
+            fth[v] = u;
+        }
+    }
+}
+
+int find(int x)
+{
+    if (fa[x] == x)
+    {
+        return x;
+    }
+    int tmp = fa[x];
+    fa[x] = find(fa[x]);
+    if (dfn[sdm[mn[tmp]]] &lt; dfn[sdm[mn[x]]])
+    {
+        mn[x] = mn[tmp];
+    }
+    return fa[x];
+}
+
+void getsdom()
+{
+    dfs(1);
+    for (int i = 1; i &lt;= n; ++i)
+    {
+        mn[i] = fa[i] = sdm[i] = i;
+    }
+    for (int i = dfc; i &gt;= 2; --i)
+    {
+        int u = pos[i], res = INF;
+        for (int j = h[1][u]; j; j = e[j].x)
+        {
+            int v = e[j].v;
+            if (!dfn[v])
+            { 
+                continue;
+            }
+            find(v);
+            if (dfn[v] &lt; dfn[u])
+            {
+                res = std::min(res, dfn[v]); 
+            }
+            else
+            {
+                res = std::min(res, dfn[sdm[mn[v]]]);
+            }
+        }
+        sdm[u] = pos[res];
+        fa[u] = fth[u];
+    }
+}</code></pre>
+<h3 id="求解直接支配点">求解直接支配点</h3>
+<h4 id="转化为-dag">转化为 DAG</h4>
+<p>可是我还是不知道半支配点有什么用！</p>
+<p>我们考虑在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
+上对每一个
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+加入
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>→</mo><mi>u</mi></mrow><annotation encoding="application/x-tex">sdom(u) \rightarrow u</annotation></semantics></math>
+的有向边。根据引理 9，新得到的这张图
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>G</mi><annotation encoding="application/x-tex">G</annotation></semantics></math>
+一定是有向无环图；又根据引理
+10，我们还发现这样加边不会改变支配关系，因此我们把原图转化为了一张
+DAG，利用上文的算法求解即可。</p>
+<h4 id="通过半支配点求解">通过半支配点求解</h4>
+<p>建一堆图也太不优雅了！</p>
+<p><strong>定理 2：</strong> 对于任意节点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>，若
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
+上从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u)</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>w</mi><annotation encoding="application/x-tex">w</annotation></semantics></math>
+的路径上的任意节点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+都满足
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>≥</mo><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>w</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(v)\ge sdom(w)</annotation></semantics></math>，则
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(u) =sdom(u)</annotation></semantics></math>。</p>
+<p><strong>证明：</strong> 根据引理 10 我们知道
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(u)</annotation></semantics></math>
+是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u)</annotation></semantics></math>
+或其祖先，因此只需证明
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mspace width="0.222em"></mspace><mi>d</mi><mi>o</mi><mi>m</mi><mspace width="0.222em"></mspace><mi>u</mi></mrow><annotation encoding="application/x-tex">sdom(u) \ dom \ u</annotation></semantics></math>。</p>
+<p>考虑任意一条
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的路径
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>P</mi><annotation encoding="application/x-tex">P</annotation></semantics></math>，我们需要证明
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u)</annotation></semantics></math>
+一定在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>P</mi><annotation encoding="application/x-tex">P</annotation></semantics></math>
+中。令
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>P</mi><annotation encoding="application/x-tex">P</annotation></semantics></math>
+中最后一个满足
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>&lt;</mo><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">x&lt;sdom(u)</annotation></semantics></math>
+的节点。如果
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+不存在则必有
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>s</mi></mrow><annotation encoding="application/x-tex">sdom(u)=idom(u) =s</annotation></semantics></math>，否则令
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>w</mi><annotation encoding="application/x-tex">w</annotation></semantics></math>
+是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>P</mi><annotation encoding="application/x-tex">P</annotation></semantics></math>
+中
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+之后在 DFS 树中从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u)</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的路径上的第一个点。</p>
+<p>我们接下来证明
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>w</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>≤</mo><mi>v</mi><mo>&lt;</mo><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(w)\le v &lt;sdom(v)</annotation></semantics></math>。考虑
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
+上
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>w</mi><annotation encoding="application/x-tex">w</annotation></semantics></math>
+的路径
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi><mo>=</mo><msub><mi>v</mi><mn>0</mn></msub><mo>→</mo><mi>…</mi><msub><mi>v</mi><mi>k</mi></msub><mo>=</mo><mi>w</mi></mrow><annotation encoding="application/x-tex">v = v_0 \rightarrow \dots v_k = w</annotation></semantics></math>，若不成立，则存在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>∈</mo><mrow><mo stretchy="true" form="prefix">[</mo><mn>1</mn><mo>,</mo><mi>k</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo><msub><mi>v</mi><mi>i</mi></msub><mo>&lt;</mo><mi>w</mi></mrow><annotation encoding="application/x-tex">i\in[1, k- 1], v_i &lt; w</annotation></semantics></math>。此时一定存在某个
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>∈</mo><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo>,</mo><mi>k</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">j\in [i, k - 1]</annotation></semantics></math>
+满足
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mi>j</mi></msub><annotation encoding="application/x-tex">v_j</annotation></semantics></math>
+是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>w</mi><annotation encoding="application/x-tex">w</annotation></semantics></math>
+的祖先。由
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+的取值可知
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>≤</mo><msub><mi>v</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">sdom(u)\le v_j</annotation></semantics></math>，于是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>v</mi><mi>j</mi></msub><annotation encoding="application/x-tex">v_j</annotation></semantics></math>
+也在 DFS 树中从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u)</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的路径上，与
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>w</mi><annotation encoding="application/x-tex">w</annotation></semantics></math>
+的定义矛盾，因此
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>w</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>≤</mo><mi>v</mi><mo>&lt;</mo><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(w)\le v &lt; sdom(v)</annotation></semantics></math>，结合定理的条件有
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>=</mo><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">y=sdom(u)</annotation></semantics></math>，即路径
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>P</mi><annotation encoding="application/x-tex">P</annotation></semantics></math>
+包含
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u)</annotation></semantics></math>。</p>
+<p><strong>定理 3：</strong> 对应任意节点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
+上从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u)</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的路径上的所有节点中最小的节点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+一定满足
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>≤</mo><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(v)\le sdom(u)</annotation></semantics></math>
+和
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(v) = idom(u)</annotation></semantics></math>。</p>
+<p><strong>证明：</strong> 考虑到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+本身也满足
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+的条件，因此
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>≤</mo><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(v)\le sdom(u)</annotation></semantics></math>。</p>
+<p>由于
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(u)</annotation></semantics></math>
+是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
+上的祖先，由引理 11 可知
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(u)</annotation></semantics></math>
+也是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(v)</annotation></semantics></math>
+的祖先，因此只需证明
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(v)</annotation></semantics></math>
+支配
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>。</p>
+<p>考虑任意一条
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的路径
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>P</mi><annotation encoding="application/x-tex">P</annotation></semantics></math>，我们需要证明
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u)</annotation></semantics></math>
+一定在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>P</mi><annotation encoding="application/x-tex">P</annotation></semantics></math>
+中。令
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
+为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>P</mi><annotation encoding="application/x-tex">P</annotation></semantics></math>
+中最后一个满足
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>&lt;</mo><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">x&lt;sdom(u)</annotation></semantics></math>
+的节点。如果
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
+不存在则必有
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>s</mi></mrow><annotation encoding="application/x-tex">sdom(u)=idom(u) =s</annotation></semantics></math>，否则令
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>
+是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>P</mi><annotation encoding="application/x-tex">P</annotation></semantics></math>
+中
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
+之后在 DFS 树中从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u)</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的路径上的第一个点。</p>
+<p>与定理 2 的证明过程同理，我们可以得到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>y</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>≤</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">sdom(y) \le x</annotation></semantics></math>。根据引理
+10 有
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>y</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>≤</mo><mi>x</mi><mo>&lt;</mo><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>≤</mo><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(y)\le x&lt;idom(v) \le sdom(v)</annotation></semantics></math>。至此，由
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+的定义可知
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>
+不能是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u)</annotation></semantics></math>
+的后代；另一方面，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>
+不能既是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(v)</annotation></semantics></math>
+的后代也是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+的祖先，否则沿 DFS 树从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>s</mi><annotation encoding="application/x-tex">s</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>y</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(y)</annotation></semantics></math>
+再沿 P 走到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>，最后沿
+DFS 树走到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+的这条路径不经过
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(v)</annotation></semantics></math>，与支配点的定义矛盾。因此
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>=</mo><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">y=idom(v)</annotation></semantics></math>，即
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>P</mi><annotation encoding="application/x-tex">P</annotation></semantics></math>
+包含
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(v)</annotation></semantics></math>。</p>
+<p>根据以上两个定理我们能够得到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u)</annotation></semantics></math>
+与
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">idom(u)</annotation></semantics></math>
+之间的关系。</p>
+<p>令
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+是满足
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
+在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(u)</annotation></semantics></math>
+与
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+之间的结点的所有节点中，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(v)</annotation></semantics></math>
+最小的一个节点，那么：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right"><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mtd><mtd columnalign="right"><mi>i</mi><mi>f</mi><mspace width="0.222em"></mspace><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mtd><mtd columnalign="right"><mi>o</mi><mi>t</mi><mi>h</mi><mi>e</mi><mi>r</mi><mi>w</mi><mi>i</mi><mi>s</mi><mi>e</mi></mtd></mtr></mtable></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+idom(u) =
+\left\{ 
+\begin{aligned} 
+&amp; sdom(u), &amp;if\ sdom(u) = sdom(v)
+\\
+&amp;idom(v), &amp;otherwise
+\end{aligned}
+\right.\end{aligned}</annotation></semantics></math></p>
+<p>只要对上面求解半支配点的代码稍作修改即可。</p>
+<pre data-tabsize="2"><code>struct E { int v, x; } e[MAX * 4];
+    int h[3][MAX * 2];
+    
+    int dfc, tot, n, m, u, v;
+    int fa[MAX], fth[MAX], pos[MAX], mn[MAX], idm[MAX], sdm[MAX], dfn[MAX], ans[MAX];
+    
+    void add(int x, int u, int v)
+    {
+        e[++tot] = {v, h[x][u]};
+        h[x][u] = tot;
+    }
+    
+    void dfs(int u)
+    {
+        dfn[u] = ++dfc; pos[dfc] = u;
+        for (int i = h[0][u]; i; i = e[i].x)
+        {
+            int v = e[i].v;
+            if (!dfn[v])
+            {
+                dfs(v);
+                fth[v] = u;
+            }
+        }
+    }
+    
+    int find(int x)
+    {
+        if (fa[x] == x)
+        {
+            return x;
+        }
+        int tmp = fa[x];
+        fa[x] = find(fa[x]);
+        if (dfn[sdm[mn[tmp]]] &lt; dfn[sdm[mn[x]]])
+        {
+            mn[x] = mn[tmp];
+        }
+        return fa[x];
+    }
+    
+    void tar(int st)
+    {
+        dfs(st);
+        for (int i = 1; i &lt;= n; ++i)
+        {
+            fa[i] = sdm[i] = mn[i] = i;
+        }
+        for (int i = dfc; i &gt;= 2; --i)
+        {
+            int u = pos[i], res = INF;
+            for (int j = h[1][u]; j; j = e[j].x)
+            {
+                int v = e[j].v;
+                if (!dfn[v])
+                {
+                    continue;
+                }
+                find(v);
+                if (dfn[v] &lt; dfn[u])
+                {
+                    res = std::min(res, dfn[v]);
+                }
+                else
+                {
+                    res = std::min(res, dfn[sdm[mn[v]]]);
+                }
+            }
+            sdm[u] = pos[res];
+            fa[u] = fth[u];
+            add(2, sdm[u], u); u = fth[u];
+            for (int j = h[2][u]; j; j = e[j].x)
+            {
+                int v = e[j].v; find(v);
+                if (sdm[mn[v]] == u)
+                {
+                    idm[v] = u;
+                }
+                else
+                {
+                    idm[v] = mn[v];
+                }
+            }
+            h[2][u] = 0;
+        }
+        for (int i = 2; i &lt;= dfc; ++i)
+        {
+            int u = pos[i];
+            if (idm[u] != sdm[u])
+            {
+                idm[u] = idm[idm[u]];
+            }
+        }
+    }</code></pre>
+<h1 id="例题">例题</h1>
+<h2 id="模板"><a
+href="https://www.luogu.com.cn/problem/P5180">模板</a></h2>
+<p>可以仅求解支配关系，求解过程中记录各个点支配了多少节点，也可以建出支配树求解每个节点的
+size。 这里给出后一种解法的代码。</p>
+<pre data-tabsize="2"><code>#include &lt;bits/stdc++.h&gt;
+
+using std::cin;
+using std::cout;
+
+const int MAX = 3e5 + 5;
+const int INF = 0x5ffffff;
+
+struct E { int v, x; } e[MAX * 4];
+int n, m, u, v, tot, dfc;
+int ans[MAX], dfn[MAX], pos[MAX], sdm[MAX], idm[MAX], fa[MAX], mn[MAX], fth[MAX];
+int h[3][MAX * 2];
+
+void add(int x, int u, int v) { e[++tot] = {v, h[x][u]}; h[x][u] = tot; }
+
+void dfs(int u)
+{
+    dfn[u] = ++dfc; pos[dfc] = u;
+    for (int i = h[0][u]; i; i = e[i].x) { int v = e[i].v; if (!dfn[v]) { dfs(v); fth[v] = u; } }
+}
+
+int find(int x)
+{
+    if (fa[x] == x) { return x; }
+    int tmp = fa[x]; fa[x] = find(fa[x]); if (dfn[sdm[mn[tmp]]] &lt; dfn[sdm[mn[x]]]) { mn[x] = mn[tmp]; }
+    return fa[x];
+}
+
+void tar(int st)
+{
+    dfs(st);
+    for (int i = 1; i &lt;= n; ++i) { mn[i] = fa[i] = sdm[i] = i; }
+    for (int i = dfc; i &gt;= 2; --i)
+    {
+        int u = pos[i], res = INF;
+        for (int j = h[1][u]; j; j = e[j].x)
+        {
+            int v = e[j].v; if (!dfn[v]) { continue; } find(v);
+            if (dfn[v] &lt; dfn[u]) { res = std::min(res, dfn[v]); }
+            else { res = std::min(res, dfn[sdm[mn[v]]]); }
+        }
+        sdm[u] = pos[res]; fa[u] = fth[u]; add(2, sdm[u], u); u = fth[u];
+        for (int j = h[2][u]; j; j = e[j].x)
+        {
+            int v = e[j].v; find(v);
+            if (u == sdm[mn[v]]) { idm[v] = u; } else { idm[v] = mn[v]; }
+        }
+        h[2][u] = 0;
+    }
+    for (int i = 2; i &lt;= dfc; ++i) { int u = pos[i]; if (idm[u] != sdm[u]) { idm[u] = idm[idm[u]]; } }
+    for (int i = dfc; i &gt;= 2; --i)
+    {
+        ++ans[pos[i]]; ans[idm[pos[i]]] += ans[pos[i]];
+    }
+    ++ans[1];
+}
+
+int main()
+{
+    cin &gt;&gt; n &gt;&gt; m;
+    for (int i = 1; i &lt;= m; ++i) { cin &gt;&gt; u &gt;&gt; v; add(0, u, v); add(1, v, u); }
+    tar(1);
+    for (int i = 1; i &lt;= n; ++i) { cout &lt;&lt; ans[i] &lt;&lt; &#39; &#39;; }
+}</code></pre>
+<h2 id="zjoi2012-灾难"><a
+href="https://www.luogu.com.cn/problem/P2597">ZJOI2012 灾难</a></h2>
+<p>在 DAG 上求支配树然后求节点 size 即可。</p>
+<pre data-tabsize="2"><code>#include &lt;bits/stdc++.h&gt;
+
+using std::cin;
+using std::cout;
+using std::vector;
+using std::stack;
+
+const int MAX = 65536;
+int n, x, tot;
+int d[MAX], w[MAX], siz[MAX], p[MAX], f[MAX][17];
+vector &lt;int&gt; e[MAX], g[MAX], h[MAX];
+stack &lt;int&gt; s;
+inline void topo()
+{
+    s.push(0);
+    for (int i = 1; i &lt;= n; ++i) { if (!w[i]) { e[0].push_back(i); g[i].push_back(0); ++w[i]; } }
+    while (!s.empty())
+    {
+        int x = s.top(); s.pop(); p[++tot] = x;
+        for (int i : e[x]) { --w[i]; if (!w[i]) { s.push(i); } }
+    }
+}
+
+inline int lca(int u, int v)
+{
+    if (d[u] &lt; d[v]) { std::swap(u, v); }
+    for (int i = 15; i &gt;= 0; --i) { if (d[f[u][i]] &gt;= d[v]) { u = f[u][i]; } }
+    if (u == v) { return u; }
+    for (int i = 15; i &gt;= 0; --i) { if (f[u][i] != f[v][i]) { u = f[u][i]; v = f[v][i]; } }
+    return f[u][0];
+}
+
+void dfs(int x) { siz[x] = 1; for (int i : h[x]) { dfs(i); siz[x] += siz[i]; } }
+
+void build()
+{
+    for (int i = 2; i &lt;= n + 1; ++i)
+    {
+        int x = p[i], y = g[x][0];
+        for (int j = 1, q = g[x].size(); j &lt; q; ++j) { y = lca(y, g[x][j]); }
+        h[y].push_back(x); d[x] = d[y] + 1; f[x][0] = y;
+        for (int i = 1; i &lt;= 15; ++i) { f[x][i] = f[f[x][i - 1]][i - 1]; }
+    }
+}
+
+int main()
+{
+    cin.tie(NULL); cout.tie(NULL); std::ios::sync_with_stdio(false);
+    cin &gt;&gt; n;
+    for (int i = 1; i &lt;= n; ++i)
+    {
+        while (true)
+        {
+            cin &gt;&gt; x; if (!x) { break; }
+            e[x].push_back(i); g[i].push_back(x); ++w[i];
+        }
+    }
+    topo(); build(); dfs(0);
+    for (int i = 1; i &lt;= n; ++i) { cout &lt;&lt; siz[i] - 1 &lt;&lt; &#39;\n&#39;; }
+    return 0;
+}</code></pre>
+</body>
