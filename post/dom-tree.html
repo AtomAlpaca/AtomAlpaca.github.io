@@ -188,36 +188,31 @@ href="https://www.luogu.com.cn/problem/P2597">ZJOI2012 灾难</a>
 <p>因此我们只要尝试将每一个结点删去后 dfs 即可，代码复杂度为
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>n</mi><mn>3</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(n^3)</annotation></semantics></math>。下面给出核心代码。</p>
 <pre data-tabsize="2"><code>// 假设图中有 n 个结点, 起始点 s = 1
-    std::bitset &lt;N&gt; vis;
-    std::vector &lt;int&gt; edge[N];
-    std::vector &lt;int&gt; dom[N];
-    
-    void dfs(int u, int del)
+std::bitset &lt;N&gt; vis;
+std::vector &lt;int&gt; edge[N];
+std::vector &lt;int&gt; dom[N];
+
+void dfs(int u, int del)
+{
+    vis[u] = true;
+    for (int v : edge[u])
+    { 
+        if (v == del or vis[v]) { continue; } 
+        dfs(v, del);
+    }
+}
+
+void getdom()
+{
+    for (int i = 2; i &lt;= n; ++i)
     {
-        vis[u] = true;
-        for (int v : edge[u])
+        vis.reset(); dfs(1, i);
+        for (int j = 1; j &lt;= n; ++j)
         {
-            if (v == del or vis[v]) { continue; }
-            dfs(v, del);
+            if (!vis[j]) { dom[j].push_back(i); }
         }
     }
-    
-    void getdom()
-    {
-        for (int i = 2; i &lt;= n; ++i)
-        {
-            vis.reset();
-            dfs(1, i);
-            for (int j = 1; j &lt;= n; ++j)
-            {
-                if (!vis[j])
-                {
-                    dom[j].push_back(i);
-                }
-            }
-        }
-    }</code></pre>
-<pre data-tabsize="2"><code></code></pre>
+}</code></pre>
 <h3 id="数据流迭代法">数据流迭代法</h3>
 <p>数据流迭代法也是 OI 中不常见的一个知识点，这里先做简要介绍。</p>
 <p>数据流分析是编译原理中的概念，用于分析数据如何在程序执行路径上的流动；而数据流迭代法是在程序的流程图的结点上列出方程并不断迭代求解，从而求得程序的某些点的数据流值的一种方法。这里我们就是把有向图看成了一个程序流程图。</p>
@@ -233,42 +228,30 @@ dom(u)=\{u\} \cup \left(\bigcap_{v\in pre(u)}{dom(v)}\right)\end{aligned}</annot
 <p>为了提高效率，我们希望每轮迭代时，当前迭代的结点的所有前驱结点尽可能都已经执行完了这次迭代，因此我们要利用深度有限排序得出这个图的逆后序，根据这个顺序进行迭代。</p>
 <p>下面给出核心代码的参考实现。这里需要预先处理每个点的前驱结点集和图的逆后序，但这不是本文讨论的主要内容，故这里不提供参考实现。</p>
 <pre data-tabsize="2"><code>std::vector &lt;int&gt; pre[N]; // 每个结点的前驱结点
-    std::vector &lt;int&gt; ord;    // 图的逆后序
-    std::bitset &lt;N&gt; dom[N];
-    std::vector &lt;int&gt; Dom[N];
-    void getdom()
+std::vector &lt;int&gt; ord;    // 图的逆后序
+std::bitset &lt;N&gt; dom[N];
+std::vector &lt;int&gt; Dom[N];
+void getdom()
+{
+    dom[1][1] = true; flag = true;
+    while (flag)
     {
-        dom[1][1] = true;
-        flag = true;
-        while (flag)
+        flag = false;
+        for (int u : ord)
         {
-            flag = false;
-            for (int u : ord)
-            {
-                std::bitset &lt;N&gt; tmp;
-                tmp[u] = true;
-                for (int v : pre[u])
-                {
-                    tmp &amp;= dom[v];
-                }
-                if (tmp != dom[u])
-                {
-                    dom[u] = tmp;
-                    flag = true;
-                }
-            }
+            std::bitset &lt;N&gt; tmp; tmp[u] = true;
+            for (int v : pre[u]) { tmp &amp;= dom[v]; }
+            if (tmp != dom[u]) { dom[u] = tmp; flag = true; }
         }
-        for (int i = 2; i &lt;= n; ++i)
+    }
+    for (int i = 2; i &lt;= n; ++i)
+    {
+        for (int j = 1; j &lt;= n; ++j)
         {
-            for (int j = 1; j &lt;= n; ++j)
-            {
-                if (dom[i][j])
-                {
-                    Dom[i].push_back(j);
-                }
-            }
+            if (dom[i][j]) { Dom[i].push_back(j); }
         }
-    }</code></pre>
+    }
+}</code></pre>
 <p>不难看出上述算法的复杂度为
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>n</mi><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(n^2)</annotation></semantics></math>。</p>
 <h1 id="支配树及其求解">支配树及其求解</h1>
@@ -317,27 +300,20 @@ dom(u)=\{u\} \cup \left(\bigcap_{v\in pre(u)}{dom(v)}\right)\end{aligned}</annot
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>v</mi></mrow><annotation encoding="application/x-tex">idom(u)=v</annotation></semantics></math>。</p>
 <p>因此，利用前文所述的算法得到每个结点的支配点集之后，我们根据上述定义便能很轻松地得到每个点的直接支配点，从而构造出支配树。下面给出参考代码。</p>
 <pre data-tabsize="2"><code>std::bitset &lt;N&gt; dom[N];
-    std::vector &lt;int&gt; Dom[N];
-    int idom[N];
-    void getidom()
+std::vector &lt;int&gt; Dom[N];
+int idom[N];
+void getidom()
+{
+    for (int u = 2; u &lt;= n; ++u)
     {
-        for (int u = 2; u &lt;= n; ++u)
+        for (int v : Dom[u])
         {
-            for (int v : Dom[u])
-            {
-                std::bitset &lt;N&gt; tmp = (dom[v] &amp; dom[u]) ^ dom[u];
-                if (tmp.count() == 1 and tmp[u])
-                {
-                    idom[u] = v;
-                    break;
-                }
-            }
+            std::bitset &lt;N&gt; tmp = (dom[v] &amp; dom[u]) ^ dom[u];
+            if (tmp.count() == 1 and tmp[u]) { idom[u] = v; break; }
         }
-        for (int u = 2; u &lt;= n; ++u)
-        {
-            e[idom[u]].push_back(u);
-        }
-    }</code></pre>
+    }
+    for (int u = 2; u &lt;= n; ++u) { e[idom[u]].push_back(u); }
+}</code></pre>
 <h2 id="树上的特例">树上的特例</h2>
 <p>显然树型图的支配树就是它本身。</p>
 <h2 id="dag-上的特例">DAG 上的特例</h2>
@@ -385,53 +361,23 @@ int fth[N][17];
 
 void topo()
 {
-    for (int i = 1; i &lt;= n; ++i)
-    {
-        if (!in[i])
-        {
-            sta.push(i);
-        }
-    }
+    for (int i = 1; i &lt;= n; ++i) { if (!in[i]) { sta.push(i); } }
     while (!sta.empty())
     {
-        int u = sta.top();
-        sta.pop();
-        tpn[++tot] = u;
-        for (int v : e[u])
-        {
-            --in[v];
-            if (!in[v])
-            {
-                s.push(v);
-            }
-        }
+        int u = sta.top(); sta.pop(); tpn[++tot] = u;
+        for (int v : e[u]) { --in[v]; if (!in[v]) { s.push(v); } }
     }
 }
 
 int lca(int u, int v)
 {
-    if (dep[u] &lt; dep[v])
-    {
-        std::swap(u, v);
-    }
+    if (dep[u] &lt; dep[v]) { std::swap(u, v); }
     for (int i = 15; i &gt;= 0; --i)
     {
-        if (dep[fth[u][i]] &gt;= dep[v])
-        {
-            u = fth[u][i];
-        }
+        if (dep[fth[u][i]] &gt;= dep[v]) { u = fth[u][i]; }
     }
-    if (u == v)
-    {
-        return u;
-    }
-    for (int i = 15; i &gt;= 0; --i)
-    {
-        if (fth[u][i] != fth[v][i])
-        {
-            u = fth[u][i]; v = fth[v][i];
-        }
-    }
+    if (u == v) { return u; }
+    for (int i = 15; i &gt;= 0; --i) { if (fth[u][i] != fth[v][i]) { u = fth[u][i]; v = fth[v][i]; } }
     return fth[u][0];
 }
 
@@ -441,18 +387,9 @@ void build()
     for (int i = 1; i &lt;= n; ++i)
     {
         int u = tpn[i], v = g[x][0];
-        for (int j = 1, q = g[x].size(); j &lt; q; ++j)
-        {
-            v = lca(v, g[x][j]);
-        }
-        idom[u] = v;
-        tree[v].push_back(u);
-        fth[u][0] = v;
-        dep[u] = dep[v] + 1;
-        for (int i = 1; i &lt;= 15; ++i)
-        {
-            fth[u][i] = fth[fth[u][i - 1]][i - 1];
-        }
+        for (int j = 1, q = g[x].size(); j &lt; q; ++j) { v = lca(v, g[x][j]); }
+        idom[u] = v; tree[v].push_back(u); fth[u][0] = v; dep[u] = dep[v] + 1;
+        for (int i = 1; i &lt;= 15; ++i) { fth[u][i] = fth[fth[u][i - 1]][i - 1]; }
     }
 }</code></pre>
 <h2 id="lengauertarjan算法">Lengauer–Tarjan算法</h2>
@@ -668,58 +605,34 @@ void build()
     for (int i = h[0][u]; i; i = e[i].x)
     {
         int v = e[i].v;
-        if (!dfn[v])
-        {
-            dfs(v);
-            fth[v] = u;
-        }
+        if (!dfn[v]) { dfs(v); fth[v] = u; }
     }
 }
 
 int find(int x)
 {
-    if (fa[x] == x)
-    {
-        return x;
-    }
-    int tmp = fa[x];
-    fa[x] = find(fa[x]);
-    if (dfn[sdm[mn[tmp]]] &lt; dfn[sdm[mn[x]]])
-    {
-        mn[x] = mn[tmp];
-    }
+    if (fa[x] == x) { return x; }
+    int tmp = fa[x]; fa[x] = find(fa[x]);
+    if (dfn[sdm[mn[tmp]]] &lt; dfn[sdm[mn[x]]]) { mn[x] = mn[tmp]; }
     return fa[x];
 }
 
 void getsdom()
 {
     dfs(1);
-    for (int i = 1; i &lt;= n; ++i)
-    {
-        mn[i] = fa[i] = sdm[i] = i;
-    }
+    for (int i = 1; i &lt;= n; ++i) { mn[i] = fa[i] = sdm[i] = i; }
     for (int i = dfc; i &gt;= 2; --i)
     {
         int u = pos[i], res = INF;
         for (int j = h[1][u]; j; j = e[j].x)
         {
             int v = e[j].v;
-            if (!dfn[v])
-            { 
-                continue;
-            }
+            if (!dfn[v]) { continue; }
             find(v);
-            if (dfn[v] &lt; dfn[u])
-            {
-                res = std::min(res, dfn[v]); 
-            }
-            else
-            {
-                res = std::min(res, dfn[sdm[mn[v]]]);
-            }
+            if (dfn[v] &lt; dfn[u]) { res = std::min(res, dfn[v]); }
+            else { res = std::min(res, dfn[sdm[mn[v]]]); }
         }
-        sdm[u] = pos[res];
-        fa[u] = fth[u];
+        sdm[u] = pos[res]; fa[u] = fth[u];
     }
 }</code></pre>
 <h3 id="求解直接支配点">求解直接支配点</h3>
@@ -937,11 +850,7 @@ idom(u) =
     int dfc, tot, n, m, u, v;
     int fa[MAX], fth[MAX], pos[MAX], mn[MAX], idm[MAX], sdm[MAX], dfn[MAX], ans[MAX];
     
-    void add(int x, int u, int v)
-    {
-        e[++tot] = {v, h[x][u]};
-        h[x][u] = tot;
-    }
+    void add(int x, int u, int v) { e[++tot] = {v, h[x][u]}; h[x][u] = tot; }
     
     void dfs(int u)
     {
@@ -949,80 +858,46 @@ idom(u) =
         for (int i = h[0][u]; i; i = e[i].x)
         {
             int v = e[i].v;
-            if (!dfn[v])
-            {
-                dfs(v);
-                fth[v] = u;
-            }
+            if (!dfn[v]) { dfs(v); fth[v] = u; }
         }
     }
     
     int find(int x)
     {
-        if (fa[x] == x)
-        {
-            return x;
-        }
+        if (fa[x] == x) { return x; }
         int tmp = fa[x];
         fa[x] = find(fa[x]);
-        if (dfn[sdm[mn[tmp]]] &lt; dfn[sdm[mn[x]]])
-        {
-            mn[x] = mn[tmp];
-        }
+        if (dfn[sdm[mn[tmp]]] &lt; dfn[sdm[mn[x]]]) { mn[x] = mn[tmp]; }
         return fa[x];
     }
     
     void tar(int st)
     {
         dfs(st);
-        for (int i = 1; i &lt;= n; ++i)
-        {
-            fa[i] = sdm[i] = mn[i] = i;
-        }
+        for (int i = 1; i &lt;= n; ++i) { fa[i] = sdm[i] = mn[i] = i; }
         for (int i = dfc; i &gt;= 2; --i)
         {
             int u = pos[i], res = INF;
             for (int j = h[1][u]; j; j = e[j].x)
             {
-                int v = e[j].v;
-                if (!dfn[v])
-                {
-                    continue;
-                }
+                int v = e[j].v; if (!dfn[v]) { continue; }
                 find(v);
-                if (dfn[v] &lt; dfn[u])
-                {
-                    res = std::min(res, dfn[v]);
-                }
-                else
-                {
-                    res = std::min(res, dfn[sdm[mn[v]]]);
-                }
+                if (dfn[v] &lt; dfn[u]) { res = std::min(res, dfn[v]); }
+                else { res = std::min(res, dfn[sdm[mn[v]]]); }
             }
-            sdm[u] = pos[res];
-            fa[u] = fth[u];
-            add(2, sdm[u], u); u = fth[u];
+            sdm[u] = pos[res]; fa[u] = fth[u]; add(2, sdm[u], u); u = fth[u];
             for (int j = h[2][u]; j; j = e[j].x)
             {
                 int v = e[j].v; find(v);
-                if (sdm[mn[v]] == u)
-                {
-                    idm[v] = u;
-                }
-                else
-                {
-                    idm[v] = mn[v];
-                }
+                if (sdm[mn[v]] == u) { idm[v] = u; }
+                else { idm[v] = mn[v]; }
             }
             h[2][u] = 0;
         }
         for (int i = 2; i &lt;= dfc; ++i)
         {
             int u = pos[i];
-            if (idm[u] != sdm[u])
-            {
-                idm[u] = idm[idm[u]];
-            }
+            if (idm[u] != sdm[u]) { idm[u] = idm[idm[u]]; }
         }
     }</code></pre>
 <h1 id="例题">例题</h1>
