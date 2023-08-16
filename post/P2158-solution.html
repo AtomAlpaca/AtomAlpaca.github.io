@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang = "zh_cn">
+
+<head>
+	<meta charset = "utf-8"/>
+		<meta name = "author" content = "AtomAlpaca">
+		<title>「题解」 P8474 立春</title>
+	<link rel = "stylesheet" href = "./style.css" type = "text/css"/>
+	<link rel="stylesheet"
+      href="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/panda-syntax-dark.min.css">
+	<script src="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/highlight.min.js"></script>
+
+</head>
+
+<body>
+	<header>
+				<p>
+			<h1>
+				「题解」 P8474 立春
+			</h1>
+		</p>
+		<p style = "text-align: center">
+						AtomAlpaca
+								</p>
+				
+			</header>
+	<script>hljs.highlightAll();</script>
+		<h2>
+		Table of contents
+	</h2>
+	<ul>
+<li><a href="#代码" id="toc-代码">代码</a></li>
+</ul>
+	
+	<p>不知道为什么题解区都是用欧拉函数做的，个人感觉完全用不到啊。</p>
+<p>考虑将观测点作为原点，向右为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
+轴 正方向，向上为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>
+轴正方向，那么所求即为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mo>+</mo><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow></msubsup><mrow><msubsup><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow></msubsup><mrow><mo stretchy="true" form="prefix">[</mo><mo>gcd</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>i</mi><mo>,</mo><mi>j</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">2 +\sum_{i = 1}^{n-1}{\sum_{j = 1}^{n - 1} [ \gcd(i, j)=1 ]}</annotation></semantics></math>。</p>
+<p>考虑如何求最大公倍数为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+的数对数。考虑容斥，即为约数中含
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+的数对数量，减去约数中含
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+的倍数的数对数量。我们设最大公倍数为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+的数对为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(k)</annotation></semantics></math>，则有：
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><mo stretchy="false" form="prefix">⌊</mo><mfrac><mi>n</mi><mi>x</mi></mfrac><mo stretchy="false" form="postfix">⌋</mo><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup><mo>−</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>2</mn></mrow><mrow><mi>i</mi><mi>x</mi><mo>≤</mo><mi>n</mi></mrow></munderover><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>i</mi><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">f(x) = (\lfloor \frac{n}{x}\rfloor)^2 - \sum_{i = 2}^{ix \le n} { f(ix) }</annotation></semantics></math></p>
+<p>答案即为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">f(1) + 2</annotation></semantics></math>，代码非常好写。</p>
+<h2 id="代码">代码</h2>
+<pre><code>#include &lt;bits/stdc++.h&gt;
+
+using std::cin;
+using std::cout;
+
+typedef long long ll;
+const ll MAX = 4e4 + 5;
+ll n, f[MAX];
+
+int main()
+{
+    cin &gt;&gt; n; --n; if (!n) { cout &lt;&lt; 0; return 0; }
+    for (ll i = n; i &gt;= 1; --i)
+    {
+        f[i] = (n / i) * (n / i);
+        for (ll j = 2; j * i &lt;= n; ++j) { f[i] -= f[i * j]; }
+    }
+    cout &lt;&lt; f[1] + 2;
+    return 0;
+}</code></pre>
+</body>

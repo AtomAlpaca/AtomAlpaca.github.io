@@ -5,6 +5,26 @@
 	<link>https://blog.atal.moe/</link>
 	<description>AtomAlpaca's Blog</description>
 	<item>
+		<title>「题解」集训模拟赛的另一道题目的另类解法</title>
+		<link>https://blog.atal.moe/post/some-solution-1</link>
+	</item>
+	<item>
+		<title>「题解」集训模拟赛的一道题目的另类解法</title>
+		<link>https://blog.atal.moe/post/some-solution-0</link>
+	</item>
+	<item>
+		<title>「题解」UVA754 Treasure Hunt</title>
+		<link>https://blog.atal.moe/post/UVA754-solution</link>
+	</item>
+	<item>
+		<title>「题解」P4671 Polygon</title>
+		<link>https://blog.atal.moe/post/P4671-solution</link>
+	</item>
+	<item>
+		<title>「题解」P2158 仪仗队</title>
+		<link>https://blog.atal.moe/post/P2158-solution</link>
+	</item>
+	<item>
 		<title>「数据结构」支配树略解</title>
 		<link>https://blog.atal.moe/post/dom-tree</link>
 	</item>
@@ -33,7 +53,7 @@
 		<link>https://blog.atal.moe/post/P2022-solution</link>
 	</item>
 	<item>
-		<title>「题解」 P7813 有趣的数</title>
+		<title>「题解」 P7813 谜 </title>
 		<link>https://blog.atal.moe/post/P7813-solution</link>
 	</item>
 </channel>
