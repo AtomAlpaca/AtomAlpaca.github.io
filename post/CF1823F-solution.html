@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang = "zh_cn">
+
+<head>
+	<meta charset = "utf-8"/>
+		<meta name = "author" content = "AtomAlpaca">
+		<title>「题解」CF1823F Random Walk</title>
+	<link rel = "stylesheet" href = "./style.css" type = "text/css"/>
+	<link rel="stylesheet"
+      href="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/panda-syntax-dark.min.css">
+	<script src="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/highlight.min.js"></script>
+
+</head>
+
+<body>
+	<header>
+				<p>
+			<h1>
+				「题解」CF1823F Random Walk
+			</h1>
+		</p>
+		<p style = "text-align: center">
+						AtomAlpaca
+								</p>
+				
+			</header>
+	<script>hljs.highlightAll();</script>
+		<h2>
+		Table of contents
+	</h2>
+	<ul>
+<li><a href="#题目" id="toc-题目">题目</a></li>
+<li><a href="#ux9898ux89e3" id="toc-ux9898ux89e3">题解</a></li>
+<li><a href="#代码" id="toc-代码">代码</a></li>
+</ul>
+	
+	<h2 id="题目">题目</h2>
+<p>简述题意：给定一棵树和两个节点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>S</mi><mo>,</mo><mi>T</mi></mrow><annotation encoding="application/x-tex">S, T</annotation></semantics></math>，从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>S</mi><annotation encoding="application/x-tex">S</annotation></semantics></math>
+出发，在树上随机游走直到走到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
+为止，求出每个节点的期望经过次数。</p>
+<p>感觉树上做法很奇妙，于是写一篇题解！</p>
+<h2 id="ux9898ux89e3">题解</h2>
+<p>令
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>d</mi><mi>u</mi></msub><annotation encoding="application/x-tex">d_u</annotation></semantics></math>
+为节点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的度数，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>f</mi><mi>u</mi></msub><annotation encoding="application/x-tex">f_u</annotation></semantics></math>
+为节点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+的期望经过次数。每次移动时，会从当前节点的所有节点中等概率选择一个节点，因此到达每个相邻节点的概率都是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mstyle displaystyle="true"><mfrac><mn>1</mn><msub><mi>d</mi><mi>u</mi></msub></mfrac></mstyle><annotation encoding="application/x-tex">\dfrac{1}{d_u}</annotation></semantics></math>；从被到达节点的角度考虑，就有
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mi>u</mi></msub><mo>=</mo><msub><mo>∑</mo><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∈</mo><mi>E</mi></mrow></msub><mstyle displaystyle="true"><mfrac><msub><mi>f</mi><mi>v</mi></msub><msub><mi>d</mi><mi>v</mi></msub></mfrac></mstyle></mrow><annotation encoding="application/x-tex">f_u = \sum_{(u, v)\in E} { \dfrac{f_v}{d_v} }</annotation></semantics></math>。</p>
+<p>特别地，节点不能从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
+转移过来，因为到达
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>T</mi><annotation encoding="application/x-tex">T</annotation></semantics></math>
+后游走就会停止；因为从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>S</mi><annotation encoding="application/x-tex">S</annotation></semantics></math>
+节点出发，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>f</mi><mi>S</mi></msub><annotation encoding="application/x-tex">f_S</annotation></semantics></math>
+初始值为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>。整理一下：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right"><msub><mi>f</mi><mi>u</mi></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mn>1</mn><mo>,</mo></mtd><mtd columnalign="right"><mi>i</mi><mi>f</mi><mspace width="0.222em"></mspace><mi>u</mi><mo>=</mo><mi>T</mi></mtd></mtr><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mrow><mo stretchy="true" form="prefix">[</mo><mi>u</mi><mo>=</mo><mi>S</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>+</mo><munder><mo>∑</mo><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∈</mo><mi>E</mi><mo>,</mo><mi>v</mi><mo>≠</mo><mi>T</mi></mrow></munder><mstyle displaystyle="true"><mfrac><msub><mi>f</mi><mi>v</mi></msub><msub><mi>d</mi><mi>v</mi></msub></mfrac></mstyle><mo>,</mo></mtd><mtd columnalign="right"><mi>o</mi><mi>t</mi><mi>h</mi><mi>e</mi><mi>r</mi><mi>w</mi><mi>i</mi><mi>s</mi><mi>e</mi></mtd></mtr></mtable></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+f_u =
+\left\{ 
+\begin{aligned} 
+&amp; 1, &amp;if \ u=T 
+\\
+&amp;[u=S] + \sum_{(u, v)\in E,v\ne T} { \dfrac{f_v}{d_v} }, &amp;otherwise
+\end{aligned}
+\right.\end{aligned}</annotation></semantics></math></p>
+<p>然而我们发现转移是有环的，不能直接
+dp。我们固然可以使用高斯消元解决这个方程组，这也是<a
+href="https://www.luogu.com.cn/problem/P3232">有环图上随机游走问题</a>的最好解决办法，但是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>n</mi><mn>3</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(n^3)</annotation></semantics></math>
+的复杂度无法通过此题。</p>
+<p>考虑到这道题的图是一棵树，我们可以考虑把式子化成
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mi>u</mi></msub><mo>=</mo><msub><mi>g</mi><mi>u</mi></msub><msub><mi>f</mi><mrow><mi>f</mi><mi>a</mi></mrow></msub><mo>+</mo><msub><mi>c</mi><mi>u</mi></msub></mrow><annotation encoding="application/x-tex">f_u=g_u f_{fa} +c_u</annotation></semantics></math>
+的形式。由于树根是没有父亲的，我们能够直接求出树根的期望经过次数，然后
+dfs 下去求得每个节点的经过次数。</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right"><mtable><mtr><mtd columnalign="right"><msub><mi>f</mi><mi>u</mi></msub></mtd><mtd columnalign="left"><mo>=</mo><mrow><mo stretchy="true" form="prefix">[</mo><mi>u</mi><mo>=</mo><mi>S</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>+</mo><munder><mo>∑</mo><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∈</mo><mi>E</mi><mo>,</mo><mi>v</mi><mo>≠</mo><mi>T</mi></mrow></munder><mstyle displaystyle="true"><mfrac><msub><mi>f</mi><mi>v</mi></msub><msub><mi>d</mi><mi>v</mi></msub></mfrac></mstyle></mtd></mtr><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mo>=</mo><mrow><mo stretchy="true" form="prefix">[</mo><mi>u</mi><mo>=</mo><mi>S</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>+</mo><mstyle displaystyle="true"><mfrac><msub><mi>f</mi><mrow><mi>f</mi><mi>a</mi></mrow></msub><msub><mi>d</mi><mrow><mi>f</mi><mi>a</mi></mrow></msub></mfrac></mstyle><mo>+</mo><munder><mo>∑</mo><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∈</mo><mi>E</mi><mo>,</mo><mi>v</mi><mo>≠</mo><mi>T</mi><mo>,</mo><mi>f</mi><mi>a</mi></mrow></munder><mstyle displaystyle="true"><mfrac><msub><mi>f</mi><mi>v</mi></msub><msub><mi>d</mi><mi>v</mi></msub></mfrac></mstyle></mtd></mtr><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mo>=</mo><mrow><mo stretchy="true" form="prefix">[</mo><mi>u</mi><mo>=</mo><mi>S</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>+</mo><mstyle displaystyle="true"><mfrac><msub><mi>f</mi><mrow><mi>f</mi><mi>a</mi></mrow></msub><msub><mi>d</mi><mrow><mi>f</mi><mi>a</mi></mrow></msub></mfrac></mstyle><mo>+</mo><munder><mo>∑</mo><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∈</mo><mi>E</mi><mo>,</mo><mi>v</mi><mo>≠</mo><mi>T</mi><mo>,</mo><mi>f</mi><mi>a</mi></mrow></munder><mstyle displaystyle="true"><mfrac><mrow><msub><mi>g</mi><mi>v</mi></msub><msub><mi>f</mi><mi>u</mi></msub><mo>+</mo><msub><mi>c</mi><mi>v</mi></msub></mrow><msub><mi>d</mi><mi>v</mi></msub></mfrac></mstyle></mtd></mtr><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mo>=</mo><mrow><mo stretchy="true" form="prefix">[</mo><mi>u</mi><mo>=</mo><mi>S</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>+</mo><mstyle displaystyle="true"><mfrac><msub><mi>f</mi><mrow><mi>f</mi><mi>a</mi></mrow></msub><msub><mi>d</mi><mrow><mi>f</mi><mi>a</mi></mrow></msub></mfrac></mstyle><mo>+</mo><munder><mo>∑</mo><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∈</mo><mi>E</mi><mo>,</mo><mi>v</mi><mo>≠</mo><mi>T</mi><mo>,</mo><mi>a</mi></mrow></munder><mstyle displaystyle="true"><mfrac><mrow><msub><mi>g</mi><mi>v</mi></msub><msub><mi>f</mi><mi>u</mi></msub></mrow><msub><mi>d</mi><mi>v</mi></msub></mfrac></mstyle><mo>+</mo><munder><mo>∑</mo><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∈</mo><mi>E</mi><mo>,</mo><mi>v</mi><mo>≠</mo><mi>T</mi><mo>,</mo><mi>f</mi><mi>a</mi></mrow></munder><mstyle displaystyle="true"><mfrac><msub><mi>c</mi><mi>v</mi></msub><msub><mi>d</mi><mi>v</mi></msub></mfrac></mstyle></mtd></mtr></mtable></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\begin{aligned} 
+f_u &amp;= [u=S] + \sum_{(u, v)\in E,v\ne T} { \dfrac{f_v}{d_v} } \\
+&amp;= [u=S] + \dfrac{f_{fa}}{d_{fa}} + \sum_{(u, v)\in E,v\ne T,fa} { \dfrac{f_v}{d_v}} \\
+&amp;= [u=S] + \dfrac{f_{fa}}{d_{fa}} + \sum_{(u, v)\in E,v\ne T,fa} { \dfrac{g_v f_u + c_v}{d_v}} \\
+&amp;= [u=S] + \dfrac{f_{fa}}{d_{fa}} + \sum_{(u, v)\in E,v\ne T,a} { \dfrac{g_v f_u}{d_v}} + \sum_{(u, v)\in E,v\ne T,fa} { \dfrac{c_v}{d_v}}\\
+\end{aligned}\end{aligned}</annotation></semantics></math> 移项得到：
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right"><mtable><mtr><mtd columnalign="right"><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><munder><mo>∑</mo><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∈</mo><mi>E</mi><mo>,</mo><mi>v</mi><mo>≠</mo><mi>T</mi><mo>,</mo><mi>f</mi><mi>a</mi></mrow></munder><mstyle displaystyle="true"><mfrac><msub><mi>g</mi><mi>v</mi></msub><msub><mi>d</mi><mi>v</mi></msub></mfrac></mstyle><mo stretchy="true" form="postfix">)</mo></mrow><msub><mi>f</mi><mi>u</mi></msub></mtd><mtd columnalign="left"><mo>=</mo><mrow><mo stretchy="true" form="prefix">[</mo><mi>u</mi><mo>=</mo><mi>S</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>+</mo><mstyle displaystyle="true"><mfrac><msub><mi>f</mi><mrow><mi>f</mi><mi>a</mi></mrow></msub><msub><mi>d</mi><mrow><mi>f</mi><mi>a</mi></mrow></msub></mfrac></mstyle><mo>+</mo><munder><mo>∑</mo><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∈</mo><mi>E</mi><mo>,</mo><mi>v</mi><mo>≠</mo><mi>T</mi><mo>,</mo><mi>f</mi><mi>a</mi></mrow></munder><mstyle displaystyle="true"><mfrac><msub><mi>c</mi><mi>v</mi></msub><msub><mi>d</mi><mi>v</mi></msub></mfrac></mstyle></mtd></mtr></mtable></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+\begin{aligned} 
+(1-\sum_{(u, v)\in E,v\ne T,fa}{\dfrac{g_v}{d_v}}) f_u &amp;= [u=S] + \dfrac{f_{fa}}{d_{fa}} + \sum_{(u, v)\in E,v\ne T, fa} { \dfrac{c_v}{d_v}}
+\end{aligned}\end{aligned}</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right"><msub><mi>f</mi><mi>u</mi></msub></mtd><mtd columnalign="left"><mo>=</mo><mstyle displaystyle="true"><mfrac><mn>1</mn><mrow><msub><mi>d</mi><mrow><mi>f</mi><mi>a</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><munder><mo>∑</mo><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∈</mo><mi>E</mi><mo>,</mo><mi>v</mi><mo>≠</mo><mi>T</mi><mo>,</mo><mi>f</mi><mi>a</mi></mrow></munder><mstyle displaystyle="true"><mfrac><msub><mi>g</mi><mi>v</mi></msub><msub><mi>d</mi><mi>v</mi></msub></mfrac></mstyle><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mstyle><msub><mi>f</mi><mrow><mi>f</mi><mi>a</mi></mrow></msub><mo>+</mo><mstyle displaystyle="true"><mfrac><mrow><mrow><mo stretchy="true" form="prefix">[</mo><mi>u</mi><mo>=</mo><mi>S</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>+</mo><munder><mo>∑</mo><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∈</mo><mi>E</mi><mo>,</mo><mi>v</mi><mo>≠</mo><mi>T</mi><mo>,</mo><mi>f</mi><mi>a</mi></mrow></munder><mstyle displaystyle="true"><mfrac><msub><mi>c</mi><mi>v</mi></msub><msub><mi>d</mi><mi>v</mi></msub></mfrac></mstyle></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><munder><mo>∑</mo><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>∈</mo><mi>E</mi><mo>,</mo><mi>v</mi><mo>≠</mo><mi>T</mi><mo>,</mo><mi>f</mi><mi>a</mi></mrow></munder><mstyle displaystyle="true"><mfrac><msub><mi>g</mi><mi>v</mi></msub><msub><mi>d</mi><mi>v</mi></msub></mfrac></mstyle><mo stretchy="true" form="postfix">)</mo></mrow></mfrac></mstyle></mtd></mtr><mtr><mtd columnalign="right"><msub><mi>f</mi><mi>u</mi></msub></mtd><mtd columnalign="left"><mo>=</mo><msub><mi>g</mi><mi>u</mi></msub><msub><mi>f</mi><mrow><mi>f</mi><mi>a</mi></mrow></msub><mo>+</mo><msub><mi>c</mi><mi>u</mi></msub></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+  f_u &amp;= \dfrac{1}{d_{fa}(1-\sum_{(u, v)\in E,v\ne T,fa}{\dfrac{g_v}{d_v}})} f_{fa} + \dfrac{[u=S]+\sum_{(u, v)\in E,v\ne T,fa} { \dfrac{c_v}{d_v}}}{(1-\sum_{(u, v)\in E,v\ne T, fa}{\dfrac{g_v}{d_v}})}
+  \\
+f_u &amp;= g_u f_{fa} + c_u\end{aligned}</annotation></semantics></math></p>
+<p>于是我们得到了
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo>,</mo><mi>c</mi></mrow><annotation encoding="application/x-tex">g, c</annotation></semantics></math>
+的转移方程，而且这个转移是仅依赖自己的子节点的！于是我们可以先一遍 dfs
+求出每个节点的
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo>,</mo><mi>c</mi></mrow><annotation encoding="application/x-tex">g, c</annotation></semantics></math>，再求出
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>f</mi><annotation encoding="application/x-tex">f</annotation></semantics></math>。</p>
+<h2 id="代码">代码</h2>
+<pre><code>#include &lt;bits/stdc++.h&gt;
+
+typedef long long ll;
+
+const int MOD = 998244353;
+const int MAX = 2e5 + 5;
+
+int n, S, T, u, v, tot;
+int h[MAX], f[MAX], c[MAX], g[MAX], d[MAX];
+
+struct E { int v, x; } e[MAX &lt;&lt; 2];
+void add(int u, int v) { e[++tot] = {v, h[u]}; h[u] = tot; e[++tot] = {u, h[v]}; h[v] = tot; }
+
+inline int qp(int a, int x)
+{
+    int res = 1;
+    while (x) { if (x &amp; 1) { res = 1ll * res * a % MOD; } a = 1ll * a * a % MOD; x &gt;&gt;= 1; }
+    return res;
+}
+
+void dfs(int u, int fa)
+{
+    int _g = 0, _c = (u == S);
+    for (int i = h[u]; i; i = e[i].x)
+    {
+        int v = e[i].v; if (v == fa) { continue; }
+        dfs(v, u);
+        _g = (_g + 1ll * g[v] * qp(d[v], MOD - 2) % MOD) % MOD;
+        _c = (_c + 1ll * c[v] * qp(d[v], MOD - 2) % MOD) % MOD;
+    }
+    _g = qp((1 - _g + MOD), MOD - 2);
+    _c = 1ll * _c * _g % MOD;
+    _g = 1ll * _g * qp(d[fa], MOD - 2) % MOD;
+    g[u] = _g; c[u] = _c;
+}
+
+void _dfs(int u, int fa)
+{
+    f[u] = (1ll * g[u] * f[fa] % MOD + c[u]) % MOD;
+    for (int i = h[u]; i; i = e[i].x)
+    {
+        int v = e[i].v; if (v == fa) { continue; }
+        _dfs(v, u);
+    }
+}
+
+int main()
+{
+    scanf(&quot;%d%d%d&quot;, &amp;n, &amp;S, &amp;T);
+    for (int i = 1; i &lt; n; ++i) { scanf(&quot;%d%d&quot;, &amp;u, &amp;v); add(u, v); ++d[u]; ++d[v]; }
+    dfs(T, 0); f[T] = 1; _dfs(T, 0); f[T] = 1;
+    for (int i = 1; i &lt;= n; ++i) { printf(&quot;%d &quot;, f[i]); }
+    return 0;
+}</code></pre>
+</body>

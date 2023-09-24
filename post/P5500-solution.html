@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang = "zh_cn">
+
+<head>
+	<meta charset = "utf-8"/>
+		<meta name = "author" content = "AtomAlpaca">
+		<title>「题解」P5500 真正的OIer从不女装</title>
+	<link rel = "stylesheet" href = "./style.css" type = "text/css"/>
+	<link rel="stylesheet"
+      href="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/panda-syntax-dark.min.css">
+	<script src="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/highlight.min.js"></script>
+
+</head>
+
+<body>
+	<header>
+				<p>
+			<h1>
+				「题解」P5500 真正的OIer从不女装
+			</h1>
+		</p>
+		<p style = "text-align: center">
+						AtomAlpaca
+								</p>
+				
+			</header>
+	<script>hljs.highlightAll();</script>
+		<h2>
+		Table of contents
+	</h2>
+	<ul>
+<li><a href="#题意" id="toc-题意">题意</a></li>
+<li><a href="#题解" id="toc-题解">题解</a></li>
+<li><a href="#ux4ee3ux7801" id="toc-ux4ee3ux7801">代码</a></li>
+</ul>
+	
+	<h2 id="题意">题意</h2>
+<p>给定一个长度为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+的序列
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>。支持以下两种操作：</p>
+<ol>
+<li><p>区间覆盖；</p></li>
+<li><p>询问区间进行不超过
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+次女装操作后，每个元素都相等的子串长度最大值。</p></li>
+</ol>
+<p>其中一次区间女装操作指在区间
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mi>l</mi><mo>,</mo><mi>r</mi><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[l,r]</annotation></semantics></math>
+内任选位置
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>，将区间
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mi>l</mi><mo>,</mo><mi>p</mi><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[l,p]</annotation></semantics></math>
+和
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>p</mi><mo>,</mo><mi>r</mi><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">(p,r]</annotation></semantics></math>
+分别翻转。</p>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>≤</mo><mi>n</mi><mo>,</mo><mi>m</mi><mo>≤</mo><mn>200000</mn></mrow><annotation encoding="application/x-tex">1 \le n,m \le 200000</annotation></semantics></math></p>
+<h2 id="题解">题解</h2>
+<p>首先我们考虑每次“女装”操作其实就是把当前区间首尾相接成一个环，然后选一个地方把它断掉再展平成一个序列。因此多次“女装”其实答案不会更优。因此只有女装和不女装的区别。</p>
+<p>没有女装操作是简单的，考虑有女装操作怎么做。</p>
+<p>我们发现把区间接成一个环之后，只会在原来右侧值和左侧值相等时，多出一个原来的右侧相等连续段和左侧极长相等段拼出来的一个子串，可能比原来的答案更优。因此我们考虑用线段树维护区间左、右侧极长相等段和区间极长相等段即可。</p>
+<h2 id="ux4ee3ux7801">代码</h2>
+<p>记得注意左、右侧极长相等段可能重合，要和询问区间长度取
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>min</mo><annotation encoding="application/x-tex">\min</annotation></semantics></math>。</p>
+<pre><code>#include &lt;bits/stdc++.h&gt;
+
+const int MAX = 2e5 + 5;
+char op;
+int l, r, c, k, n, m, a[MAX];
+
+struct N
+{
+  int l, r, lv, rv, lm, rm, mx, tg = 0;
+  void pu(N l, N r)
+  {
+    this -&gt; l = l.l; this -&gt; r = r.r; lm = l.lm; rm = r.rm; lv = l.lv; rv = r.rv; mx = std::max(l.mx, r.mx);
+    if (l.rv == r.lv)
+    { 
+      mx = std::max(mx, l.rm + r.lm);
+      if (l.lm == l.r - l.l + 1) { lm = std::max(lm, l.lm + r.lm); }
+      if (r.rm == r.r - r.l + 1) { rm = std::max(rm, r.rm + l.rm); }
+    }
+  }
+
+  void mdf(int x) { lm = rm = mx = r - l + 1; lv = rv = tg = x; }
+  
+  void pd(N &amp; l, N &amp; r)
+  {
+    l.mdf(tg); r.mdf(tg);
+    tg = 0;
+  }
+} st[MAX &lt;&lt; 2];
+
+void build(int l, int r, int x)
+{
+  st[x].l = l; st[x].r = r;
+  if (l == r) { st[x].lv = st[x].rv = a[l]; st[x].lm = st[x].rm = st[x].mx = 1; return ; }
+  int k = l + ((r - l) &gt;&gt; 1);
+  build(l, k, x &lt;&lt; 1); build(k + 1, r, x &lt;&lt; 1 | 1);
+  st[x].pu(st[x &lt;&lt; 1], st[x &lt;&lt; 1 | 1]);
+}
+
+void mdf(int l, int r, int s, int t, int c, int x)
+{
+  if (l &gt;= s and r &lt;= t) { st[x].mdf(c); return ; }
+  if (st[x].tg) { st[x].pd(st[x &lt;&lt; 1], st[x &lt;&lt; 1 | 1]); };
+  int k = l + ((r - l) &gt;&gt; 1);
+  if (s &lt;= k) { mdf(l, k, s, t, c, x &lt;&lt; 1); }
+  if (t &gt;  k) { mdf(k + 1, r, s, t, c, x &lt;&lt; 1 | 1); }
+  st[x].pu(st[x &lt;&lt; 1], st[x &lt;&lt; 1 | 1]);
+}
+
+N qry(int l, int r, int s, int t, int x)
+{
+  if (l &gt;= s and r &lt;= t) { return st[x]; }
+  if (st[x].tg) { st[x].pd(st[x &lt;&lt; 1], st[x &lt;&lt; 1 | 1]); };
+  N res; int k = l + ((r - l) &gt;&gt; 1);
+  if (s &lt;= k and t &gt; k) { res.pu(qry(l, k, s, t, x &lt;&lt; 1), qry(k + 1, r, s, t, x &lt;&lt; 1 | 1)); return res; }
+  if (s &lt;= k) { return qry(l, k, s, t, x &lt;&lt; 1); }
+  if (t &gt;  k) { return qry(k + 1, r, s, t, x &lt;&lt; 1 | 1); }
+}
+
+int main()
+{
+  scanf(&quot;%d%d&quot;, &amp;n, &amp;m);
+  for (int i = 1; i &lt;= n; ++i) { scanf(&quot;%d&quot;, &amp;a[i]); }
+  build(1, n, 1);
+  for (int i = 1; i &lt;= m; ++i)
+  {
+    scanf(&quot;\n%c&quot;, &amp;op);
+    if (op == &#39;Q&#39;)
+    {
+      scanf(&quot;%d%d%d&quot;, &amp;l, &amp;r, &amp;k);
+      N res = qry(1, n, l, r, 1);
+      if (k and res.lv == res.rv) { printf(&quot;%d\n&quot;, std::max(res.mx, std::min(res.lm + res.rm, r - l + 1))); }
+      else { printf(&quot;%d\n&quot;, res.mx); }
+    }
+    else { scanf(&quot;%d%d%d&quot;, &amp;l, &amp;r, &amp;c); mdf(1, n, l, r, c, 1); }
+  }
+}
+</code></pre>
+</body>
