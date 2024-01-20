@@ -50,12 +50,13 @@
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mi>n</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">2n - 1</annotation></semantics></math>
 个数.</p>
 <p>我们看数据范围:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>≤</mo><mstyle displaystyle="true"><mfrac><mrow><mi>k</mi><mo>+</mo><mn>1</mn></mrow><mn>2</mn></mfrac></mstyle><mo>≤</mo><mi>N</mi><mo>≤</mo><msup><mn>10</mn><mn>9</mn></msup></mrow><annotation encoding="application/x-tex">1 \le \dfrac {k + 1}{2} \le N \le 10^9</annotation></semantics></math></p>
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>≤</mo><mfrac displaystyle="true"><mrow><mi>k</mi><mo>+</mo><mn>1</mn></mrow><mn>2</mn></mfrac><mo>≤</mo><mi>N</mi><mo>≤</mo><msup><mn>10</mn><mn>9</mn></msup></mrow><annotation encoding="application/x-tex">1 \le \dfrac {k + 1}{2} \le N \le 10^9</annotation></semantics></math></p>
 <p>也就是说
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right"><mi>k</mi><mo>+</mo><mn>1</mn></mtd><mtd columnalign="left"><mo>≤</mo><mn>2</mn><mi>N</mi></mtd></mtr><mtr><mtd columnalign="right"><mi>k</mi></mtd><mtd columnalign="left"><mo>≤</mo><mn>2</mn><mi>N</mi><mo>−</mo><mn>1</mn></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>k</mi><mo>+</mo><mn>1</mn></mtd><mtd columnalign="left" style="text-align: left"><mo>≤</mo><mn>2</mn><mi>N</mi></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>k</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>≤</mo><mn>2</mn><mi>N</mi><mo>−</mo><mn>1</mn></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
         k + 1   &amp;\le 2N \\ 
         k       &amp;\le 2N - 1
-    \end{aligned}</annotation></semantics></math></p>
+    
+\end{aligned}</annotation></semantics></math></p>
 <p>也就是说, 最多只会取相当于最后两行数量的数.
 因为越向下、越向右的数字越大, 且可以从最右方开始遍历最后两行,
 我们只需要考虑最后两行就行了.</p>
@@ -101,40 +102,43 @@
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>
 个最大的.</p>
 <p>当选择个数为偶数时, 显然
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>=</mo><mi>y</mi><mo>=</mo><mstyle displaystyle="true"><mfrac><mi>k</mi><mn>2</mn></mfrac></mstyle></mrow><annotation encoding="application/x-tex">x = y = \dfrac {k} {2}</annotation></semantics></math></p>
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>=</mo><mi>y</mi><mo>=</mo><mfrac displaystyle="true"><mi>k</mi><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">x = y = \dfrac {k} {2}</annotation></semantics></math></p>
 <p>当选择个数为奇数时, 因为第
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>N</mi><annotation encoding="application/x-tex">N</annotation></semantics></math>
 行的数字总比第
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">N - 1</annotation></semantics></math>
 行的数字大, 所以</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right"><mi>x</mi></mtd><mtd columnalign="left"><mo>=</mo><mrow><mo stretchy="true" form="prefix">⌈</mo><mstyle displaystyle="true"><mfrac><mi>k</mi><mn>2</mn></mfrac></mstyle><mo stretchy="true" form="postfix">⌉</mo></mrow></mtd></mtr><mtr><mtd columnalign="right"><mi>y</mi></mtd><mtd columnalign="left"><mo>=</mo><mrow><mo stretchy="true" form="prefix">⌊</mo><mstyle displaystyle="true"><mfrac><mi>k</mi><mn>2</mn></mfrac></mstyle><mo stretchy="true" form="postfix">⌋</mo></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>x</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mrow><mo stretchy="true" form="prefix">⌈</mo><mfrac displaystyle="true"><mi>k</mi><mn>2</mn></mfrac><mo stretchy="true" form="postfix">⌉</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>y</mi></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mrow><mo stretchy="true" form="prefix">⌊</mo><mfrac displaystyle="true"><mi>k</mi><mn>2</mn></mfrac><mo stretchy="true" form="postfix">⌋</mo></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
         x &amp;= \left\lceil  \dfrac {k} {2} \right\rceil  \\
         y &amp;= \left\lfloor \dfrac {k} {2} \right\rfloor
-    \end{aligned}</annotation></semantics></math></p>
+    
+\end{aligned}</annotation></semantics></math></p>
 <p>第
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
 行第
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
 个数的值为:
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mi>i</mi></mtd></mtr><mtr><mtd columnalign="right"><mo>=</mo></mtd><mtd columnalign="left"><mstyle displaystyle="true"><mfrac><mrow><mi>n</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mn>2</mn></mfrac></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></munderover><mi>i</mi></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mo>=</mo></mtd><mtd columnalign="left" style="text-align: left"><mfrac displaystyle="true"><mrow><mi>n</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mn>2</mn></mfrac></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
           &amp;\sum_{i = 1}^{n}{i} \\
         = &amp;\dfrac{n \left( {n + 1} \right) } {2}
-    \end{aligned}</annotation></semantics></math></p>
+    
+\end{aligned}</annotation></semantics></math></p>
 <p>显然第
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
 行第
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mi>k</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>≤</mo><mi>K</mi><mo>&lt;</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">n - k \left( 0 \le K &lt; n \right)</annotation></semantics></math>
 个数的值为:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle displaystyle="true"><mfrac><mrow><mi>n</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mn>2</mn></mfrac></mstyle><mo>−</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">\dfrac{n \left( {n + 1} \right) } {2} - k</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac displaystyle="true"><mrow><mi>n</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mn>2</mn></mfrac><mo>−</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">\dfrac{n \left( {n + 1} \right) } {2} - k</annotation></semantics></math></p>
 <p>第
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
 行取
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
 个最大的数, 它们的和为:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mi>x</mi><mo>⋅</mo><mstyle displaystyle="true"><mfrac><mrow><mi>n</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mn>2</mn></mfrac></mstyle><mo>−</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>+</mo><mn>1</mn><mo>+</mo><mi>…</mi><mo>+</mo><mi>x</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right"><mo>=</mo></mtd><mtd columnalign="left"><mi>x</mi><mo>⋅</mo><mstyle displaystyle="true"><mfrac><mrow><mi>n</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mn>2</mn></mfrac></mstyle><mo>−</mo><mstyle displaystyle="true"><mfrac><mrow><mi>x</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mn>2</mn></mfrac></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mi>x</mi><mo>⋅</mo><mfrac displaystyle="true"><mrow><mi>n</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mn>2</mn></mfrac><mo>−</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>0</mn><mo>+</mo><mn>1</mn><mo>+</mo><mi>…</mi><mo>+</mo><mi>x</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mo>=</mo></mtd><mtd columnalign="left" style="text-align: left"><mi>x</mi><mo>⋅</mo><mfrac displaystyle="true"><mrow><mi>n</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mn>2</mn></mfrac><mo>−</mo><mfrac displaystyle="true"><mrow><mi>x</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mn>2</mn></mfrac></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
           &amp;x \cdot \dfrac {n \left( {n + 1} \right) } {2} - \left( 0 + 1 + \dots + x - 1 \right) \\
         = &amp;x \cdot \dfrac {n \left( {n + 1} \right) } {2} - \dfrac {x \left( x - 1 \right)} {2}
-    \end{aligned}</annotation></semantics></math></p>
+    
+\end{aligned}</annotation></semantics></math></p>
 <p>我们只需要分别将第
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
 行与第

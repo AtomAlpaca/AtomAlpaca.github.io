@@ -53,13 +53,14 @@
 为
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0</mn><annotation encoding="application/x-tex">0</annotation></semantics></math>。</p>
 <p>考虑到当且仅当向一个好串后方接上一个偶回文串，这个串依然是好串；且极短偶回文串本身也是一个好串，我们可以写出转移方程：</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right"><msub><mi>f</mi><mi>i</mi></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mn>0</mn><mo>,</mo></mtd><mtd columnalign="right"><mi>i</mi><mi>f</mi><msub><mi>g</mi><mi>i</mi></msub><mo>=</mo><mn>0</mn></mtd></mtr><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><msub><mi>f</mi><mrow><mi>i</mi><mo>−</mo><msub><mi>g</mi><mi>i</mi></msub></mrow></msub><mo>+</mo><mn>1</mn><mo>,</mo></mtd><mtd columnalign="right"><mi>o</mi><mi>t</mi><mi>h</mi><mi>e</mi><mi>r</mi><mi>w</mi><mi>i</mi><mi>s</mi><mi>e</mi></mtd></mtr></mtable></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>f</mi><mi>i</mi></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mn>0</mn><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right"><mi>i</mi><mi>f</mi><msub><mi>g</mi><mi>i</mi></msub><mo>=</mo><mn>0</mn></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><msub><mi>f</mi><mrow><mi>i</mi><mo>−</mo><msub><mi>g</mi><mi>i</mi></msub></mrow></msub><mo>+</mo><mn>1</mn><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right"><mi>o</mi><mi>t</mi><mi>h</mi><mi>e</mi><mi>r</mi><mi>w</mi><mi>i</mi><mi>s</mi><mi>e</mi></mtd></mtr></mtable></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
   f_i = \left\{
 \begin{aligned}
 &amp; 0, &amp;if g_i=0 \\
 &amp;f_{i-g_i} + 1, &amp;otherwise
 \end{aligned}
-\right. \end{aligned}</annotation></semantics></math></p>
+\right. 
+\end{aligned}</annotation></semantics></math></p>
 <p>因为每次向后面加上的都是极短的偶回文串，这种 dp
 方式一定是不重不漏的。答案即为
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mrow><mo stretchy="true" form="prefix">|</mo><mi>s</mi><mo stretchy="true" form="postfix">|</mo></mrow></msubsup><msub><mi>f</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\sum_{i=1}^{|s|}{f_i}</annotation></semantics></math>。</p>
@@ -78,7 +79,7 @@
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>h</mi><mi>u</mi></msub><mo>=</mo><msub><mi>h</mi><mrow><mi>f</mi><mi>a</mi><mi>i</mi><msub><mi>l</mi><mi>u</mi></msub></mrow></msub></mrow><annotation encoding="application/x-tex">h_u=h_{fail_u}</annotation></semantics></math>；二是自己本身是一个偶回文串，此时
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>h</mi><mi>u</mi></msub><mo>=</mo><mi>l</mi><mi>e</mi><msub><mi>n</mi><mi>u</mi></msub></mrow><annotation encoding="application/x-tex">h_u=len_u</annotation></semantics></math>。</p>
 <p>整理一下：</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right"><mi>h</mi><mi>_</mi><mi>u</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><msub><mi>h</mi><mrow><mi>f</mi><mi>a</mi><mi>i</mi><msub><mi>l</mi><mi>u</mi></msub></mrow></msub><mo>,</mo></mtd><mtd columnalign="right"><msub><mi>h</mi><mrow><mi>f</mi><mi>a</mi><mi>i</mi><msub><mi>l</mi><mi>u</mi></msub></mrow></msub><mo>≠</mo><mn>0</mn></mtd></mtr><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mi>l</mi><mi>e</mi><msub><mi>n</mi><mi>u</mi></msub><mo>,</mo></mtd><mtd columnalign="right"><msub><mi>f</mi><mrow><mi>f</mi><mi>a</mi><mi>i</mi><msub><mi>l</mi><mi>u</mi></msub></mrow></msub><mo>=</mo><mn>0</mn><mspace width="0.222em"></mspace><mi>a</mi><mi>n</mi><mi>d</mi><mspace width="0.222em"></mspace><mi>l</mi><mi>e</mi><msub><mi>n</mi><mi>u</mi></msub><mo>mod</mo><mn>2</mn><mo>=</mo><mn>0</mn></mtd></mtr><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mn>0</mn><mo>,</mo></mtd><mtd columnalign="right"><mi>o</mi><mi>t</mi><mi>h</mi><mi>e</mi><mi>r</mi><mi>w</mi><mi>i</mi><mi>s</mi><mi>e</mi></mtd></mtr></mtable></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>h</mi><mi>_</mi><mi>u</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><msub><mi>h</mi><mrow><mi>f</mi><mi>a</mi><mi>i</mi><msub><mi>l</mi><mi>u</mi></msub></mrow></msub><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right"><msub><mi>h</mi><mrow><mi>f</mi><mi>a</mi><mi>i</mi><msub><mi>l</mi><mi>u</mi></msub></mrow></msub><mo>≠</mo><mn>0</mn></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mi>l</mi><mi>e</mi><msub><mi>n</mi><mi>u</mi></msub><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right"><msub><mi>f</mi><mrow><mi>f</mi><mi>a</mi><mi>i</mi><msub><mi>l</mi><mi>u</mi></msub></mrow></msub><mo>=</mo><mn>0</mn><mspace width="0.222em"></mspace><mi>a</mi><mi>n</mi><mi>d</mi><mspace width="0.222em"></mspace><mi>l</mi><mi>e</mi><msub><mi>n</mi><mi>u</mi></msub><mo>mod</mo><mn>2</mn><mo>=</mo><mn>0</mn></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mn>0</mn><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right"><mi>o</mi><mi>t</mi><mi>h</mi><mi>e</mi><mi>r</mi><mi>w</mi><mi>i</mi><mi>s</mi><mi>e</mi></mtd></mtr></mtable></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
 h\_u = \left\{
 \begin{aligned}
 &amp; h_{fail_u}, &amp;h_{fail_u} \ne 0
@@ -87,7 +88,8 @@ h\_u = \left\{
 \\
 &amp;0, &amp;otherwise
 \end{aligned}
-\right.\end{aligned}</annotation></semantics></math></p>
+\right.
+\end{aligned}</annotation></semantics></math></p>
 <p>在插入字符时维护即可。由于回文自动机复杂度是线性的，整体复杂度为
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mo stretchy="true" form="prefix">|</mo><mi>s</mi><mo stretchy="true" form="postfix">|</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(|s|)</annotation></semantics></math>。</p>
 <h2 id="代码">代码</h2>

@@ -56,9 +56,9 @@ id="toc-求解直接支配点">求解直接支配点</a></li>
 </ul></li>
 <li><a href="#例题" id="toc-例题">例题</a>
 <ul>
-<li><a href="#模板" id="toc-模板"><span>模板</span></a></li>
-<li><a href="#zjoi2012-灾难" id="toc-zjoi2012-灾难"><span>ZJOI2012
-灾难</span></a></li>
+<li><a href="#模板" id="toc-模板">模板</a></li>
+<li><a href="#zjoi2012-灾难" id="toc-zjoi2012-灾难">ZJOI2012
+灾难</a></li>
 </ul></li>
 </ul>
 	
@@ -217,9 +217,9 @@ void getdom()
 <p>数据流迭代法也是 OI 中不常见的一个知识点，这里先做简要介绍。</p>
 <p>数据流分析是编译原理中的概念，用于分析数据如何在程序执行路径上的流动；而数据流迭代法是在程序的流程图的结点上列出方程并不断迭代求解，从而求得程序的某些点的数据流值的一种方法。这里我们就是把有向图看成了一个程序流程图。</p>
 <p>这个问题中，方程为：</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right"><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mo stretchy="false" form="prefix">{</mo><mi>u</mi><mo stretchy="false" form="postfix">}</mo><mo>∪</mo><mrow><mo stretchy="true" form="prefix">(</mo><munder><mo>⋂</mo><mrow><mi>v</mi><mo>∈</mo><mi>p</mi><mi>r</mi><mi>e</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></munder><mrow><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
-dom(u)=\{u\} \cup \left(\bigcap_{v\in pre(u)}{dom(v)}\right)\end{aligned}</annotation></semantics></math>
-其中
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mo stretchy="false" form="prefix">{</mo><mi>u</mi><mo stretchy="false" form="postfix">}</mo><mo>∪</mo><mrow><mo stretchy="true" form="prefix">(</mo><munder><mo>⋂</mo><mrow><mi>v</mi><mo>∈</mo><mi>p</mi><mi>r</mi><mi>e</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></munder><mrow><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+dom(u)=\{u\} \cup \left(\bigcap_{v\in pre(u)}{dom(v)}\right)
+\end{aligned}</annotation></semantics></math> 其中
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mi>r</mi><mi>e</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">pre(u)</annotation></semantics></math>
 定义为
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
@@ -834,7 +834,7 @@ DFS 树走到
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
 之间的结点的所有节点中，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">sdom(v)</annotation></semantics></math>
 最小的一个节点，那么：</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right"><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mtd><mtd columnalign="right"><mi>i</mi><mi>f</mi><mspace width="0.222em"></mspace><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right"></mtd><mtd columnalign="left"><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mtd><mtd columnalign="right"><mi>o</mi><mi>t</mi><mi>h</mi><mi>e</mi><mi>r</mi><mi>w</mi><mi>i</mi><mi>s</mi><mi>e</mi></mtd></mtr></mtable></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right"><mi>i</mi><mi>f</mi><mspace width="0.222em"></mspace><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>s</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mi>i</mi><mi>d</mi><mi>o</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo></mtd><mtd columnalign="right" style="text-align: right"><mi>o</mi><mi>t</mi><mi>h</mi><mi>e</mi><mi>r</mi><mi>w</mi><mi>i</mi><mi>s</mi><mi>e</mi></mtd></mtr></mtable></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
 idom(u) =
 \left\{ 
 \begin{aligned} 
@@ -842,7 +842,8 @@ idom(u) =
 \\
 &amp;idom(v), &amp;otherwise
 \end{aligned}
-\right.\end{aligned}</annotation></semantics></math></p>
+\right.
+\end{aligned}</annotation></semantics></math></p>
 <p>只要对上面求解半支配点的代码稍作修改即可。</p>
 <pre data-tabsize="2"><code>struct E { int v, x; } e[MAX * 4];
     int h[3][MAX * 2];

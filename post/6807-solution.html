@@ -57,7 +57,7 @@
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>5</mn><mo>×</mo><msup><mn>10</mn><mn>9</mn></msup></mrow><annotation encoding="application/x-tex">5 \times 10 ^ 9</annotation></semantics></math>
 条边, 直接跑最小生成树肯定会 TLE, 我们需要减少边的数量.</p>
 <p>考虑到
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>c</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mstyle displaystyle="true"><mfrac><mrow><mi>u</mi><mo>⋅</mo><mi>v</mi></mrow><mrow><mi>g</mi><mi>c</mi><mi>d</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mstyle></mrow><annotation encoding="application/x-tex">lcm\left( u, v \right) = \dfrac {u \cdot v}{ gcd\left( u,v \right) }</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>c</mi><mi>m</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac displaystyle="true"><mrow><mi>u</mi><mo>⋅</mo><mi>v</mi></mrow><mrow><mi>g</mi><mi>c</mi><mi>d</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac></mrow><annotation encoding="application/x-tex">lcm\left( u, v \right) = \dfrac {u \cdot v}{ gcd\left( u,v \right) }</annotation></semantics></math>
 , 当
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
 和
@@ -88,7 +88,7 @@
 <p>我们想到,
 要枚举到在区间内不可能存在两个数满足这两个数都是这个数的倍数为止,
 这个数应当是
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mstyle displaystyle="true"><mfrac><mi>R</mi><mn>2</mn></mfrac></mstyle><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">{\dfrac{R}{2}} + 1</annotation></semantics></math>.</p>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac displaystyle="true"><mi>R</mi><mn>2</mn></mfrac><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">{\dfrac{R}{2}} + 1</annotation></semantics></math>.</p>
 <p>我们还需要建立平凡边. 想象我们先用优秀边跑完最小生成树,
 就可以得到若干个联通块(当然也有只有一个块的情况,
 但是跑最小生成树的时候会直接 break, 这里不考虑,
