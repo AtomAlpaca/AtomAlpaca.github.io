@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang = "zh_cn">
+
+<head>
+	<meta charset = "utf-8"/>
+		<meta name = "author" content = "AtomAlpaca">
+		<title>「题解」P9224 k 叉堆</title>
+	<link rel = "stylesheet" href = "./style.css" type = "text/css"/>
+	<link rel="stylesheet"
+      href="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/panda-syntax-dark.min.css">
+	<script src="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/highlight.min.js"></script>
+
+</head>
+
+<body>
+	<header>
+				<p>
+			<h1>
+				「题解」P9224 k 叉堆
+			</h1>
+		</p>
+		<p style = "text-align: center">
+						AtomAlpaca
+								</p>
+				
+			</header>
+	<script>hljs.highlightAll();</script>
+		<h2>
+		Table of contents
+	</h2>
+	<ul>
+<li><a href="#题意" id="toc-题意">题意</a></li>
+<li><a href="#题解" id="toc-题解">题解</a></li>
+<li><a href="#代码" id="toc-代码">代码</a></li>
+</ul>
+	
+	<p><span> </span></p>
+<h2 id="题意">题意</h2>
+<p><a href="https://www.luogu.com.cn/problem/P9224">link</a></p>
+<h2 id="题解">题解</h2>
+<p>提供一个不需要根号分治的做法。</p>
+<p>首先考虑
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+叉堆的情况下，每个点的儿子的区间。考虑这样构造
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+叉堆：维护一个没被成为儿子的节点队列，从小到大考虑每个点，将队列中前
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+个树拎出来成为它的儿子。</p>
+<p>那么对于节点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>，它前面有
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>×</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">(n - 1)\times k</annotation></semantics></math>
+个节点被分配了，而
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>
+节点不能被分配为其它节点的儿子，所以节点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+的儿子区间是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mi>k</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mn>2</mn><mo>,</mo><mi>k</mi><mi>x</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[k(x - 1) + 2, kx + 1]</annotation></semantics></math>
+这一段。于是我们考虑对每一维信息维护一个 st
+表，从小到大枚举叉数，检查每个节点的儿子区间内是否有比自己大的就可以了。</p>
+<p>复杂度是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow></msubsup><mfrac><mi>n</mi><mi>i</mi></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mi>n</mi><msub><mi>H</mi><mi>n</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(k(\sum_{i=1}^{n-1}{\frac{n}{i}})) = O(knH_n)</annotation></semantics></math>，其中
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>H</mi><annotation encoding="application/x-tex">H</annotation></semantics></math>
+是调和数。考虑到调和数增长很慢，几乎是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>log</mo><annotation encoding="application/x-tex">\log</annotation></semantics></math>
+级别的，这个做法应该是比出题人题解更优的。</p>
+<h2 id="代码">代码</h2>
+<pre><code>#include &lt;bits/stdc++.h&gt;
+        
+const int MAX = 2e5 + 5;
+        
+int n, k;
+int a[MAX], st[21][MAX];
+std::bitset &lt;MAX&gt; ans;
+        
+int mx(int l, int r)
+{
+    r = std::min(r, n); int lg = log2(r - l + 1);
+    return std::max(st[lg][l], st[lg][r - (1 &lt;&lt; lg) + 1]);
+}
+        
+void solve()
+{
+    for (int i = 1; i &lt;= n; ++i) { scanf(&quot;%d&quot;, &amp;a[i]); st[0][i] = a[i]; }
+    for (int i = 1; (1 &lt;&lt; i) &lt;= n; ++i)
+    {
+        for (int j = 1; j + (1 &lt;&lt; i) - 1 &lt;= n; ++j)
+        {
+            st[i][j] = std::max(st[i - 1][j], st[i - 1][j + (1 &lt;&lt; (i - 1))]);
+        }
+    }
+    for (int k = 1; k &lt; n; ++k)
+    {
+        if (!ans[k]) { continue; }
+        for (int i = 1; k * (i - 1) + 2 &lt;= n; ++i)
+        {
+            if (mx(k * (i - 1) + 2, k * i + 1) &gt; a[i]) { ans[k] = false; break; }
+        }
+    }
+}
+
+int main()
+{
+    scanf(&quot;%d%d&quot;, &amp;n, &amp;k);
+    for (int i = 1; i &lt;  n; ++i) { ans[i] = true; }
+    for (int i = 1; i &lt;= k; ++i) { solve(); }
+    printf(&quot;%ld\n&quot;, ans.count());
+    for (int i = 1; i &lt;  n; ++i) { if (ans[i]) { printf(&quot;%d &quot;, i); } }
+}</code></pre>
+</body>
