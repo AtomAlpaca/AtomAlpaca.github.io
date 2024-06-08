@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang = "zh_cn">
+
+<head>
+	<meta charset = "utf-8"/>
+		<meta name = "author" content = "AtomAlpaca">
+		<title>「数学」高中导数杂题选讲</title>
+	<link rel = "stylesheet" href = "./style.css" type = "text/css"/>
+	<link rel="stylesheet"
+      href="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/panda-syntax-dark.min.css">
+	<script src="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/highlight.min.js"></script>
+
+</head>
+
+<body>
+	<header>
+				<p>
+			<h1>
+				「数学」高中导数杂题选讲
+			</h1>
+		</p>
+		<p style = "text-align: center">
+						AtomAlpaca
+								</p>
+				
+			</header>
+	<script>hljs.highlightAll();</script>
+		<h2>
+		Table of contents
+	</h2>
+	<ul>
+<li><a href="#符号约定" id="toc-符号约定">符号约定</a></li>
+<li><a href="#第一题" id="toc-第一题">第一题</a>
+<ul>
+<li><a href="#题目" id="toc-题目">题目</a></li>
+<li><a href="#解答" id="toc-解答">解答</a></li>
+</ul></li>
+<li><a href="#第二题" id="toc-第二题">第二题</a>
+<ul>
+<li><a href="#题目-1" id="toc-题目-1">题目</a></li>
+<li><a href="#解答-1" id="toc-解答-1">解答</a></li>
+</ul></li>
+</ul>
+	
+	<h1 id="符号约定">符号约定</h1>
+<ol>
+<li><p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f_{min}(x)</annotation></semantics></math>
+代表函数
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(x)</annotation></semantics></math>
+的最小值；</p></li>
+<li><p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mrow><mi>m</mi><mi>a</mi><mi>x</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f_{max}(x)</annotation></semantics></math>
+代表函数
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(x)</annotation></semantics></math>
+的最大值；</p></li>
+</ol>
+<h1 id="第一题">第一题</h1>
+<h2 id="题目">题目</h2>
+<div class="theorem">
+<p><strong>Theorem 1</strong>.
+<em>求证：<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>⋅</mo><mfrac><mrow><mn>1</mn><mo>−</mo><mi>x</mi><mrow><mo stretchy="true" form="prefix">(</mo><mo>ln</mo><mi>x</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><msup><mi>e</mi><mi>x</mi></msup></mfrac><mo>&lt;</mo><msup><mi>e</mi><mi>x</mi></msup><mo>+</mo><msup><mi>e</mi><mrow><mi>x</mi><mo>−</mo><mn>2</mn></mrow></msup></mrow><annotation encoding="application/x-tex">(x+1) \cdot \frac{1-x(\ln x - 1)}{e^x} &lt; e^x + e^{x-2}</annotation></semantics></math></em></p>
+</div>
+<h2 id="解答">解答</h2>
+<div class="proof">
+<p><em>Proof.</em>
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mn>1</mn><mo>−</mo><mi>x</mi><mo>ln</mo><mi>x</mi><mo>−</mo><mi>x</mi><mo>&lt;</mo><mfrac><mrow><mn>2</mn><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><mi>x</mi><mo>+</mo><mn>1</mn></mrow></mfrac><mo>&lt;</mo><mfrac><msup><mi>e</mi><mrow><mi>x</mi><mo>+</mo><mn>1</mn><mo>+</mo><msup><mi>e</mi><mrow><mi>x</mi><mo>−</mo><mn>1</mn></mrow></msup></mrow></msup><mrow><mi>x</mi><mo>+</mo><mn>1</mn></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mo>⇔</mo></mtd><mtd columnalign="left" style="text-align: left"><mi>x</mi><mo>+</mo><mi>x</mi><mo>ln</mo><mi>x</mi><mo>+</mo><mn>1</mn><mo>&gt;</mo><mn>0</mn></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+         &amp; 1 - x\ln x - x &lt; \frac{2(x+1)}{x+1} &lt; \frac{e^{x+1 + e^{x - 1}}}{x + 1} \\
+        \Leftrightarrow&amp; x + x \ln x +1 &gt; 0
+    
+\end{aligned}</annotation></semantics></math> 令
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>x</mi><mo>+</mo><mi>x</mi><mo>ln</mo><mi>x</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">f(x) = x + x \ln x +1</annotation></semantics></math>，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mi>′</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mo>ln</mo><mi>x</mi><mo>+</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">f&#39;(x) = \ln x+2</annotation></semantics></math></p>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>e</mi><mrow><mi>−</mi><mn>2</mn></mrow></msup><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>1</mn><mo>−</mo><msup><mi>e</mi><mrow><mi>−</mi><mn>2</mn></mrow></msup><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">f_{min}(x) = f(e^{-2}) = 1 - e^{-2} &gt; 0</annotation></semantics></math>，故
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">f(x) &gt; 0</annotation></semantics></math> ◻</p>
+</div>
+<h1 id="第二题">第二题</h1>
+<h2 id="题目-1">题目</h2>
+<div class="theorem">
+<p><strong>Theorem 2</strong>.
+<em><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>2</mn><mo>ln</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mfrac><mi>a</mi><msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mn>2</mn></msup></mfrac></mrow><annotation encoding="application/x-tex">f(x) = 2\ln(x + 1) - \frac{a}{(x + 1)^2}</annotation></semantics></math>
+有两个不同零点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>x</mi><mn>1</mn></msub><mo>,</mo><msub><mi>x</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">x_1, x_2</annotation></semantics></math></em></p>
+<ol>
+<li><p><em>当
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>1</mn><mo>&lt;</mo><mi>x</mi><mo>&lt;</mo><mi>−</mi><mfrac><mn>1</mn><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">-1 &lt; x &lt; -\frac{1}{2}</annotation></semantics></math>
+时，求证：<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mo>ln</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>&gt;</mo><mi>−</mi><mfrac><mn>1</mn><mrow><mi>x</mi><mo>+</mo><mn>1</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">2 \ln(x+1) &gt; - \frac{1}{x+1}</annotation></semantics></math></em></p></li>
+<li><p><em>求
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
+的取值范围</em></p></li>
+</ol>
+</div>
+<h2 id="解答-1">解答</h2>
+<div class="proof">
+<p><em>Proof.</em> 1. 令
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>=</mo><mi>x</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">t = x + 1</annotation></semantics></math>，即证
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>∈</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>o</mi><mo>,</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">t \in (o, \frac{1}{2})</annotation></semantics></math>
+时有
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mo>ln</mo><mi>t</mi><mo>&gt;</mo><mi>−</mi><mfrac><mn>1</mn><mi>t</mi></mfrac></mrow><annotation encoding="application/x-tex">2 \ln t &gt; -\frac{1}{t}</annotation></semantics></math>
+令
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>2</mn><mo>ln</mo><mi>t</mi><mo>+</mo><mfrac><mn>1</mn><mi>t</mi></mfrac></mrow><annotation encoding="application/x-tex">g(t) = 2 \ln t + \frac{1}{t}</annotation></semantics></math>，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mi>′</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mrow><mn>2</mn><mi>t</mi><mo>−</mo><mn>1</mn></mrow><msup><mi>t</mi><mn>2</mn></msup></mfrac></mrow><annotation encoding="application/x-tex">g&#39;(t) = \frac{2t - 1}{t^2}</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>g</mi><mo>min</mo></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>g</mi><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>2</mn><mo>−</mo><mn>2</mn><mo>ln</mo><mn>2</mn><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">g_{\min}(t) = g(\frac{1}{2}) = 2 - 2 \ln 2 &gt; 0</annotation></semantics></math> ◻</p>
+</div>
+<p>2. 令
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>=</mo><mi>x</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">t = x + 1</annotation></semantics></math>，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mi>′</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mn>2</mn><mi>t</mi></mfrac><mo>+</mo><mfrac><mrow><mn>2</mn><mi>a</mi></mrow><msup><mi>t</mi><mn>2</mn></msup></mfrac><mo>=</mo><mfrac><mrow><mn>2</mn><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>t</mi><mn>2</mn></msup><mo>+</mo><mi>a</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><msup><mi>t</mi><mn>3</mn></msup></mfrac></mrow><annotation encoding="application/x-tex">f&#39;(t) = \frac{2}{t} + \frac{2a}{t^2} = \frac{2(t^2 + a)}{t^3}</annotation></semantics></math></p>
+<ol>
+<li><p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>≥</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">a \ge 0</annotation></semantics></math>，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(t)</annotation></semantics></math>
+单增，无解</p></li>
+<li><p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>&lt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">a &lt; 0</annotation></semantics></math>，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mi>m</mi></msub><mi>i</mi><mi>n</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><msqrt><mrow><mi>−</mi><mi>a</mi></mrow></msqrt><mo stretchy="true" form="postfix">)</mo></mrow><mo>&lt;</mo><mn>0</mn><mo>⇔</mo><mn>2</mn><mi>l</mi><mi>n</mi><msqrt><mrow><mi>−</mi><mi>a</mi></mrow></msqrt><mo>+</mo><mn>1</mn><mo>&lt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">f_min(t) = f(\sqrt{-a}) &lt; 0 \Leftrightarrow 2ln \sqrt{-a} + 1 &lt; 0</annotation></semantics></math><br />
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>∈</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>−</mi><msup><mi>e</mi><mrow><mi>−</mi><mn>1</mn></mrow></msup><mo>,</mo><mn>0</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">a \in (-e^{-1}, 0)</annotation></semantics></math></p></li>
+</ol>
+</body>
