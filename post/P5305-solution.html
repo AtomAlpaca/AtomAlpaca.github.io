@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang = "zh_cn">
+
+<head>
+	<meta charset = "utf-8"/>
+		<meta name = "author" content = "AtomAlpaca">
+		<title>「题解」P5305 [GXOI/GZOI2019] 旧词</title>
+	<link rel = "stylesheet" href = "./style.css" type = "text/css"/>
+	<link rel="stylesheet"
+      href="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/panda-syntax-dark.min.css">
+	<script src="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/highlight.min.js"></script>
+
+</head>
+
+<body>
+	<header>
+				<p>
+			<h1>
+				「题解」P5305 [GXOI/GZOI2019] 旧词
+			</h1>
+		</p>
+		<p style = "text-align: center">
+						AtomAlpaca
+								</p>
+				
+			</header>
+	<script>hljs.highlightAll();</script>
+		<h2>
+		Table of contents
+	</h2>
+	<ul>
+<li><a href="#题目" id="toc-题目">题目</a></li>
+<li><a href="#正文" id="toc-正文">正文</a></li>
+<li><a href="#代码" id="toc-代码">代码</a></li>
+<li><a href="#另解" id="toc-另解">另解</a></li>
+</ul>
+	
+	<h2 id="题目">题目</h2>
+<p>给一棵树和常数
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>，每次询问给出
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mo>,</mo><mi>r</mi><mo>,</mo><mi>u</mi></mrow><annotation encoding="application/x-tex">l, r, u</annotation></semantics></math>
+求
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mo>∑</mo><mrow><mi>v</mi><mo>∈</mo><mrow><mo stretchy="true" form="prefix">[</mo><mi>l</mi><mo>,</mo><mi>r</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow></msub><mrow><mo>dep</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><mo>lca</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mi>k</mi></msup></mrow></mrow><annotation encoding="application/x-tex">\sum_{v \in [l, r]}{\operatorname{dep}(\operatorname{lca}(u, v))^k}</annotation></semantics></math></p>
+<h2 id="正文">正文</h2>
+<p>很小清新的一道题目，之前给学弟学妹讲课讲过，很喜欢。休学了找点事情写一下。</p>
+<p>首先我们发现这个
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+次方很难处理。考虑
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">k = 1</annotation></semantics></math>
+的情况。发现答案有可减性，考虑可以固定
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">l = 1</annotation></semantics></math>
+差分。</p>
+<p>然后我们可以对编号在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mn>1</mn><mo>,</mo><mi>r</mi><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[1, r]</annotation></semantics></math>
+的每个节点，都把它到树根的路径点值
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1</mn></mrow><annotation encoding="application/x-tex">+1</annotation></semantics></math>，然后对
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+到根的路径求和即可。</p>
+<p>考虑拓展。思考这里我们发现我们点值
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>+</mi><mn>1</mn></mrow><annotation encoding="application/x-tex">+1</annotation></semantics></math>
+其实是可以看成对每个节点加
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>d</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mn>1</mn></msup><mo>−</mo><msup><mi>d</mi><mn>1</mn></msup></mrow><annotation encoding="application/x-tex">(d+1)^1 - d^1</annotation></semantics></math>，这样一条链求和就是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>d</mi><mn>1</mn></msup><mo>−</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>d</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mn>1</mn></msup><mo>+</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>d</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mn>1</mn></msup><mo>−</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>d</mi><mo>−</mo><mn>2</mn><mo stretchy="true" form="postfix">)</mo></mrow><mn>1</mn></msup><mi>⋯</mi><mo>=</mo><msup><mi>d</mi><mn>1</mn></msup></mrow><annotation encoding="application/x-tex">d^1 - (d - 1)^1 + (d - 1) ^1 - (d - 2) ^ 1 \cdots = d^1</annotation></semantics></math>。</p>
+<p>现在要拓展到任意
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>，我们只需要修改指数，让每次对
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>u</mi><annotation encoding="application/x-tex">u</annotation></semantics></math>
+节点点值增加
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>d</mi><mi>u</mi><mi>k</mi></msubsup><mo>−</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>d</mi><mi>u</mi></msub><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mi>k</mi></msup></mrow><annotation encoding="application/x-tex">d_{u}^{k} - (d_u - 1) ^ k</annotation></semantics></math>
+即可。树剖转换为一个简单的数据结构问题：给两个序列
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>,</mo><mi>b</mi></mrow><annotation encoding="application/x-tex">a, b</annotation></semantics></math>，每次给一个区间
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mi>l</mi><mo>,</mo><mi>r</mi><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[l, r]</annotation></semantics></math>
+使得
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∀</mo><mi>i</mi><mo>∈</mo><mrow><mo stretchy="true" form="prefix">[</mo><mi>l</mi><mo>,</mo><mi>r</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo><msub><mi>a</mi><mi>i</mi></msub><mo>←</mo><msub><mi>a</mi><mi>i</mi></msub><mo>+</mo><msub><mi>b</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\forall i \in[l, r], a_i \leftarrow a_i + b_i</annotation></semantics></math>，线段树解决即可。最终复杂度
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><msup><mo>log</mo><mn>2</mn></msup><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(n\log^2n)</annotation></semantics></math>。可以上科技摘一只
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>log</mo><annotation encoding="application/x-tex">\log</annotation></semantics></math>
+但是没必要。</p>
+<p>据说这个技巧也叫树上差分。</p>
+<h2 id="代码">代码</h2>
+<pre><code>#include &lt;bits/stdc++.h&gt;
+
+using std::cin;
+using std::cout;
+using std::vector;
+
+const int MAX = 5e5 + 5;
+const int MOD = 998244353;;
+
+typedef long long ll;
+
+struct Q { int p, x, id; } q[MAX];
+vector &lt;int&gt; e[MAX];
+ll n, m, l, r, x, v, tot, sz, p, k;
+ll dfn[MAX], fth[MAX], son[MAX], siz[MAX], st[MAX &lt;&lt; 2], tag[MAX &lt;&lt; 2], ans[MAX], top[MAX], dep[MAX], w[MAX], wht[MAX &lt;&lt; 2];
+
+ll qp(ll a, ll x)
+{
+    ll res = a; --x;
+    while (x)
+    {
+        if (x &amp; 1) { res = res * a % MOD; }
+        x &gt;&gt;= 1; a = a * a % MOD;
+    }
+    return res;
+}
+
+void dfs0(int u, int fa)
+{
+    siz[u] = 1; fth[u] = fa; dep[u] = dep[fa] + 1; ll mx = -1;
+    for (int v : e[u])
+    {
+        if (v == fa) { continue; }
+        dfs0(v, u);
+        siz[u] += siz[v];
+        if (siz[v] &gt; mx) { mx = siz[v]; son[u] = v; }
+    }
+}
+
+void dfs1(int u, int fa)
+{
+    dfn[u] = ++tot; w[tot] = ((qp(dep[u], k) - qp(dep[u] - 1, k)) % MOD + MOD) % MOD;
+    if (son[fth[u]] == u) { top[u] = top[fa]; } else { top[u] = u; }
+    if (!son[u]) { return ; } dfs1(son[u], u);
+    for (int v : e[u])
+    {
+        if (v == fa or v == son[u]) { continue; }
+        dfs1(v, u);
+    }
+}
+void pd(int x)
+{
+    if (!tag[x]) { return ; }
+    ll k = l + ((r - l) &gt;&gt; 1);
+    tag[x &lt;&lt; 1] += tag[x]; tag[x &lt;&lt; 1 | 1] += tag[x];
+    st[x &lt;&lt; 1] += wht[x &lt;&lt; 1] * tag[x]; st[x &lt;&lt; 1 | 1] += wht[x &lt;&lt; 1 | 1] * tag[x];
+    tag[x] = 0;
+}
+
+void pu(int x) { st[x] = (st[x &lt;&lt; 1] + st[x &lt;&lt; 1 | 1]) % MOD; }
+
+void build(int l, int r, int x)
+{
+    if (l == r) { wht[x] = w[l]; return ; }
+    ll k = l + ((r - l) &gt;&gt; 1);
+    build(l, k, x &lt;&lt; 1); build(k + 1, r, x &lt;&lt; 1 | 1);
+    wht[x] = wht[x &lt;&lt; 1] + wht[x &lt;&lt; 1 | 1];
+}
+
+void add(int l, int r, int s, int t, int c, int x)
+{
+    if (l &gt;= s and r &lt;= t) { tag[x] += c; st[x] += wht[x] * c; st[x] %= MOD; return ; }
+    pd(x); ll k = l + ((r - l) &gt;&gt; 1);
+    if (s &lt;= k) { add(l, k, s, t, c, x &lt;&lt; 1); }
+    if (t &gt;  k) { add(k + 1, r, s, t, c, x &lt;&lt; 1 | 1); }
+    pu(x);
+}
+
+int sum(int l, int r, int s, int t, int x)
+{
+    if (l &gt;= s and r &lt;= t) { return st[x] % MOD; }
+    pd(x); ll k = l + ((r - l) &gt;&gt; 1), res = 0;
+    if (s &lt;= k) { res += sum(l, k, s, t, x &lt;&lt; 1); res %= MOD; }
+    if (t &gt;  k) { res += sum(k + 1, r, s, t, x &lt;&lt; 1 | 1); res %= MOD; }
+    return res % MOD;
+}
+
+void ins(int x)
+{
+    while (x) { add(1, n, dfn[top[x]], dfn[x], 1, 1); x = fth[top[x]]; }
+}
+
+int que(int x)
+{
+    ll res = 0;
+    while (x) { res += sum(1, n, dfn[top[x]], dfn[x], 1); x = fth[top[x]]; res %= MOD; }
+    return res;
+}
+
+bool cmp(Q a, Q b) { return a.p &lt; b.p; }
+
+void add(int u, int v) { e[u].push_back(v); e[v].push_back(u); }
+
+void solve()
+{
+    int I = 0;
+    for (int i = 1; i &lt;= m; ++i)
+    {
+        while (I &lt; q[i].p) { ins(++I); }
+        ans[q[i].id] = que(q[i].x);
+    }
+}
+
+int main()
+{
+    cin.tie(NULL);
+    cout.tie(NULL);
+    std::ios::sync_with_stdio(false);
+    cin &gt;&gt; n &gt;&gt; m &gt;&gt; k;
+    for (int i = 2; i &lt;= n; ++i) { cin &gt;&gt; v; add(i, v); }
+    dfs0(1, 0); dfs1(1, 0);
+    build(1, n, 1);
+    for (int i = 1; i &lt;= m; ++i)
+    {
+        cin &gt;&gt; p &gt;&gt; x; q[i].p = p; q[i].x = x; q[i].id = i;
+    }
+    std::sort(q + 1, q + m + 1, cmp);
+    solve();
+    for (int i = 1; i &lt;= m; ++i) { cout &lt;&lt; ((ans[i] % MOD) + MOD) % MOD &lt;&lt; &#39;\n&#39;; } 
+}
+</code></pre>
+<h2 id="另解">另解</h2>
+<p>如果你是一个不那么小清新的人，我们还可以暴力分块解决这个问题。</p>
+<p>首先
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math>
+求
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>lca</mo><annotation encoding="application/x-tex">\operatorname{lca}</annotation></semantics></math>
+的方法是众所周知的。然后对序列分块，设
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mrow><mi>i</mi><mo>,</mo><mi>u</mi></mrow></msub><mo>=</mo><msub><mo>∑</mo><mrow><mi>v</mi><mo>∈</mo><mi>b</mi><mi>l</mi><mi>o</mi><mi>c</mi><msub><mi>k</mi><mi>i</mi></msub></mrow></msub><mrow><mo>dep</mo><msup><mrow><mo stretchy="true" form="prefix">(</mo><mo>lca</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>u</mi><mo>,</mo><mi>v</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mi>k</mi></msup></mrow></mrow><annotation encoding="application/x-tex">f_{i, u} = \sum_{v \in block_i}{\operatorname{dep}(\operatorname{lca}(u, v))^k}</annotation></semantics></math>，处理方式是和上面相同的链加，不过同时处理多个节点我们可以一次
+dfs 把块内点的祖先全标记上，再进行一次 dfs 在过程中累加，
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(n)</annotation></semantics></math>
+求出一个块对所有点的贡献，然后对每个块间做前缀和，查询时散块逐个块暴力查，整块前缀和查询就好了。</p>
+<p>复杂度是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><msup><mi>n</mi><mn>2</mn></msup><mi>B</mi></mfrac><mo>+</mo><mi>q</mi><mi>B</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(\frac{n^2}{B} + qB)</annotation></semantics></math>，取块长
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mo>=</mo><mfrac><mi>n</mi><msqrt><mi>q</mi></msqrt></mfrac></mrow><annotation encoding="application/x-tex">B = \frac{n}{\sqrt{q}}</annotation></semantics></math>
+能做到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><msqrt><mi>q</mi></msqrt><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(n\sqrt{q})</annotation></semantics></math>。跑得很慢。</p>
+</body>
