@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang = "zh_cn">
+
+<head>
+	<meta charset = "utf-8"/>
+		<meta name = "author" content = "AtomAlpaca">
+		<title>「题解」AGC023E Inversions</title>
+	<link rel = "stylesheet" href = "./style.css" type = "text/css"/>
+	<link rel="stylesheet"
+      href="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/panda-syntax-dark.min.css">
+	<script src="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/highlight.min.js"></script>
+
+</head>
+
+<body>
+	<header>
+				<p>
+			<h1>
+				「题解」AGC023E Inversions
+			</h1>
+		</p>
+		<p style = "text-align: center">
+						AtomAlpaca
+								</p>
+				
+			</header>
+	<script>hljs.highlightAll();</script>
+		<h2>
+		Table of contents
+	</h2>
+	<ul>
+<li><a href="#题意" id="toc-题意">题意</a></li>
+<li><a href="#题解" id="toc-题解">题解</a></li>
+<li><a href="#代码" id="toc-代码">代码</a></li>
+</ul>
+	
+	<h2 id="题意">题意</h2>
+<p>给定一个长度为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+的数组
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>，问对于所有满足
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∀</mo><mi>i</mi><mo>,</mo><msub><mi>p</mi><mi>i</mi></msub><mo>≤</mo><msub><mi>a</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">\forall i, p_i \le a_i</annotation></semantics></math>
+的排列
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>
+的逆序对个数和。</p>
+<h2 id="题解">题解</h2>
+<p>首先令
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>b</mi><annotation encoding="application/x-tex">b</annotation></semantics></math>
+为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
+从小到大排序的结果，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><msub><mi>k</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">rk_i</annotation></semantics></math>
+表示
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mi>i</mi></msub><annotation encoding="application/x-tex">a_i</annotation></semantics></math>
+的排名，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><msub><mi>d</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">id_i</annotation></semantics></math>
+表示排名为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+的数在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
+中的下标。</p>
+<p>那么所有符合条件的排列个数为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi><mi>n</mi><mi>t</mi><mo>=</mo><msubsup><mo>∏</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>n</mi></msubsup><mrow><msub><mi>a</mi><mi>i</mi></msub><mo>−</mo><mi>r</mi><msub><mi>k</mi><mi>i</mi></msub><mo>+</mo><mn>1</mn></mrow></mrow><annotation encoding="application/x-tex">cnt = \prod_{i=1}^{n}{a_i-rk_i+1}</annotation></semantics></math>。因为我们从小到大考虑每个排名
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>，那么它前面已经被选了
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">x - 1</annotation></semantics></math>
+个
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>x</mi></msub></mrow></msub><annotation encoding="application/x-tex">a_{id_x}</annotation></semantics></math>
+范围内的数，那么这个位置能选择的数就有
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>x</mi></msub></mrow></msub><mo>−</mo><mi>x</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">a_{id_x} - x + 1</annotation></semantics></math>
+个。</p>
+<p>那么接下来我们依然从小到大考虑排名。假设我们考虑到排名
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>，那么对于每个
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>&lt;</mo><mi>i</mi></mrow><annotation encoding="application/x-tex">j &lt; i</annotation></semantics></math>，我们分情况讨论：</p>
+<p>首先如果
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><msub><mi>d</mi><mi>i</mi></msub><mo>&gt;</mo><mi>i</mi><msub><mi>d</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">id_i &gt; id_j</annotation></semantics></math>，那么我们
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>i</mi></msub></mrow></msub><annotation encoding="application/x-tex">a_{id_i}</annotation></semantics></math>
+比
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>j</mi></msub></mrow></msub><annotation encoding="application/x-tex">a_{id_j}</annotation></semantics></math>
+大的部分并不会产生贡献，我们直接扔掉不考虑。那么我们把
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>i</mi></msub></mrow></msub><annotation encoding="application/x-tex">a_{id_i}</annotation></semantics></math>
+削到和
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>j</mi></msub></mrow></msub><annotation encoding="application/x-tex">a_{id_j}</annotation></semantics></math>
+相等，此时两个位置上选择方案有
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>j</mi></msub></mrow></msub><mo>−</mo><mi>j</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>j</mi></msub></mrow></msub><mo>−</mo><mi>j</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">(a_{id_j} - j + 1)(a_{id_j} - j)</annotation></semantics></math>
+种，其中只有一半是形成逆序对的。</p>
+<p>然后我们发现如果强行让它的范围缩小，那么对所有满足
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>&lt;</mo><mi>k</mi><mo>&lt;</mo><mi>i</mi></mrow><annotation encoding="application/x-tex">j &lt; k &lt; i</annotation></semantics></math>
+的
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>，我们可以选择的数其实是减少了一个。于是我们得到这一对点的贡献是：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>j</mi></msub></mrow></msub><mo>−</mo><mi>j</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>j</mi></msub></mrow></msub><mo>−</mo><mi>j</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mn>2</mn></mfrac><mfrac><mrow><mi>c</mi><mi>n</mi><mi>t</mi></mrow><mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>i</mi></msub></mrow></msub><mo>−</mo><mi>i</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>j</mi></msub></mrow></msub><mo>−</mo><mi>j</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><munderover><mo>∏</mo><mrow><mi>k</mi><mo>=</mo><mi>j</mi><mo>+</mo><mn>1</mn></mrow><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></munderover><mfrac><mrow><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>k</mi></msub></mrow></msub><mo>−</mo><mi>k</mi></mrow><mrow><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>k</mi></msub></mrow></msub><mo>−</mo><mi>k</mi><mo>+</mo><mn>1</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac{(a_{id_j} - j + 1)(a_{id_j} - j)}{2} \frac{cnt}{(a_{id_i} - i + 1)(a_{id_j} - j + 1)} \prod_{k = j + 1}^{i - 1}{\frac{a_{id_k} - k}{a_{id_k} - k + 1}}</annotation></semantics></math></p>
+<p>如果
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><msub><mi>d</mi><mi>i</mi></msub><mo>&lt;</mo><mi>i</mi><msub><mi>d</mi><mi>j</mi></msub></mrow><annotation encoding="application/x-tex">id_i &lt; id_j</annotation></semantics></math>，我们考虑直接求产生顺序对的数量，这和上面的式子是一样的。只需要用总排列数减去即可。</p>
+<p>考虑维护最后一项的前缀积是可以轻松做到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>n</mi><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(n^2)</annotation></semantics></math>
+的，但是这并不足够通过此题。我们考虑把上面的式子化简下。</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mfrac><mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>j</mi></msub></mrow></msub><mo>−</mo><mi>j</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>j</mi></msub></mrow></msub><mo>−</mo><mi>j</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mn>2</mn></mfrac><mfrac><mrow><mi>c</mi><mi>n</mi><mi>t</mi></mrow><mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>i</mi></msub></mrow></msub><mo>−</mo><mi>i</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>j</mi></msub></mrow></msub><mo>−</mo><mi>j</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><munderover><mo>∏</mo><mrow><mi>k</mi><mo>=</mo><mi>j</mi><mo>+</mo><mn>1</mn></mrow><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></munderover><mfrac><mrow><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>k</mi></msub></mrow></msub><mo>−</mo><mi>k</mi></mrow><mrow><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>k</mi></msub></mrow></msub><mo>−</mo><mi>k</mi><mo>+</mo><mn>1</mn></mrow></mfrac></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mo>=</mo></mtd><mtd columnalign="left" style="text-align: left"><mfrac><mrow><mi>c</mi><mi>n</mi><mi>t</mi></mrow><mrow><mn>2</mn><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>i</mi></msub></mrow></msub><mo>−</mo><mi>i</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>j</mi></msub></mrow></msub><mo>−</mo><mi>j</mi><mo stretchy="true" form="postfix">)</mo></mrow><munderover><mo>∏</mo><mrow><mi>k</mi><mo>=</mo><mi>j</mi><mo>+</mo><mn>1</mn></mrow><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></munderover><mfrac><mrow><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>k</mi></msub></mrow></msub><mo>−</mo><mi>k</mi></mrow><mrow><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>k</mi></msub></mrow></msub><mo>−</mo><mi>k</mi><mo>+</mo><mn>1</mn></mrow></mfrac></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+    &amp;\frac{(a_{id_j} - j + 1)(a_{id_j} - j)}{2} \frac{cnt}{(a_{id_i} - i + 1)(a_{id_j} - j + 1)} \prod_{k = j + 1}^{i - 1}{\frac{a_{id_k} - k}{a_{id_k} - k + 1}}
+    \\
+    =&amp;\frac{cnt}{2(a_{id_i} - i + 1)} (a_{id_j} - j)\prod_{k = j + 1}^{i - 1}{\frac{a_{id_k} - k}{a_{id_k} - k + 1}}
+\end{aligned}</annotation></semantics></math> 最前面的一项是只和
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+有关的，我们只需要维护后面的两项。</p>
+<p>考虑我们每次枚举
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+之后对后面的影响其实就是把最后一项乘了个
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mfrac displaystyle="true"><mrow><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>i</mi></msub></mrow></msub><mo>−</mo><mi>i</mi></mrow><mrow><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>i</mi></msub></mrow></msub><mo>−</mo><mi>i</mi><mo>+</mo><mn>1</mn></mrow></mfrac><annotation encoding="application/x-tex">\dfrac{a_{id_i} - i}{a_{id_i} - i + 1}</annotation></semantics></math>，然后要多考虑一个
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>。那么我们考虑用一个支持全局乘、单点加、区间和的线段树，每个位置
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+记录
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><msub><mi>d</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">id_i</annotation></semantics></math>
+的后面两项的值。</p>
+<p>这样我们的答案就是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>q</mi><mi>r</mi><mi>y</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>,</mo><mi>i</mi><msub><mi>d</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mi>p</mi><mo>×</mo><mi>c</mi><mi>n</mi><mi>t</mi><mo>−</mo><mi>q</mi><mi>r</mi><mi>y</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>i</mi><msub><mi>d</mi><mi>i</mi></msub><mo>,</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">qry(1, id_i) + p \times cnt - qry(id_i, n)</annotation></semantics></math>，其中
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>p</mi><annotation encoding="application/x-tex">p</annotation></semantics></math>
+是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>&gt;</mo><mi>i</mi></mrow><annotation encoding="application/x-tex">j &gt; i</annotation></semantics></math>
+的点数。每次统计完
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+的答案全局乘
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mfrac displaystyle="true"><mrow><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>i</mi></msub></mrow></msub><mo>−</mo><mi>i</mi></mrow><mrow><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>i</mi></msub></mrow></msub><mo>−</mo><mi>i</mi><mo>+</mo><mn>1</mn></mrow></mfrac><annotation encoding="application/x-tex">\dfrac{a_{id_i} - i}{a_{id_i} - i + 1}</annotation></semantics></math>
+单点加
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mrow><mi>i</mi><msub><mi>d</mi><mi>i</mi></msub></mrow></msub><mo>=</mo><mi>j</mi></mrow><annotation encoding="application/x-tex">a_{id_i} = j</annotation></semantics></math>
+即可。</p>
+<p>另外，我们用线段树只能得到所有
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi><mo>&gt;</mo><mi>i</mi></mrow><annotation encoding="application/x-tex">j &gt; i</annotation></semantics></math>
+的答案，并不知道有多少个，因此要类似二维数点地开一个树状数组维护。</p>
+<p>这样我们就可以以
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><mo>log</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(n \log n)</annotation></semantics></math>
+的时间复杂度解决这个问题。</p>
+<h2 id="代码">代码</h2>
+<pre><code>#include &lt;bits/stdc++.h&gt;
+
+typedef long long ll;
+const int MAX = 2e5 + 5;
+const int MOD = 1e9 + 7;
+
+ll n, tot, ans;
+ll a[MAX], rk[MAX], id[MAX];
+
+struct N { ll x, y; } b[MAX];
+bool cmp(N a, N b) { return (a.x == b.x ? a.y &lt; b.y : a.x &lt; b.x); }
+
+ll qp(ll a, ll x)
+{
+    ll res = 1;
+    while (x) { if (x &amp; 1) { res = res * a % MOD; } a = a * a % MOD; x &gt;&gt;= 1; }
+    return res;
+}
+
+ll inv(ll x) { return qp(x, MOD - 2); }
+
+struct BIT
+{
+    int t[MAX];
+    inline int lbt(int x) { return x &amp; -x; }
+    void mdf(int x, int c) { while (x &lt;= n) { t[x] += c; x += lbt(x); } }
+    int qry(int x) { int res = 0; while (x) { res += t[x]; x -= lbt(x); } return res; }
+} bt;
+
+struct SGT
+{
+    ll st[MAX &lt;&lt; 2], tg[MAX &lt;&lt; 2];
+    void init() { for (int i = 1; i &lt;= 4 * n; ++i) { tg[i] = 1; } }
+    inline void pd(int x)
+    {
+        st[x &lt;&lt; 1] = st[x &lt;&lt; 1] * tg[x] % MOD; st[x &lt;&lt; 1 | 1] = st[x &lt;&lt; 1 | 1] * tg[x] % MOD;
+        tg[x &lt;&lt; 1] = tg[x &lt;&lt; 1] * tg[x] % MOD; tg[x &lt;&lt; 1 | 1] = tg[x &lt;&lt; 1 | 1] * tg[x] % MOD;
+        tg[x] = 1;
+    }
+    inline void pu(int x) { st[x] = (st[x &lt;&lt; 1] + st[x &lt;&lt; 1 | 1]) % MOD; }
+    void mdf0(ll v) { st[1] = st[1] * v % MOD; tg[1] = tg[1] * v % MOD; }
+    void mdf1(int l, int r, int s, ll c, int x)
+    {
+        if (l == r and l == s) { st[x] += c; return ; }
+        pd(x); int k = l + ((r - l) &gt;&gt; 1);
+        if (k &gt;= s) { mdf1(l, k, s, c, x &lt;&lt; 1); }
+        else { mdf1(k + 1, r, s, c, x &lt;&lt; 1 | 1); }
+        pu(x);
+    }
+    ll qry(int l, int r, int s, int t, int x)
+    {
+        if (l &gt;= s and r &lt;= t) { return st[x]; }
+        pd(x); int k = l + ((r - l) &gt;&gt; 1); ll res = 0;
+        if (k &gt;= s) { res = (res + qry(l, k, s, t, x &lt;&lt; 1)) % MOD; }
+        if (k &lt;  t) { res = (res + qry(k + 1, r, s, t, x &lt;&lt; 1 | 1)) % MOD; }
+        return res;
+    }
+} st;
+
+int main()
+{
+    scanf(&quot;%lld&quot;, &amp;n); tot = 1; st.init();
+    for (int i = 1; i &lt;= n; ++i) { scanf(&quot;%lld&quot;, &amp;a[i]); b[i] = {a[i], i}; }
+    std::sort(b + 1, b + n + 1, cmp);
+    for (int i = 1; i &lt;= n; ++i) { id[i] = b[i].y; rk[id[i]] = i; }
+    for (int i = 1; i &lt;= n; ++i)
+    {
+        if (b[i].x - i + 1 &lt;= 0) { printf(&quot;0&quot;); return 0; }
+        tot = tot * (b[i].x - i + 1) % MOD;
+    }
+    for (int i = 1; i &lt;= n; ++i)
+    {
+        ll res1 = st.qry(1, n, 1, id[i], 1), res2 = st.qry(1, n, id[i], n, 1), cnt = bt.qry(n) - bt.qry(id[i]);
+        ll tmp = inv(2) * inv(a[id[i]] - i + 1) % MOD * tot % MOD;
+        ans = (ans + tmp * (res1 - res2 + MOD) % MOD) % MOD;
+        ans = (ans + cnt * tot % MOD) % MOD;
+        st.mdf0((a[id[i]] - i) * inv(a[id[i]] - i + 1) % MOD);
+        st.mdf1(1, n, id[i], a[id[i]] - i, 1);
+        bt.mdf(id[i], 1);
+    }
+    printf(&quot;%lld&quot;, ans);
+    return 0;
+}</code></pre>
+</body>

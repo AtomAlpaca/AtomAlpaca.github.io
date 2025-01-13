@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang = "zh_cn">
+
+<head>
+	<meta charset = "utf-8"/>
+		<meta name = "author" content = "AtomAlpaca">
+		<title>「题解」P6514 [QkOI#R1] Quark and Strings</title>
+	<link rel = "stylesheet" href = "./style.css" type = "text/css"/>
+	<link rel="stylesheet"
+      href="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/panda-syntax-dark.min.css">
+	<script src="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/highlight.min.js"></script>
+
+</head>
+
+<body>
+	<header>
+				<p>
+			<h1>
+				「题解」P6514 [QkOI#R1] Quark and Strings
+			</h1>
+		</p>
+		<p style = "text-align: center">
+						AtomAlpaca
+								</p>
+				
+			</header>
+	<script>hljs.highlightAll();</script>
+		<h2>
+		Table of contents
+	</h2>
+	<ul>
+<li><a href="#题意" id="toc-题意">题意</a></li>
+<li><a href="#题解" id="toc-题解">题解</a></li>
+<li><a href="#代码" id="toc-代码">代码</a></li>
+</ul>
+	
+	<h2 id="题意">题意</h2>
+<p>维护一个字符串序列
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><msub><mi>S</mi><mi>n</mi></msub><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\{S_n\}</annotation></semantics></math>，有两种操作共
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>q</mi><annotation encoding="application/x-tex">q</annotation></semantics></math>
+次，设当前为第
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+次操作。</p>
+<p>‘1 l r‘，表示在所有编号在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mi>l</mi><mo>,</mo><mi>r</mi><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[l,r]</annotation></semantics></math>
+内的字符串末尾添加字符
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>。</p>
+<p>‘2 l r‘，表示询问所有编号在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mi>l</mi><mo>,</mo><mi>r</mi><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[l,r]</annotation></semantics></math>
+内的字符串的最长公共子序列长度。</p>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>≤</mo><mi>n</mi><mo>,</mo><mi>q</mi><mo>≤</mo><msup><mn>10</mn><mn>5</mn></msup></mrow><annotation encoding="application/x-tex">1\le n,q\le 10^5</annotation></semantics></math></p>
+<h2 id="题解">题解</h2>
+<p>发现每次往后面加的都是一个独一无二的字符，我们其实要求的就是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mi>l</mi><mo>,</mo><mi>r</mi><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[l, r]</annotation></semantics></math>
+内都含有的字符种类。</p>
+<p>考虑用一个
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mi>t</mi><mo>,</mo><mi>l</mi><mo>,</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(t, l, r)</annotation></semantics></math>
+三元组来描述一个操作，分别表示操作的时间、左端点、右端点，那么对于一个询问操作
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>，我们其实就是要求
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mi>y</mi></msub><mo>&lt;</mo><msub><mi>t</mi><mi>x</mi></msub><mo>,</mo><msub><mi>l</mi><mi>y</mi></msub><mo>≤</mo><msub><mi>l</mi><mi>x</mi></msub><mo>,</mo><msub><mi>r</mi><mi>y</mi></msub><mo>≥</mo><msub><mi>r</mi><mi>x</mi></msub></mrow><annotation encoding="application/x-tex">t_y &lt; t_x, l_y \le l_x, r_y \ge r_x</annotation></semantics></math>
+的修改操作
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>y</mi><annotation encoding="application/x-tex">y</annotation></semantics></math>
+的数量，这就是一个三维偏序的形式，我们用 CDQ 分治做一下就好了。复杂度
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><msup><mo>log</mo><mn>2</mn></msup><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(n \log^2{n})</annotation></semantics></math>。代码相当简洁。</p>
+<h2 id="代码">代码</h2>
+<pre><code>#include &lt;bits/stdc++.h&gt;
+
+const int MAX = 1e5 + 5;
+int n, q, op, l, r, t;
+int ans[MAX];
+struct N { int t, l, r, x; } a[MAX];
+
+bool cmpl(N a, N b) { return a.l == b.l ? a.r &gt; b.r  : a.l &lt; b.l; }
+bool cmpt(N a, N b) { return a.t == b.t ? cmpl(a, b) : a.t &lt; b.t; }
+
+struct BIT
+{
+    int t[MAX];
+    int lbt(int x) { return x &amp; -x; }
+    void add(int x) { if (!x) { return ; } while (x &lt;= n) { ++t[x]; x += lbt(x); } }
+    int qry(int x) { int res = 0; while (x) { res += t[x]; x -= lbt(x); } return res; }
+    void clear() { for (int i = 1; i &lt;= n; ++i) { t[i] = 0; } }
+} st;
+
+void solve(int l, int r)
+{
+    if (l == r) { return ; }
+    int k = l + ((r - l) &gt;&gt; 1); solve(l, k); solve(k + 1, r);
+    std::sort(a + l, a + k + 1, cmpl); std::sort(a + k + 1, a + r + 1, cmpl);
+    int L = l, R = k + 1; st.clear();
+    for (; R &lt;= r; ++R)
+    {
+        while (L &lt;= k and a[L].l &lt;= a[R].l) { if (!a[L].x) { st.add(a[L].r); } ++L; }
+        if (a[R].x) { ans[a[R].x] += st.qry(n) - st.qry(a[R].r - 1); }
+    }
+}
+
+int main()
+{
+    scanf(&quot;%d%d&quot;, &amp;n, &amp;q);
+    for (int i = 1; i &lt;= q; ++i)
+    {
+        scanf(&quot;%d%d%d&quot;, &amp;op, &amp;l, &amp;r);
+        a[i] = {i, l, r, (op == 2 ? ++t : 0)};
+    }
+    solve(1, q);
+    for (int i = 1; i &lt;= t; ++i) { printf(&quot;%d\n&quot;, ans[i]); }
+}</code></pre>
+</body>

@@ -5,6 +5,22 @@
 	<link>https://blog.atal.moe/</link>
 	<description>AtomAlpaca's Blog</description>
 	<item>
+		<title>「数据结构」魔导绪论：数据结构概述</title>
+		<link>https://blog.atal.moe/post/ds</link>
+	</item>
+	<item>
+		<title>「题解」P2619 [国家集训队] Tree I</title>
+		<link>https://blog.atal.moe/post/P2619-solution</link>
+	</item>
+	<item>
+		<title>「算法」wqs 二分略解</title>
+		<link>https://blog.atal.moe/post/wqs</link>
+	</item>
+	<item>
+		<title>「题解」CF2037F Ardent Flames</title>
+		<link>https://blog.atal.moe/post/CF2037F-solution</link>
+	</item>
+	<item>
 		<title>「题解」P5305 [GXOI/GZOI2019] 旧词 </title>
 		<link>https://blog.atal.moe/post/P5305-solution</link>
 	</item>
@@ -13,12 +29,48 @@
 		<link>https://blog.atal.moe/post/type</link>
 	</item>
 	<item>
+		<title>「题解」CF1956D Nene and the Mex Operator</title>
+		<link>https://blog.atal.moe/post/CF1956D-solution</link>
+	</item>
+	<item>
+		<title>「题解」CF1923D Slimes</title>
+		<link>https://blog.atal.moe/post/CF1923D-solution</link>
+	</item>
+	<item>
 		<title>「数学」高中导数杂题选讲</title>
 		<link>https://blog.atal.moe/post/some-math-problems</link>
 	</item>
 	<item>
+		<title>「数据结构」WBLT 略解</title>
+		<link>https://blog.atal.moe/post/wblt</link>
+	</item>
+	<item>
+		<title>「题解」树上邻域数点/ [Ynoi2003] 雾雨魔理沙</title>
+		<link>https://blog.atal.moe/post/P8498-solution</link>
+	</item>
+	<item>
+		<title>「题解」CF868F Yet Another Minimization Problem</title>
+		<link>https://blog.atal.moe/post/CF868F-solution</link>
+	</item>
+	<item>
+		<title>「题解」UOJ 207. 共价大爷游长沙</title>
+		<link>https://blog.atal.moe/post/207-solution</link>
+	</item>
+	<item>
+		<title>「题解」ARC154E Reverse and Inversion</title>
+		<link>https://blog.atal.moe/post/ARC154E-solution</link>
+	</item>
+	<item>
+		<title>「题解」P6514 [QkOI#R1] Quark and Strings</title>
+		<link>https://blog.atal.moe/post/P6514-solution</link>
+	</item>
+	<item>
 		<title>「题解」P3320 [SDOI2015] 寻宝游戏</title>
 		<link>https://blog.atal.moe/post/P3320-solution</link>
+	</item>
+	<item>
+		<title>「题解」AGC023E Inversions</title>
+		<link>https://blog.atal.moe/post/AGC023E-solution</link>
 	</item>
 	<item>
 		<title>「题解」ARC167C MST on Line++</title>

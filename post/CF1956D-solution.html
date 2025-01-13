@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang = "zh_cn">
+
+<head>
+	<meta charset = "utf-8"/>
+		<meta name = "author" content = "AtomAlpaca">
+		<title>「题解」 CF1956D Nene and the Mex Operator</title>
+	<link rel = "stylesheet" href = "./style.css" type = "text/css"/>
+	<link rel="stylesheet"
+      href="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/panda-syntax-dark.min.css">
+	<script src="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/highlight.min.js"></script>
+
+</head>
+
+<body>
+	<header>
+				<p>
+			<h1>
+				「题解」 CF1956D Nene and the Mex Operator
+			</h1>
+		</p>
+		<p style = "text-align: center">
+						AtomAlpaca
+								</p>
+				
+			</header>
+	<script>hljs.highlightAll();</script>
+		<h2>
+		Table of contents
+	</h2>
+	<ul>
+<li><a href="#题意" id="toc-题意">题意</a></li>
+<li><a href="#题解" id="toc-题解">题解</a></li>
+<li><a href="#代码" id="toc-代码">代码</a></li>
+</ul>
+	
+	<h2 id="题意">题意</h2>
+<p>给定一个长度为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+的序列，你可以进行若干次操作，一次操作可以将一个区间内的数全都变成这个区间内所有数的
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>mex</mo><annotation encoding="application/x-tex">\operatorname{mex}</annotation></semantics></math>。</p>
+<p>要求构造一种方案，使得操作之后序列和最大。</p>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>≤</mo><mn>18</mn></mrow><annotation encoding="application/x-tex">n \le 18</annotation></semantics></math>。</p>
+<h2 id="题解">题解</h2>
+<p>不难发现，如果一个长度为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+的区间内出现了从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0</mn><annotation encoding="application/x-tex">0</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n - 1</annotation></semantics></math>
+的所有数字，操作后这个区间全都变成了
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>——这也是通过操作能达到的上界。</p>
+<p>我们考虑如何把一个长度为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+的区间变成<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0</mn><annotation encoding="application/x-tex">0</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n - 1</annotation></semantics></math>
+的一个排列。考虑递归下去，对前
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n - 1</annotation></semantics></math>
+个数，让其成为一个
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0</mn><annotation encoding="application/x-tex">0</annotation></semantics></math>
+到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">n - 2</annotation></semantics></math>
+的排列，这时如果最后一个数恰好是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n - 1</annotation></semantics></math>
+就做完了，否则整体做一次操作可以使得区间全部变成
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n - 1</annotation></semantics></math>，再对前
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n - 1</annotation></semantics></math>
+个数做操作即可。并且
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n = 1</annotation></semantics></math>
+的情况是显然的，于是就做完了。不难发现
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+每增加
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>
+操作数最多变为原来的两部加一，操作数是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mn>2</mn><mi>n</mi></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(2^n)</annotation></semantics></math>
+的。</p>
+<p>然后我们考虑求出哪些区间应当被做以上操作。当然可以进行 dp
+记下转移点，但出题人只给了
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>≤</mo><mn>18</mn></mrow><annotation encoding="application/x-tex">n \le 18</annotation></semantics></math>，因此无脑暴力枚举也是可行的。至此，我们在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>n</mi><msup><mn>2</mn><mi>n</mi></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(n2^n)</annotation></semantics></math>
+的复杂度内完成此题。</p>
+<h2 id="代码">代码</h2>
+<pre><code>#include &lt;bits/stdc++.h&gt;
+
+const int MAX = 25;
+
+std::vector &lt;std::pair &lt;int, int&gt;&gt; res, g;
+int n, sum, mx; bool b[MAX];
+int a[MAX];
+
+void f(int l, int r)
+{
+    if (l == r) { if (a[l] != 0) { a[l] = 0; res.push_back({l, l}); } return ; }
+    if (a[r] == r - l) { f(l, r - 1); return ; }
+    f(l, r - 1);
+    res.push_back({l, r}); for (int i = l; i &lt;= r; ++i) { a[i] = r - l; }
+    f(l, r - 1);
+}
+
+int main()
+{
+    scanf(&quot;%d&quot;, &amp;n);
+    for (int i = 1; i &lt;= n; ++i) { scanf(&quot;%d&quot;, &amp;a[i]); }
+    for (int S = 0; S &lt; (1 &lt;&lt; n); ++S)
+    {
+        for (int i = 1; i &lt;= n; ++i) { b[i] = (S &gt;&gt; (i - 1)) &amp; 1; }
+        int l = 0, r = -1, sm = 0; std::vector &lt;std::pair &lt;int, int&gt;&gt; p;
+        for (int i = 1; i &lt;= n; ++i)
+        {
+            if (b[i]) { if (b[i - 1]) { r = i; } else { l = r = i; } }
+            else
+            {
+                sm += (r - l + 1) * (r - l + 1);
+                if (l != 0) { p.push_back({l, r}); }
+                l = 0; r = -1; sm += a[i];
+            }
+        }
+        if (b[n] == 1 and l != 0) { p.push_back({l, r}); sm += (r - l + 1) * (r - l + 1); }
+        if (sm &gt; mx) { mx = sm; g = p; }
+    }
+    for (auto [l, r] : g) { f(l, r); res.push_back({l, r}); }
+    printf(&quot;%d %ld\n&quot;, mx, res.size());
+    for (auto [l, r] : res) { printf(&quot;%d %d\n&quot;, l, r); }
+}</code></pre>
+</body>

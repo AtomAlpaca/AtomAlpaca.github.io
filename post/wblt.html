@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang = "zh_cn">
+
+<head>
+	<meta charset = "utf-8"/>
+		<meta name = "author" content = "AtomAlpaca">
+		<title>「数据结构」WBLT 略解</title>
+	<link rel = "stylesheet" href = "./style.css" type = "text/css"/>
+	<link rel="stylesheet"
+      href="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/panda-syntax-dark.min.css">
+	<script src="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/highlight.min.js"></script>
+
+</head>
+
+<body>
+	<header>
+				<p>
+			<h1>
+				「数据结构」WBLT 略解
+			</h1>
+		</p>
+		<p style = "text-align: center">
+						AtomAlpaca
+								</p>
+				
+			</header>
+	<script>hljs.highlightAll();</script>
+		<h2>
+		Table of contents
+	</h2>
+	<ul>
+<li><a href="#前言" id="toc-前言">前言</a></li>
+<li><a href="#平衡树基础操作" id="toc-平衡树基础操作">平衡树基础操作</a>
+<ul>
+<li><a href="#代码约定" id="toc-代码约定">代码约定</a></li>
+<li><a href="#建树" id="toc-建树">建树</a></li>
+<li><a href="#插入和删除" id="toc-插入和删除">插入和删除</a></li>
+<li><a href="#维护平衡" id="toc-维护平衡">维护平衡</a></li>
+<li><a href="#查询排名" id="toc-查询排名">查询排名</a></li>
+<li><a href="#查询第-k-大的数" id="toc-查询第-k-大的数">查询第 k
+大的数</a></li>
+<li><a href="#总结" id="toc-总结">总结</a></li>
+</ul></li>
+</ul>
+	
+	<p>同步一下之前发在 OI wiki 上的版本。</p>
+<h2 id="前言">前言</h2>
+<p>Weight Balanced Leafy Tree，下称
+WBLT，是一种平衡树，比起其它平衡树主要有实现简单、常数小的优点。</p>
+<p>Weight Balanced Leafy Tree 顾名思义是 Weight Balanced Tree 和 Leafy
+Tree 的结合。</p>
+<p>Weight Balanced Tree
+的每个结点储存这个结点下子树的大小，并且通过保持左右子树的大小关系在一定范围来保证树高。</p>
+<p>Leafy Tree 维护的原始信息仅存储在树的 叶子节点
+上，而非叶子节点仅用于维护子节点信息和维持数据结构的形态。我们熟知的线段树就是一种
+Leafy Tree。</p>
+<h2 id="平衡树基础操作">平衡树基础操作</h2>
+<h3 id="代码约定">代码约定</h3>
+<p>下文中，我们用 <code>ls[x]</code> 表示节点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
+的左儿子，<code>rs[x]</code> 表示节点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
+的右儿子，<code>vl[x]</code> 表示节点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
+的权值，<code>sz[x]</code> 表示节点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>x</mi><annotation encoding="application/x-tex">x</annotation></semantics></math>
+及其子树中叶子节点的个数。</p>
+<h3 id="建树">建树</h3>
+<p>正如前言中所说的，WBLT
+的原始信息仅存储在叶子节点上。而我们规定每个非叶子节点一定有两个子节点，这个节点要维护其子节点信息的合并。同时，每个节点还要维护自身及其子树中叶子节点的数量，用于实现维护平衡。</p>
+<p>和大多数的平衡树一样，每个非叶子节点的右儿子的权值大于等于左儿子的权值，且在
+WBLT
+中非叶子节点节点的权值等于右儿子的权值。不难看出每个节点的权值就是其子树中的最大权值。</p>
+<p>这样听起来就很像一棵维护区间最大值的动态开点线段树了，且所有叶子从左到右是递增的。事实上的建树操作也与线段树十分相似，只需要向下递归，直至区间长度为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>
+时把要维护的信息放叶子节点上，回溯的时候合并区间信息即可。</p>
+<p>代码实现如下：</p>
+<pre><code>/* 添加一个权值为 v 的节点，返回这个节点的编号 */
+int add(int v) {
+    ++cnt;
+    ls[cnt] = rs[cnt] = 0;
+    sz[cnt] = 1;
+    vl[cnt] = v;
+    return cnt;
+}
+
+/* 更新节点编号为 x 的节点的信息 */
+void pushup(int x) {
+    vl[x] = vl[rs[x]];
+    sz[x] = sz[ls[x]] + sz[rs[x]];
+}
+
+/* 递归建树 */
+int build(int l, int r) {
+    if (l == r) {
+        return add(a[l]);
+    }
+    int x = add(0);
+    int k = l + ((r - l) &gt;&gt; 1);
+    ls[x] = build(l, k);
+    rs[x] = build(k + 1, r);
+    pushup(x);
+}</code></pre>
+<h3 id="插入和删除">插入和删除</h3>
+<p>由于 WBLT
+的信息都存储在叶子节点上，插入和删除一个元素其实就是增加或减少了一个叶子节点。</p>
+<p>对于插入操作，我们类似从根节点开始向下递归，直到找到权值大于等于插入元素的权值最小的叶子节点，再新建两个节点，其中一个用来存储新插入的值，另一个作为两个叶子的新父亲替代这个最小叶子节点的位置，再将这两个叶子连接到这个父亲上。</p>
+<p>例如我们向以下树中加入一个值为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>4</mn><annotation encoding="application/x-tex">4</annotation></semantics></math>
+的元素。</p>
+<p><img src="https://oi-wiki.org/ds/images/wblt-1.svg"
+style="width:80.0%" alt="image" /></p>
+<p>我们首先找到了叶子节点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>5</mn><annotation encoding="application/x-tex">5</annotation></semantics></math>，随后新建了一个非叶子节点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math>，并将
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>4</mn><annotation encoding="application/x-tex">4</annotation></semantics></math>
+和
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>5</mn><annotation encoding="application/x-tex">5</annotation></semantics></math>
+连接到了
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>D</mi><annotation encoding="application/x-tex">D</annotation></semantics></math>
+上。</p>
+<p><img src="https://oi-wiki.org/ds/images/wblt-2.svg"
+style="width:80.0%" alt="image" /></p>
+<p>对于删除，我们考虑上面过程的逆过程。即找到与要删除的值权值相等的一个叶子节点，将它和它的父亲节点删除，并用其父亲的另一个儿子代替父亲的位置。</p>
+<p>上面提到的建树也可以通过不断往树里插入节点实现，不过如果这样做必须要加入一个权值为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>∞</mi><annotation encoding="application/x-tex">\infty</annotation></semantics></math>⁡
+的节点作为根，否则会导致插入第一个元素的时候找不到大于自己的叶子节点。</p>
+<p>代码实现：</p>
+<pre><code>    /* 将某一节点的全部信息复制到另一节点上 */
+void copynode(int x, int y) {
+    ls[x] = ls[y];
+    rs[x] = rs[y];
+    sz[x] = sz[y];
+    vl[x] = vl[y];
+}
+
+/* 判断某一节点是否为叶子节点 */
+bool leaf(int x) { return !ls[x] || !rs[x]; }
+
+void insert(int v) {
+    if (leaf(x)) {
+        ls[x] = add(std::min(v, vl[x]));
+        rs[x] = add(std::max(v, vl[x]));
+        pushup(x);
+        maintain(x);
+        return;
+    }
+    if (vl[ls[x]] &gt;= v) {
+        insert(ls[x], v);
+    } else {
+        insert(rs[x], v);
+    }
+    pushup(x);
+    maintain(x);
+}
+
+void delete(int x, int v, int fa) {
+    if (leaf(x)) {
+        if (ls[fa] == x) {
+            copynode(fa, rs[fa]);
+        } else {
+            copynode(fa, ls[fa]);
+        }
+        pushup(fa);
+        return;
+    }
+    if (vl[ls[x]] &gt;= v) {
+        delete (ls[x], v, x);
+    } else {
+        delete (rs[x], v, x);
+    }
+    pushup(x);
+    maintain(x);
+}</code></pre>
+<h3 id="维护平衡">维护平衡</h3>
+<p>类似替罪羊树地，我们引入重构参数
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>∈</mo><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo>,</mo><mfrac displaystyle="true"><mn>1</mn><mn>2</mn></mfrac><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">\alpha \in (0, \dfrac{1}{2}]</annotation></semantics></math>，我们设一个节点的平衡度
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ρ</mi><annotation encoding="application/x-tex">\rho</annotation></semantics></math>
+为当前节点左子树大小和节点大小的比值。当一个节点满足
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ρ</mi><mo>∈</mo><mrow><mo stretchy="true" form="prefix">[</mo><mi>α</mi><mo>,</mo><mn>1</mn><mo>−</mo><mi>α</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\rho \in[\alpha, 1-\alpha]</annotation></semantics></math>
+时，我们称其为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>-
+平衡的。如果一棵 WBLT 的每一个节点都是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>-
+平衡的，那么这棵树的树高一定能保证是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mo>log</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(\log n)</annotation></semantics></math>
+量级的。证明是显然的，我们从一个叶子节点往父亲方向走，每次走到的节点维护的范围至少扩大到原来的
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mfrac displaystyle="true"><mn>1</mn><mrow><mn>1</mn><mo>−</mo><mi>α</mi></mrow></mfrac><annotation encoding="application/x-tex">\dfrac{1}{1 - \alpha}</annotation></semantics></math>
+倍，那么树高就是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mo>log</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>−</mo><mi>α</mi></mrow></mfrac></msub><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mo>log</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(\log_{\frac{1}{1-\alpha}}n) = O(\log n)</annotation></semantics></math>
+量级的。</p>
+<p>当某个节点不满足
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>-
+平衡时，说明这个节点是失衡的，我们需要重新维护平衡。但是和替罪羊树不同的是，WBLT
+使用旋转操作维护平衡。旋转的大致过程为：将过重的儿子的两个儿子拆下来，一个和过轻的儿子合并，另一个成为一个新的儿子。</p>
+<p>我们来举个例子：</p>
+<p><img src="https://oi-wiki.org/ds/images/wblt-3.svg"
+style="width:80.0%" alt="image" /></p>
+<p>这是一棵十分不平衡的 WBLT，节点
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math>
+的右儿子显著地重于左儿子。我们先把右儿子及其两个儿子和左儿子都拆下来：</p>
+<p><img src="https://oi-wiki.org/ds/images/wblt-4.svg"
+style="width:80.0%" alt="image" /></p>
+<p>然后，我们将
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>
+和
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>2</mn><annotation encoding="application/x-tex">2</annotation></semantics></math>
+两个节点合并作为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math>
+节点的左儿子，将
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>C</mi><annotation encoding="application/x-tex">C</annotation></semantics></math>
+作为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math>
+的右儿子。由于
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>B</mi><annotation encoding="application/x-tex">B</annotation></semantics></math>
+节点原本并不是叶子节点，因此其并不存储原始信息，直接删除就好。</p>
+<p><img src="https://oi-wiki.org/ds/images/wblt-5.svg"
+style="width:80.0%" alt="image" /></p>
+<p>旋转之后我们的树就变得十分平衡了。</p>
+<p>但是上面的例子中，假设
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math>
+节点的左子树过于大，我们把它合并到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math>
+的左子树上之后
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math>
+的左子树又会很大，这时
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math>
+依然可能不平衡。</p>
+<p><img src="https://oi-wiki.org/ds/images/wblt-6.svg"
+style="width:80.0%" alt="image" /></p>
+<p>不失一般性，我们接下来仅讨论一个方向上的旋转，另一方向的旋转是对称的。我们不妨设
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math>
+的平衡度为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ρ</mi><mn>1</mn></msub><annotation encoding="application/x-tex">\rho_1</annotation></semantics></math>，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>B</mi><annotation encoding="application/x-tex">B</annotation></semantics></math>
+的平衡度为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ρ</mi><mn>2</mn></msub><annotation encoding="application/x-tex">\rho_2</annotation></semantics></math>。那么我们可以得到旋转后
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>A</mi><annotation encoding="application/x-tex">A</annotation></semantics></math>
+的平衡度
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mn>1</mn></msub><mo>=</mo><msub><mi>ρ</mi><mn>1</mn></msub><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>ρ</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><msub><mi>ρ</mi><mn>2</mn></msub></mrow><annotation encoding="application/x-tex">\gamma_1= \rho_1+(1 - \rho_1)\rho_2</annotation></semantics></math>，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>B</mi><annotation encoding="application/x-tex">B</annotation></semantics></math>
+的平衡度
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mn>2</mn></msub><mo>=</mo><mfrac displaystyle="true"><msub><mi>ρ</mi><mn>1</mn></msub><mrow><msub><mi>ρ</mi><mn>1</mn></msub><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>ρ</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><msub><mi>ρ</mi><mn>2</mn></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">\gamma_2 =\dfrac{\rho_1}{\rho_1 + (1 - \rho_1)\rho_2}</annotation></semantics></math>，推导过程直接将各节点大小用
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mi>i</mi><msub><mi>z</mi><mi>A</mi></msub></mrow><annotation encoding="application/x-tex">siz_A</annotation></semantics></math>
+表示后代入定义式化简即可，这里略去。</p>
+<p>不难发现仅当
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ρ</mi><mn>2</mn></msub><mo>≤</mo><mfrac displaystyle="true"><mrow><mn>1</mn><mo>−</mo><mn>2</mn><mi>α</mi></mrow><mrow><mn>1</mn><mo>−</mo><mi>α</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\rho_2 \le \dfrac{1 - 2\alpha}{1 - \alpha}</annotation></semantics></math>
+时
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mn>1</mn></msub><mo>,</mo><msub><mi>γ</mi><mn>2</mn></msub><mo>∈</mo><mrow><mo stretchy="true" form="prefix">[</mo><mi>α</mi><mo>,</mo><mn>1</mn><mo>−</mo><mi>α</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\gamma_1, \gamma_2 \in [\alpha, 1 - \alpha]</annotation></semantics></math>。</p>
+<p>为了旋转后仍不平衡的情况出现，我们引入双旋操作。具体地，我们在较大子树上做一次相反方向的旋转操作，然后再维护当前节点的平衡。</p>
+<p><img src="https://oi-wiki.org/ds/images/wblt-7.svg"
+style="width:80.0%" alt="image" /></p>
+<p>类似地定义
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ρ</mi><mn>3</mn></msub><mo>,</mo><msub><mi>γ</mi><mn>3</mn></msub></mrow><annotation encoding="application/x-tex">\rho_3,\gamma_3</annotation></semantics></math>，则有
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mn>1</mn></msub><mo>=</mo><msub><mi>ρ</mi><mn>1</mn></msub><mo>+</mo><msub><mi>ρ</mi><mn>2</mn></msub><msub><mi>ρ</mi><mn>3</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>ρ</mi><mn>3</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo><msub><mi>γ</mi><mn>2</mn></msub><mo>=</mo><mfrac displaystyle="true"><msub><mi>ρ</mi><mn>1</mn></msub><mrow><mi>ρ</mi><mn>1</mn><mo>+</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>ρ</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mi>ρ</mi><mn>2</mn><mi>ρ</mi><mn>3</mn></mrow></mfrac><mo>,</mo><msub><mi>γ</mi><mn>3</mn></msub><mo>=</mo><mfrac displaystyle="true"><mrow><msub><mi>ρ</mi><mn>2</mn></msub><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>−</mo><msub><mi>ρ</mi><mn>3</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><mn>1</mn><mo>−</mo><msub><mi>ρ</mi><mn>2</mn></msub><msub><mi>ρ</mi><mn>3</mn></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">\gamma_1=\rho_1+\rho_2\rho_3(1-\rho_3), \gamma_2=\dfrac{\rho_1}{\rho1+(1 - \rho_1)\rho2\rho3}, \gamma_3 = \dfrac{\rho_2(1-\rho_3)}{1-\rho_2\rho_3}</annotation></semantics></math>。可以证明当
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>&lt;</mo><mn>1</mn><mo>−</mo><mfrac displaystyle="true"><msqrt><mn>2</mn></msqrt><mn>2</mn></mfrac><mo>≈</mo><mn>0.292</mn></mrow><annotation encoding="application/x-tex">\alpha &lt; 1- \dfrac{\sqrt2}{2} \approx 0.292</annotation></semantics></math>
+时一定有
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>γ</mi><mn>1</mn></msub><mo>,</mo><msub><mi>γ</mi><mn>2</mn></msub><mo>,</mo><msub><mi>γ</mi><mn>3</mn></msub><mo>∈</mo><mrow><mo stretchy="true" form="prefix">[</mo><mi>α</mi><mo>,</mo><mn>1</mn><mo>−</mo><mi>α</mi><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\gamma_1, \gamma_2, \gamma_3 \in [\alpha, 1 - \alpha]</annotation></semantics></math>。</p>
+<p>实现上，我们在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ρ</mi><mn>2</mn></msub><mo>≤</mo><mfrac displaystyle="true"><mrow><mn>1</mn><mo>−</mo><mn>2</mn><mi>α</mi></mrow><mrow><mn>1</mn><mo>−</mo><mi>α</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">\rho_2 \le \dfrac{1 - 2\alpha}{1 - \alpha}</annotation></semantics></math>
+时进行单旋，否则进行双旋。</p>
+<p>代码实现，这里取
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>=</mo><mn>0.25</mn></mrow><annotation encoding="application/x-tex">\alpha = 0.25</annotation></semantics></math>：</p>
+<pre><code>const double alpha = 0.25;
+
+void rotate(int x, int flag) {
+    if (!flag) {
+        rs[x] = merge(rs[ls[x]], rs[x]);
+        ls[x] = ls[ls[x]];
+    } else {
+        ls[x] = merge(ls[x], ls[rs[x]]);
+        rs[x] = rs[rs[x]];
+    }
+}
+
+void maintain(int x) {
+    if (sz[ls[x]] &gt; sz[rs[x]] * 3) {
+        if (sz[rs[ls[x]]] &gt; sz[ls[ls[x]]] * 2) {
+            rotate(ls[x], 1);
+        }
+        rotate(x, 0);
+    } else if (sz[rs[x]] &gt; sz[ls[x]] * 3) {
+        if (sz[ls[rs[x]]] &gt; sz[rs[rs[x]]] * 2) {
+            rotate(rs[x], 0);
+        }
+        rotate(x, 1);
+    }
+}</code></pre>
+<h3 id="查询排名">查询排名</h3>
+<p>我们发现 WBLT
+的形态和线段树十分相似，因此查询排名可以使用类似线段树上二分的方式：如果左子树的最大值比大于等于待查值就往左儿子跳，否则就向右跳，同时答案加上左子树的
+<code>size</code>。</p>
+<pre><code>int rank(int x, int v) {
+    if (leaf(x)) {
+        return 1;
+    }
+    if (vl[ls[x]] &gt;= v) {
+        return rank(ls[x], v);
+    } else {
+        return rank(rs[x], v) + sz[ls[x]];
+    }
+}</code></pre>
+<h3 id="查询第-k-大的数">查询第 k 大的数</h3>
+<p>依然是利用线段树上二分的思想，只不过这里比较的是节点的大小。</p>
+<pre><code>int kth(int x, int v) {
+    if (sz[x] == v) {
+        return vl[x];
+    }
+    if (sz[ls[x]] &gt;= v) {
+        return kth(ls[x], v);
+    } else {
+        return kth(rs[x], v - sz[ls[x]]);
+    }
+}</code></pre>
+<h3 id="总结">总结</h3>
+<p>以上，我们利用 WBLT 完成了平衡树基本的几大操作。下面是用 WBLT 实现的
+<a href="https://loj.ac/p/104">普通平衡树模板</a>。</p>
+<pre><code>#include &lt;bits/stdc++.h&gt;
+
+typedef long long ll;
+
+const ll MAX = 2e6 + 5;
+const ll INF = 0x7fffffff;
+
+ll ans, lst, n, m, t, op, rt, cnt;
+ll ls[MAX], rs[MAX], vl[MAX], sz[MAX];
+
+void cp(ll x, ll y) {
+    ls[x] = ls[y];
+    rs[x] = rs[y];
+    sz[x] = sz[y];
+    vl[x] = vl[y];
+}
+
+ll add(ll v, ll s, ll l, ll r) {
+    ++cnt;
+    ls[cnt] = l;
+    rs[cnt] = r;
+    sz[cnt] = s;
+    vl[cnt] = v;
+    return cnt;
+}
+
+ll merge(ll x, ll y) { return add(vl[y], sz[x] + sz[y], x, y); }
+
+void upd(ll x) {
+    if (!ls[x]) {
+        sz[x] = 1;
+        return;
+    }
+    sz[x] = sz[ls[x]] + sz[rs[x]];
+    vl[x] = vl[rs[x]];
+}
+
+void rot(int x, int flag) {
+    if (!flag) {
+        rs[x] = merge(rs[ls[x]], rs[x]);
+        ls[x] = ls[ls[x]];
+    } else {
+        ls[x] = merge(ls[x], ls[rs[x]]);
+        rs[x] = rs[rs[x]];
+    }
+}
+
+void mat(int x) {
+    if (sz[ls[x]] &gt; sz[rs[x]] * 3) {
+        if (sz[rs[ls[x]]] &gt; sz[ls[ls[x]]] * 2) {
+            rot(ls[x], 1);
+        }
+        rot(x, 0);
+    } else if (sz[rs[x]] &gt; sz[ls[x]] * 3) {
+        if (sz[ls[rs[x]]] &gt; sz[rs[rs[x]]] * 2) {
+            rot(rs[x], 0);
+        }
+        rot(x, 1);
+    }
+}
+
+void ins(ll x, ll v) {
+    if (!ls[x]) {
+        ls[x] = add(std::min(v, vl[x]), 1, 0, 0);
+        rs[x] = add(std::max(v, vl[x]), 1, 0, 0);
+        upd(x);
+        mat(x);
+        return;
+    }
+    if (vl[ls[x]] &gt;= v) {
+        ins(ls[x], v);
+    } else {
+        ins(rs[x], v);
+    }
+    upd(x);
+    mat(x);
+    return;
+}
+
+void del(ll x, ll v, ll fa) {
+    if (!ls[x]) {
+        if (vl[ls[fa]] == v) {
+            cp(fa, rs[fa]);
+        } else if (vl[rs[fa]] == v) {
+            cp(fa, ls[fa]);
+        }
+        return;
+    }
+    if (vl[ls[x]] &gt;= v) {
+        del(ls[x], v, x);
+    } else {
+        del(rs[x], v, x);
+    }
+    upd(x);
+    mat(x);
+    return;
+}
+
+ll rnk(ll x, ll v) {
+    if (sz[x] == 1) {
+        return 1;
+    }
+    if (vl[ls[x]] &gt;= v) {
+        return rnk(ls[x], v);
+    } else {
+        return rnk(rs[x], v) + sz[ls[x]];
+    }
+}
+
+ll kth(ll x, ll v) {
+    if (sz[x] == v) {
+        return vl[x];
+    }
+    if (sz[ls[x]] &gt;= v) {
+        return kth(ls[x], v);
+    } else {
+        return kth(rs[x], v - sz[ls[x]]);
+    }
+}
+
+ll pre(ll x) { return kth(rt, rnk(rt, x) - 1); }
+
+ll nxt(ll x) { return kth(rt, rnk(rt, x + 1)); }
+
+int main() {
+    scanf(&quot;%lld&quot;, &amp;m);
+    rt = add(INF, 1, 0, 0);
+    while (m--) {
+        scanf(&quot;%lld%lld&quot;, &amp;op, &amp;t);
+        if (op == 1) {
+            ins(rt, t);
+        } else if (op == 2) {
+            del(rt, t, -1);
+        } else if (op == 3) {
+            printf(&quot;%lld\n&quot;, rnk(rt, t));
+        } else if (op == 4) {
+            printf(&quot;%lld\n&quot;, kth(rt, t));
+        } else if (op == 5) {
+            printf(&quot;%lld\n&quot;, pre(t));
+        } else {
+            printf(&quot;%lld\n&quot;, nxt(t));
+        }
+    }
+    return 0;
+}</code></pre>
+</body>
