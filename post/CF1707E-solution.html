@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang = "zh_cn">
+
+<head>
+	<meta charset = "utf-8"/>
+		<meta name = "author" content = "AtomAlpaca">
+		<title>「题解」CF1707E Replace</title>
+	<link rel = "stylesheet" href = "./style.css" type = "text/css"/>
+	<link rel="stylesheet"
+      href="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/panda-syntax-dark.min.css">
+	<script src="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/highlight.min.js"></script>
+
+</head>
+
+<body>
+	<header>
+				<p>
+			<h1>
+				「题解」CF1707E Replace
+			</h1>
+		</p>
+		<p style = "text-align: center">
+						AtomAlpaca
+								</p>
+				
+			</header>
+	<script>hljs.highlightAll();</script>
+		<h2>
+		Table of contents
+	</h2>
+	<ul>
+<li><a href="#题意" id="toc-题意">题意</a></li>
+<li><a href="#题解" id="toc-题解">题解</a></li>
+<li><a href="#代码" id="toc-代码">代码</a></li>
+</ul>
+	
+	<p>錦瑟無端五十絃，一絃一柱思華年。</p>
+<p>2023 年北京集训好题分享讲了这题。</p>
+<h2 id="题意">题意</h2>
+<p>给定一个长为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+的序列
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>a</mi><mi>n</mi></msub><mo>,</mo><mo>∀</mo><mi>i</mi><mo>∈</mo><mrow><mo stretchy="true" form="prefix">[</mo><mn>1</mn><mo>,</mo><mi>n</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo><mn>1</mn><mo>≤</mo><msub><mi>a</mi><mi>i</mi></msub><mo>≤</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">a_n, \forall i \in [1, n], 1 \le a_i \le n</annotation></semantics></math>。</p>
+<p>定义
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mo>,</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><msubsup><mo>min</mo><mrow><mi>i</mi><mo>=</mo><mi>l</mi></mrow><mi>r</mi></msubsup><msub><mi>a</mi><mi>i</mi></msub><mo>,</mo><msubsup><mo>max</mo><mrow><mi>i</mi><mo>=</mo><mi>l</mi></mrow><mi>r</mi></msubsup><msub><mi>a</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(l,r)=(\min_{i=l}^{r}{a_i}, \max_{i=l}^{r} {a_i})</annotation></semantics></math>。</p>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>q</mi><annotation encoding="application/x-tex">q</annotation></semantics></math>
+次询问，每次给定
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mo>,</mo><mi>r</mi></mrow><annotation encoding="application/x-tex">l,r</annotation></semantics></math>，询问最小的
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+使得
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>f</mi><mi>k</mi></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mo>,</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>,</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f^k (l, r) = (1, n)</annotation></semantics></math>，无解输出
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>−</mi><mn>1</mn></mrow><annotation encoding="application/x-tex">-1</annotation></semantics></math>。</p>
+<h2 id="题解">题解</h2>
+<p>首先两个十分显然的性质：</p>
+<ul>
+<li><p>如果某次操作把区间变成了
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>,</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(1, n)</annotation></semantics></math>，那么无论再操作多少次这个区间都是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>,</mo><mi>n</mi><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(1, n)</annotation></semantics></math>；</p></li>
+<li><p>状态数是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>n</mi><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(n^2)</annotation></semantics></math>
+的。</p></li>
+</ul>
+<p>这引导我们想到，如果能求得
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>f</mi><mi>k</mi></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mo>,</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f^k(l, r)</annotation></semantics></math>
+在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>≥</mo><msup><mi>n</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">k \ge n^2</annotation></semantics></math>
+时的结果，就能判定是否有解，同时也可以利用二分之类的方法求得答案。</p>
+<p>Key Observation 1:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mo>,</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msubsup><mo>⋃</mo><mrow><mi>i</mi><mo>=</mo><mi>l</mi></mrow><mrow><mi>r</mi><mo>−</mo><mn>1</mn></mrow></msubsup><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>i</mi><mo>,</mo><mi>i</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">f(l, r) = \bigcup_{i=l}^{r-1}{f(i, i+1)}</annotation></semantics></math>。</p>
+<p>证明：考虑归纳，则只需证明：<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>l</mi><mn>1</mn></msub><mo>,</mo><msub><mi>r</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">]</mo></mrow><mo>∪</mo><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>l</mi><mn>2</mn></msub><mo>,</mo><msub><mi>r</mi><mn>2</mn></msub><mo stretchy="true" form="postfix">]</mo></mrow><mo>=</mo><mrow><mo stretchy="true" form="prefix">[</mo><mi>l</mi><mo>,</mo><mi>r</mi><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>l</mi><mn>1</mn></msub><mo>,</mo><msub><mi>r</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">]</mo></mrow><mo>∩</mo><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>l</mi><mn>2</mn></msub><mo>,</mo><msub><mi>r</mi><mn>2</mn></msub><mo stretchy="true" form="postfix">]</mo></mrow><mo>≠</mo><mi>⌀</mi></mrow><annotation encoding="application/x-tex">[l_1, r_1] \cup [l_2, r_2] = [l, r], [l_1, r_1] \cap [l_2, r_2] \ne \varnothing</annotation></semantics></math>，则
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mo>,</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>l</mi><mn>1</mn></msub><mo>,</mo><msub><mi>r</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>∪</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>l</mi><mn>2</mn></msub><mo>,</mo><msub><mi>r</mi><mn>2</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(l, r) = f(l_1, r_1) \cup f(l_2, r_2)</annotation></semantics></math>。而这是显然的。</p>
+<p>Key Observation 2:
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>f</mi><mi>k</mi></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mo>,</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msubsup><mo>⋃</mo><mrow><mi>i</mi><mo>=</mo><mi>l</mi></mrow><mrow><mi>r</mi><mo>−</mo><mn>1</mn></mrow></msubsup><mrow><msup><mi>f</mi><mi>k</mi></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>i</mi><mo>,</mo><mi>i</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mrow><annotation encoding="application/x-tex">f^k(l, r) = \bigcup_{i=l}^{r-1}{f^k(i, i+1)}</annotation></semantics></math>。</p>
+<p>证明：考虑上一页中结论，每次增加
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+相邻两个区间仍然总是有交。</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><msup><mi>f</mi><mi>k</mi></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mo>,</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mo>=</mo></mtd><mtd columnalign="left" style="text-align: left"><msup><mi>f</mi><mi>k</mi></msup><mrow><mo stretchy="true" form="prefix">(</mo><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>l</mi><mn>1</mn></msub><mo>,</mo><msub><mi>r</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">]</mo></mrow><mo>∪</mo><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>l</mi><mn>2</mn></msub><mo>,</mo><msub><mi>r</mi><mn>2</mn></msub><mo stretchy="true" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mo>=</mo></mtd><mtd columnalign="left" style="text-align: left"><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>f</mi><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>l</mi><mn>1</mn></msub><mo>,</mo><msub><mi>r</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>∪</mo><msup><mi>f</mi><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>l</mi><mn>2</mn></msub><mo>,</mo><msub><mi>r</mi><mn>2</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mo>=</mo></mtd><mtd columnalign="left" style="text-align: left"><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>f</mi><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>l</mi><mn>1</mn></msub><mo>,</mo><msub><mi>r</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow><mo>∪</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>f</mi><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>l</mi><mn>2</mn></msub><mo>,</mo><msub><mi>r</mi><mn>2</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mo>=</mo></mtd><mtd columnalign="left" style="text-align: left"><msup><mi>f</mi><mi>k</mi></msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>l</mi><mn>1</mn></msub><mo>,</mo><msub><mi>r</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>∪</mo><msup><mi>f</mi><mi>k</mi></msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>l</mi><mn>2</mn></msub><mo>,</mo><msub><mi>r</mi><mn>2</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+    &amp;f^k(l,r) \\
+    =&amp; f^k([l_1, r_1] \cup [l_2, r_2]) \\
+    =&amp; f(f^{k - 1}(l_1, r_1) \cup f^{k - 1}(l_2, r_2)) \\
+    =&amp; f(f^{k - 1}(l_1, r_1)) \cup f(f^{k - 1}(l_2, r_2)) \\
+    =&amp; f^{k}(l_1, r_1) \cup f^{k}(l_2, r_2) \\
+\end{aligned}</annotation></semantics></math></p>
+<p>然后我们发现到最后相邻两项区间还是有交，因此我们最终区间到左、右端点就是这些区间左、右节点的极值。这允许我们通过维护
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mi>i</mi><mo>,</mo><mi>i</mi><mo>+</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[i, i+1]</annotation></semantics></math>
+的信息，并利用 st 表求得任意区间的结果。</p>
+<p>我们令
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>F</mi><mi>/</mi><msub><mi>G</mi><mrow><mi>k</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>i</mi></mrow></msub></mrow><annotation encoding="application/x-tex">F/G_{k, j, i}</annotation></semantics></math>
+为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>f</mi><mi>k</mi></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>j</mi><mo>,</mo><mi>j</mi><mo>+</mo><msup><mn>2</mn><mi>i</mi></msup><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f^k(j, j+2^i - 1)</annotation></semantics></math>
+的左、右端点。那么对于
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+这维的转移，我们有：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>F</mi><mrow><mi>k</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>i</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mo>min</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>F</mi><mrow><mi>k</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>,</mo><msub><mi>F</mi><mrow><mi>k</mi><mo>,</mo><mi>j</mi><mo>+</mo><msup><mn>2</mn><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msup><mo>,</mo><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>G</mi><mrow><mi>k</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>i</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mo>max</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>G</mi><mrow><mi>k</mi><mo>,</mo><mi>j</mi><mo>,</mo><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>,</mo><msub><mi>G</mi><mrow><mi>k</mi><mo>,</mo><mi>j</mi><mo>+</mo><msup><mn>2</mn><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msup><mo>,</mo><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+    F_{k,j,i} &amp;= \min(F_{k,j,i - 1}, F_{k,j + 2^{i-1}, i - 1}) \\
+    G_{k,j,i} &amp;= \max(G_{k,j,i - 1}, G_{k,j + 2^{i-1}, i - 1})
+\end{aligned}</annotation></semantics></math></p>
+<p>对于
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>
+这一维，我们有：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><msup><mi>f</mi><mi>k</mi></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mo>,</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>f</mi><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>l</mi><mn>1</mn></msub><mo>,</mo><msub><mi>r</mi><mn>1</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>∪</mo><msup><mi>f</mi><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></msup><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>l</mi><mn>2</mn></msub><mo>,</mo><msub><mi>r</mi><mn>2</mn></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+    &amp;f^k(l,r) = f(f^{k - 1}(l_1, r_1) \cup f^{k - 1}(l_2, r_2)) \\
+\end{aligned}</annotation></semantics></math></p>
+<p>那么我们知道
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>f</mi><mi>k</mi></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mo>,</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f^k(l, r)</annotation></semantics></math>
+的左右端点分别是：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mo>min</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>F</mi><mrow><mi>k</mi><mo>,</mo><mi>l</mi><mo>,</mo><mi>l</mi><mi>g</mi></mrow></msub><mo>,</mo><msub><mi>F</mi><mrow><mi>k</mi><mo>,</mo><mi>r</mi><mo>−</mo><msup><mn>2</mn><mrow><mi>l</mi><mi>g</mi></mrow></msup><mo>+</mo><mn>1</mn><mo>,</mo><mi>l</mi><mi>g</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mo>max</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>G</mi><mrow><mi>k</mi><mo>,</mo><mi>l</mi><mo>,</mo><mi>l</mi><mi>g</mi></mrow></msub><mo>,</mo><msub><mi>G</mi><mrow><mi>k</mi><mo>,</mo><mi>r</mi><mo>−</mo><msup><mn>2</mn><mrow><mi>l</mi><mi>g</mi></mrow></msup><mo>+</mo><mn>1</mn><mo>,</mo><mi>l</mi><mi>g</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+    &amp;\min(F_{k, l, lg}, F_{k,r - 2^{lg} + 1,lg}) \\
+    &amp;\max(G_{k, l, lg}, G_{k,r - 2^{lg} + 1,lg})
+\end{aligned}</annotation></semantics></math></p>
+<p>至此，预处理后我们能够在
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(1)</annotation></semantics></math>
+时间内求解
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>f</mi><mi>k</mi></msup><mrow><mo stretchy="true" form="prefix">(</mo><mi>l</mi><mo>,</mo><mi>r</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f^k(l, r)</annotation></semantics></math>。二分或倍增即可求得答案。</p>
+<h2 id="代码">代码</h2>
+<p>代码实现把
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>F</mi><annotation encoding="application/x-tex">F</annotation></semantics></math>
+和
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>G</mi><annotation encoding="application/x-tex">G</annotation></semantics></math>
+放在了同一个数组里来卡常。</p>
+<pre><code>#pragma GCC optimize(&quot;Ofast&quot;)
+
+#include &lt;bits/stdc++.h&gt;
+
+const int MAX = 1e5 + 5;
+const int LG = 35;
+const int MAXX = 37;
+
+int n, q, l, r;
+int a[MAX], lg2[MAX], f[MAXX][MAX][20][3];
+
+inline int read()
+{
+    char c=getchar();int x=0;bool f=0;
+    for(;!isdigit(c);c=getchar())f^=!(c^45);
+    for(;isdigit(c);c=getchar())x=(x&lt;&lt;1)+(x&lt;&lt;3)+(c^48);
+    if(f)x=-x;return x;
+}
+
+inline int min(int a, int b) { return a &lt; b ? a : b; }
+inline int max(int a, int b) { return a &gt; b ? a : b; }
+void init(int k)
+{
+    for (int i = 1; (1 &lt;&lt; i) &lt; n; ++i)
+    {
+        for (int j = 1; j + (1 &lt;&lt; i) &lt;= n; ++j)
+        {
+            f[k][j][i][0] = min(f[k][j][i - 1][0], f[k][j + (1 &lt;&lt; (i - 1))][i - 1][0]);
+            f[k][j][i][1] = max(f[k][j][i - 1][1], f[k][j + (1 &lt;&lt; (i - 1))][i - 1][1]);
+        }
+    }
+}
+
+int getl(int l, int r, int k)
+{
+    int lg = lg2[r - l + 1];
+    return min(f[k][l][lg][0], f[k][r - (1 &lt;&lt; lg) + 1][lg][0]);
+}
+
+int getr(int l, int r, int k)
+{
+    int lg = lg2[r - l + 1];
+    return max(f[k][l][lg][1], f[k][r - (1 &lt;&lt; lg) + 1][lg][1]);
+}
+
+void solve()
+{
+    l = read(); r = read(); long long res = 0;
+    if (l == 1 and r == n) { printf(&quot;0\n&quot;); return ; }
+    else if (l == r) { printf(&quot;-1\n&quot;); return ; }
+    int _l = getl(l, r - 1, LG), _r = getr(l, r - 1, LG);
+    if (_l != 1 or _r != n) { printf(&quot;-1\n&quot;); return ; }
+    for (int i = LG - 1; i &gt;= 0; --i)
+    {
+        _l = getl(l, r - 1, i), _r = getr(l, r - 1, i);
+        if (_l != 1 or _r != n) { res += (1ll &lt;&lt; i); l = _l; r = _r; }
+    }
+    _l = getl(l, r - 1, 0), _r = getr(l, r - 1, 0);
+    if (_l == 1 and _r == n) { printf(&quot;%lld\n&quot;, res + 1); } else { printf(&quot;-1\n&quot;); }
+}
+
+int main()
+{
+    n = read(); q = read();
+    for (int i = 1; i &lt;= n; ++i) { a[i] = read(); }
+    for (int i = 2; i &lt;= n; ++i) { lg2[i] = lg2[i &gt;&gt; 1] + 1; }
+    for (int i = 1; i &lt;  n; ++i) { f[0][i][0][0] = min(a[i], a[i + 1]); f[0][i][0][1] = max(a[i], a[i + 1]); }
+    init(0);
+    for (int i = 1; i &lt;= LG; ++i)
+    {
+        for (int j = 1; j &lt;  n; ++j)
+        {
+            f[i][j][0][0] = getl(f[i - 1][j][0][0], f[i - 1][j][0][1] - 1, i - 1);
+            f[i][j][0][1] = getr(f[i - 1][j][0][0], f[i - 1][j][0][1] - 1, i - 1);
+        }
+        init(i);
+    }
+    while (q--) { solve(); }
+    return 0;
+}</code></pre>
+</body>
