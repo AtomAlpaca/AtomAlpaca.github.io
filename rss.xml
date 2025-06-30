@@ -9,6 +9,18 @@
 		<link>https://blog.atal.moe/post/ds</link>
 	</item>
 	<item>
+		<title>「信创」如何给 ncnn 做 riscv 优化</title>
+		<link>https://blog.atal.moe/post/how-to-opt-ncnn-for-riscv</link>
+	</item>
+	<item>
+		<title>「算法」wqs 二分略解</title>
+		<link>https://blog.atal.moe/post/wqs</link>
+	</item>
+	<item>
+		<title>「数学」类型论学习笔记</title>
+		<link>https://blog.atal.moe/post/type</link>
+	</item>
+	<item>
 		<title>「生活」我与自残</title>
 		<link>https://blog.atal.moe/post/me-and-self-harm</link>
 	</item>
@@ -29,20 +41,12 @@
 		<link>https://blog.atal.moe/post/P2619-solution</link>
 	</item>
 	<item>
-		<title>「算法」wqs 二分略解</title>
-		<link>https://blog.atal.moe/post/wqs</link>
-	</item>
-	<item>
 		<title>「题解」CF2037F Ardent Flames</title>
 		<link>https://blog.atal.moe/post/CF2037F-solution</link>
 	</item>
 	<item>
 		<title>「题解」P5305 [GXOI/GZOI2019] 旧词 </title>
 		<link>https://blog.atal.moe/post/P5305-solution</link>
-	</item>
-	<item>
-		<title>「数学」类型论学习笔记</title>
-		<link>https://blog.atal.moe/post/type</link>
 	</item>
 	<item>
 		<title>「题解」CF1956D Nene and the Mex Operator</title>

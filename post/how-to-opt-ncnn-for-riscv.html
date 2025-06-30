@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang = "zh_cn">
+
+<head>
+	<meta charset = "utf-8"/>
+		<meta name = "author" content = "AtomAlpaca">
+		<title>「信创」如何给 ncnn 做 riscv 优化</title>
+	<link rel = "stylesheet" href = "./style.css" type = "text/css"/>
+	<link rel="stylesheet"
+      href="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/panda-syntax-dark.min.css">
+	<script src="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/highlight.min.js"></script>
+
+</head>
+
+<body>
+	<header>
+				<p>
+			<h1>
+				「信创」如何给 ncnn 做 riscv 优化
+			</h1>
+		</p>
+		<p style = "text-align: center">
+						AtomAlpaca
+								</p>
+				
+			</header>
+	<script>hljs.highlightAll();</script>
+		<h2>
+		Table of contents
+	</h2>
+	<ul>
+<li><a href="#起因" id="toc-起因">起因</a></li>
+<li><a href="#配置环境" id="toc-配置环境">配置环境</a>
+<ul>
+<li><a href="#交叉编译工具链"
+id="toc-交叉编译工具链">交叉编译工具链</a></li>
+<li><a href="#pk-和-spike" id="toc-pk-和-spike">pk 和 spike</a></li>
+<li><a href="#qemu-for-riscv" id="toc-qemu-for-riscv">qemu for
+riscv</a></li>
+</ul></li>
+<li><a href="#ncnn-代码浅析" id="toc-ncnn-代码浅析">ncnn
+代码浅析</a></li>
+<li><a href="#riscv-v-拓展浅析" id="toc-riscv-v-拓展浅析">Riscv v
+拓展浅析</a>
+<ul>
+<li><a href="#riscv-v-拓展大致模式" id="toc-riscv-v-拓展大致模式">Riscv
+v 拓展大致模式</a></li>
+<li><a href="#常用指令" id="toc-常用指令">常用指令</a>
+<ul>
+<li><a href="#存取" id="toc-存取">存取</a></li>
+<li><a href="#操作" id="toc-操作">操作</a></li>
+</ul></li>
+<li><a href="#mask" id="toc-mask">Mask</a></li>
+<li><a href="#intrinsic" id="toc-intrinsic">Intrinsic</a></li>
+<li><a href="#类型系统" id="toc-类型系统">类型系统</a></li>
+<li><a href="#指令" id="toc-指令">指令</a></li>
+<li><a href="#有关-vl" id="toc-有关-vl">有关 vl</a></li>
+</ul></li>
+<li><a href="#实际开发测试" id="toc-实际开发测试">实际开发、测试</a>
+<ul>
+<li><a href="#为-risc-v-编译" id="toc-为-risc-v-编译">为 RISC-V
+编译</a></li>
+<li><a href="#优化算子" id="toc-优化算子">优化算子</a>
+<ul>
+<li><a href="#以防你不知道-v-zfh-zvfh-和-xtheadvector-的故事"
+id="toc-以防你不知道-v-zfh-zvfh-和-xtheadvector-的故事">以防你不知道 v,
+zfh, zvfh 和 xtheadvector 的故事</a></li>
+<li><a href="#你具体要做的" id="toc-你具体要做的">你具体要做的</a></li>
+</ul></li>
+<li><a href="#玄铁你真的是" id="toc-玄铁你真的是">玄铁你真的是</a></li>
+</ul></li>
+</ul>
+	
+	<h1 id="起因">起因</h1>
+<p>起因是我参加了前段时间的<a
+href="Riscv 黑客松">[</a>https://www.bilibili.com/video/BV1NpdeYHETU/]，入门了
+RISC-V。然后突然有一天 mizu-bai 找到我发了一段聊天记录。</p>
+<pre><code>        nihui：github.com/atomalpaca
+        nihui：这头像怎么和 mizu 这么像
+        小小跑：这头像怎么和 mizu 这么像</code></pre>
+<p>然后我问这是什么群，mizu 姐姐说是 ncnn 的开发者群，给 ncnn 交个 pr
+就能进，快来玩。</p>
+<p>然后我看了一圈 issues，看了一圈代码，我说我不知道干什么啊，mizu
+姐姐说有很多算子在 riscv 上没有优化你可以折腾一下。</p>
+<h1 id="配置环境">配置环境</h1>
+<h2 id="交叉编译工具链">交叉编译工具链</h2>
+<p>首先我们需要一套 Riscv 的交叉编译工具链。riscv 给出的构建默认不包含 v
+拓展，于是我们需要自己编译一份出来。</p>
+<p>另外我们还需要支持 xtheadvector，这在 toolchain 中默认的 gcc 14
+中是不支持的，所以我们要手动拉一份 gcc 15。</p>
+<p>P.S. 写这篇文章的时候 gcc16 出来了，读者可以尝试一下（）</p>
+<pre><code>git clone https://github.com/riscv-collab/riscv-gnu-toolchain
+cd riscv-gnu-toolchain
+git submodule update --init
+rm -rf ./gcc
+git clone https://gcc.gnu.org/git/gcc.git
+cd gcc
+git branch -r
+git checkout releases/gcc-15
+cd ..
+mkdir build &amp;&amp; cd build
+# --prefix    指定的是工具链要放在的地方，注意要有写权限
+# --with-arch 指定的是拓展，默认是 rv64gc
+# 无需 make install，make 后会直接放到指定的目录
+# 编译可能非常非常慢
+../configure --prefix=/home/atal/riscv-toolchain/ --with-arch=rv64gcv --enable-multilib
+make -j4</code></pre>
+<p>为了方便我们可以把工具链的目录加到 <code>PATH</code>
+变量里，这样就可以直接调用。</p>
+<pre><code>export PATH=$PATH:/home/atal/riscv-toolchain/bin</code></pre>
+<h2 id="pk-和-spike">pk 和 spike</h2>
+<p><code>spike</code> 是 <code>riscv</code> 自行开发的一个模拟器</p>
+<p>首先编译 pk（proxy kernel）</p>
+<pre><code>git clone https://github.com/riscv/riscv-pk.git
+cd riscv-pk
+        
+mkdir build &amp;&amp; cd build
+../configure --prefix=/home/atal/riscv-toolchain/ --host=riscv64-unknown-elf --with-arch=rv64gcv
+make -j4
+make install</code></pre>
+<p>然后是 spike 本身</p>
+<pre><code>git clone https://github.com/riscv/riscv-isa-sim.git
+cd riscv-isa-sim
+    
+mkdir build &amp;&amp; cd build
+../configure --prefix=/opt/riscv
+make -j4
+make install</code></pre>
+<p>老版本的 <code>spike</code> 编译的时候需要加上
+<code>–with-isa=rv64gcv</code> 来启用 <code>v</code>
+拓展，但现在这个选项已经删掉了，现在我们只需要在运行的时候加上
+<code>–isa=rv64gcv</code> 来指定运行时的架构。</p>
+<p>使用方式是这样的：</p>
+<pre><code>riscv64-unknown-elf-gcc ./test.c -o test
+spike --isa=rv64gcv pk ./test</code></pre>
+<h2 id="qemu-for-riscv">qemu for riscv</h2>
+<p>同时我们可以用 <code>qemu</code>
+进行模拟，这两个选其中一个用就好。</p>
+<pre><code>git clone https://github.com/qemu/qemu
+cd qemu
+mkdir build &amp;&amp; cd build
+../configure --target-list=riscv64-softmmu,riscv64-linux-user --prefix=/home/atal/riscv-toolchain/qemu
+make -j4 
+make install</code></pre>
+<h1 id="ncnn-代码浅析">ncnn 代码浅析</h1>
+<p>TODO，内容有点多可能会单独开一系列文章。</p>
+<h1 id="riscv-v-拓展浅析">Riscv v 拓展浅析</h1>
+<h2 id="riscv-v-拓展大致模式">Riscv v 拓展大致模式</h2>
+<p>和 <code>x86</code> 选用的 <code>SIMD</code> 不同，<code>Riscv</code>
+使用向量指令集来进行并行优化。</p>
+<p><code>v</code> 拓展新增了若干名称以 <code>v</code>
+开头的“向量寄存器”（对 RV32V 来说，一般是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>32</mn><annotation encoding="application/x-tex">32</annotation></semantics></math>
+个），这些寄存器的长度由处理器分配的向量寄存器堆大小决定，处理器会把堆均匀地划分给各个启用的向量寄存器，并且把向量寄存器能够使用的最大长度存储在寄存器
+<code>mvl</code> 中。能存储的元素数进一步由存储的元素长度决定。</p>
+<p>我们可以选择性地启用或禁用部分向量寄存器，处理器会动态调整向量寄存器的长度。如假设我们有
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1024</mn><annotation encoding="application/x-tex">1024</annotation></semantics></math>
+字节的堆空间，并且启用全部
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>32</mn><annotation encoding="application/x-tex">32</annotation></semantics></math>
+个 寄存器，每个寄存器都会分配到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>32</mn><annotation encoding="application/x-tex">32</annotation></semantics></math>
+字节的长度；如果我们仅启用其中两个，则每个寄存器都会变成
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>512</mn><annotation encoding="application/x-tex">512</annotation></semantics></math>
+字节长，并且 <code>mvl</code> 将会随之动态变化。但 <code>mvl</code>
+的值只能由处理器设置，软件层面无法直接修改 <code>mvl</code> 的值。</p>
+<p>同时 <code>v</code> 拓展新增了
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>7</mn><annotation encoding="application/x-tex">7</annotation></semantics></math>
+个非特权 <code>CSR</code>
+寄存器：<code>vstart</code>，<code>vxsat</code>，<code>vxrm</code>，<code>vcsr</code>，<code>vl</code>，<code>vtype</code>，<code>vlenb</code>。</p>
+<p><code>vxrm</code> 和 <code>vxsat</code> 分别是 Vector Fixed-Point
+Saturation Flag vxsat 和 Vector Fixed-Point Saturation Flag，他们都是
+<code>vcsr</code> 中对应位的镜像。这些暂且掠过。</p>
+<p><code>vl</code>
+设定了每次向量操作所操作的元素数量，我们只会操作从开头开始
+<code>vl</code> 个元素，可以通过 <code>setvl</code>
+指令设定。<code>vstart</code>
+则进一步设置了向量操作会从哪一个元素开始进行操作（注意不会向后顺延），注意每次向量操作之后
+<code>vstart</code> 都会被清零。</p>
+<p><code>vlenb</code> 是以字节为单位的向量寄存器长度。</p>
+<p><code>vtype</code> 中包含
+<code>vill</code>，<code>vma</code>，<code>vta</code>，<code>vsew</code>
+和 <code>vlmul</code> 五个字段。<code>vsew</code>
+代表了每个元素的长度，<code>vlmul</code> 涉及到 <code>v</code>
+拓展的另一个机制，多个向量寄存器可以进行拼接组合获取更长的向量，<code>vlmul</code>
+则是寄存器拼接的数量。</p>
+<p><code>vma</code> 和 <code>vta</code> 分别指示了被 <code>mask</code>
+的（之后会提到）元素和不在操作范围内的元素会被如何处理，分为“undisturbed”
+和 “agnostic”。值为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>0</mn><annotation encoding="application/x-tex">0</annotation></semantics></math>
+代表 “undisturbed” 会全部保持原值，而 值为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>
+代表 “agnostic” 既可能保持原值也可能全部写
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>。</p>
+<h2 id="常用指令">常用指令</h2>
+<p><img src="https://cdn.luogu.com.cn/upload/image_hosting/jh7douvh.png"
+style="width:80.0%" alt="image" /></p>
+<h3 id="存取">存取</h3>
+<p>我们使用 <code>vld</code> 从内存中读取连续的一段进入向量寄存器。如当
+<code>vsew</code> 为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>32</mn><annotation encoding="application/x-tex">32</annotation></semantics></math>
+时，<code>vld v0, 0(a0)</code> 会从 <code>a0</code> 指向的地址开始，读取
+<code>a0，a0 + 4, a0 + 8...</code> 直至 <code>vl</code> 设置的上限。</p>
+<p>同时我们可以稀疏地读取数据，<code>vlds v0, 0(a0), a1</code> 会读取
+<code>a0, a0 + a1, a0 + 2a1</code> 直至上限。或者将
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>o</mi><mi>f</mi><mi>f</mi><mi>s</mi><mi>e</mi><mi>t</mi></mrow><annotation encoding="application/x-tex">offset</annotation></semantics></math>
+存入另一向量寄存器，通过 <code>vldx v0, a0, v1</code> 读取。</p>
+<p>存入内存只需将 <code>vld</code> 改为 <code>vst</code>。</p>
+<h3 id="操作">操作</h3>
+<p>操作的格式基本是
+<code>v + 操作名 + 操作种类后缀</code>。操作分为向量与向量操作（<code>.vv</code>
+后缀）和向量与标量（<code>.vs</code> 后缀）操作两种。</p>
+<h2 id="mask">Mask</h2>
+<p>向量架构通过掩码（Mask）的方式来实现一些分支操作。RVV 拓展提供了
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>8</mn><annotation encoding="application/x-tex">8</annotation></semantics></math>
+个向量谓词寄存器
+<code>vp{</code><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math><code>}</code>，我们可以将其视作一列
+bool
+值。我们可以在他们之间进行逻辑运算（<code>vp{and, or, xor, etc.}</code>），也可以将向量寄存器进行比较等操作的结果存入。我们在进行向量寄存器之间的操作时可以额外一共一个谓词寄存器，当谓词寄存器一个位置的值为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>
+时这个位置不会进行操作，而是会根据 <code>vma</code>
+位置的值来选择保持原值还是置
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>。</p>
+<h2 id="intrinsic">Intrinsic</h2>
+<p>简单来说就是给编程语言提供了一个便于调用和管理的接口，让你不用在项目里写大量的内联汇编。</p>
+<p>文档主要在 <a
+href="https://github.com/riscv-non-isa/rvv-intrinsic-doc/">这</a>，另外有个<a
+href="https://dzaima.github.io/intrinsics-viewer/">超好用的网站</a>可以帮你快速搜索以及熟悉用途，向
+Github 用户 dzaima 致敬。</p>
+<h2 id="类型系统">类型系统</h2>
+<p><code>Intrinsic</code>
+最方便的一点就是提供了类型系统，使得我们能像操作变量一样操作向量寄存器，而不是把自己训练成寄存器管理大师。
+一个寄存器的大概格式为 <code>v&lt;type&gt;&lt;vlmul&gt;_t</code>。</p>
+<p>其中 <code>type</code> 可以取
+<code>int{8/16/32/64} | uint{8/16/32/64} | float{16/32/64} | bool{1/2/4/8/16/32/64}</code>，一看就知道什么意思！</p>
+<p><code>vlmul</code> 就是多少个寄存器拼在一起，大于一用
+<code>m{1/2/4/8}</code> 来表示，小于的用 <code>mf{2/4/8}</code>
+来表示拆成 <code>2/4/8</code> 份。注意 <code>bool</code>
+类型不能拼，也不需要写 <code>&lt;vlmul&gt;</code> 这项，举个例子你应该写
+<code>vbool1_t</code>。</p>
+<p>另外你还可以在 <code>&lt;vlmul&gt;</code> 后面加个
+<code>x2/4/8</code> 来构成元组类型，但是似乎没什么用。</p>
+<h2 id="指令">指令</h2>
+<p>指令的基本格式
+<code>__riscv_&lt;instruction&gt;_&lt;operand&gt;_&lt;return_type&gt;_&lt;policy&gt;</code>。举个例子
+<code>vint32m1_t __riscv_vadd_vv_i32m1_m(vbool32_t vm, vint32m1_t vs2, vint32m1_t vs1, size_t vl);</code></p>
+<p><code>instruction</code> 就是指令名。<code>operand</code>
+代表操作类型，如 <code>vv</code>。</p>
+<p>这里的 <code>return_type</code> 采用简写，即
+<code>&lt;i{8, 16, 32, 64} | u{8, 16, 32, 64} | f{16, 32, 64}&gt;&lt;m{1, 2, 4, 8} | mf{2, 4, 8}&gt;</code>。</p>
+<p><code>policy</code> 用来表示 <code>vta</code> 和 <code>vma</code>
+这两个寄存器，决定被 <code>mask</code> 和尾部的位置该怎么处理。</p>
+<ul>
+<li><p>留空：不使用 mask，<code>vta = 1</code></p></li>
+<li><p><code>_tu</code>：不使用 mask，<code>vta = 0</code></p></li>
+<li><p><code>_m</code> 使用
+mask，<code>vta = 1</code>，<code>vma = 1</code></p></li>
+<li><p><code>_tum</code> 使用
+mask，<code>vta = 0</code>，<code>vma = 1</code></p></li>
+<li><p><code>_mu</code> 使用
+mask，<code>vta = 1</code>，<code>vma = 0</code></p></li>
+<li><p><code>_tumu</code> 使用
+mask，<code>vta = 0</code>，<code>vma = 0</code></p></li>
+</ul>
+<h2 id="有关-vl">有关 vl</h2>
+<p><code>Intrinsic</code> 提供了 <code>__riscv_vsetvl_*</code>，将可用的
+<code>vl</code> 和你提供的要计算的长度取
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>m</mi><mi>i</mi><mi>n</mi></mrow><annotation encoding="application/x-tex">min</annotation></semantics></math>，确保得到的始终是合法的
+vl。</p>
+<h1 id="实际开发测试">实际开发、测试</h1>
+<h2 id="为-risc-v-编译">为 RISC-V 编译</h2>
+<p>我们先来讲讲怎么编译以及怎么跑测试。在 <code>ncnn/toolchains</code>
+下有若干个针对不同平台进行设置的 <code>cmake</code> 文件，比如
+<code>riscv64-unknown-linux-gnu.toolchain.cmake</code>。和 RISCV
+有关的这几个基本只有选用的编译器不同。首先确保你设置里
+<code>RISCV_ROOT_PATH</code> 这个环境变量。</p>
+<pre><code>export RISCV_ROOT_PATH=&lt;path_to_your_riscv_toolchain&gt;
+mkdir build &amp;&amp; cd build
+cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/riscv64-unknown-linux-gnu.toolchain.cmake -DCMAKE_BUILD_TYPE=debug -DNCNN_COVERAGE=ON -DNCNN_RUNTIME_CPU=OFF -DNCNN_RVV=ON -DNCNN_ZFH=ON -DNCNN_ZVFH=ON -DNCNN_OPENMP=ON -DNCNN_BUILD_TOOLS=OFF -DNCNN_BUILD_EXAMPLES=OFF -DNCNN_BUILD_TESTS=ON ..
+// 我们这里把 CMAKE_BUILD_TYPE 设置为 debug 是为了方便调试，如果要跑 benchmark 建议切换到 release
+cmake --build . -j 8
+TESTS_EXECUTABLE_LOADER=qemu-riscv64 TESTS_EXECUTABLE_LOADER_ARGUMENTS=&quot;-cpu;rv64,v=true,zfh=true,zvfh=true,vlen=256,elen=64,vext_spec=v1.0;-L;&lt;path_to_your_riscv_toolchain&gt;/sysroot&quot; ctest --output-on-failure -j 8</code></pre>
+<h2 id="优化算子">优化算子</h2>
+<p>如果你想添加一个全新的算子你需要先阅读 <a
+href="https://github.com/Tencent/ncnn/wiki/add-custom-layer.zh">这两篇</a><a
+href="https://github.com/Tencent/ncnn/wiki/how-to-implement-custom-layer-step-by-step">文档</a>，简而言之你要先实现一份
+native 的版本并且在 <code>CMakeList</code> 里注册。</p>
+<h3 id="以防你不知道-v-zfh-zvfh-和-xtheadvector-的故事">以防你不知道 v,
+zfh, zvfh 和 xtheadvector 的故事</h3>
+<p><code>v</code>, <code>zfh</code>, <code>zvfh</code> 和
+<code>xtheadvector</code> 是 RISC-V 的四个拓展，简单介绍一下：</p>
+<ul>
+<li><p><code>v</code>：上面提到的向量拓展</p></li>
+<li><p><code>zfh</code> 半精度浮点数拓展，支持 16bit 的浮点数</p></li>
+<li><p><code>zvfh</code> 半精度浮点数的向量拓展</p></li>
+<li><p><code>xtheadvector</code> 其实就是 rvv-0.7.1
+指令集，虽然已经被弃用但是作为曾经常用的标准，现在还有很多设备在用这套指令，于是给它塞到了
+<code>xthead</code> 里。有 <code>zfh</code> 的功能和 <code>v</code>
+拓展和 <code>zvfh</code> 的大部分功能。</p></li>
+</ul>
+<p>也就是说 <code>xtheadvector</code> 不支持一些现在的 <code>v</code>
+拓展的 <code>Intrinsic</code>。<a
+href="https://github.com/XUANTIE-RV/thead-extension-spec/blob/master/xtheadvector/intrinsics.adoc">点击这里看更多</a>。</p>
+<p>各个厂商的各个设备都有可能随机地实现了其中几个拓展，因此我们编译的时候会把代码复制出好几份用不同的参数分别编译。</p>
+<p>我们需要分别实现单精浮点数和半精浮点数的代码（<code>layer_riscv.cpp</code>
+和
+<code>layer_riscv_zfh.cpp</code>），前者会编译成<code>rv64gc</code>，<code>rv64gcv</code>，<code>rv64gc_xtheadvector</code>
+三个版本，后者会编译成
+<code>rv64gc_zfh</code>，<code>rv64gcv_zfh_zvfh</code>，<code>rv64gc_zfh_xtheadvector</code>。</p>
+<p>你的代码需要同时支持这几种情况。我们需要通过
+<code>__riscv_vector</code>、<code>__riscv_xtheadvector</code> 和
+<code>__riscv_zvfh</code>
+这几个宏来判断各个拓展是否开启，然后写出对应的正确代码。</p>
+<h3 id="你具体要做的">你具体要做的</h3>
+<p>首先我们在 src/layer/riscv 下，先建立
+<code>yourlayer_riscv.h</code>。在 ncnn namesoace 里面新建一个
+<code>Yourlayer_riscv</code> 继承自 native 版本的 Yourlayer
+类。然后实现你要优化的函数。</p>
+<p>例如</p>
+<pre><code>namespace ncnn {
+    
+    class BNLL_riscv : public BNLL
+    {
+        public:
+        BNLL_riscv();
+        
+        virtual int forward_inplace(Mat&amp; bottom_top_blob, const Option&amp; opt) const;
+        
+        protected:
+        #if NCNN_ZFH
+        int forward_inplace_fp16s(Mat&amp; bottom_top_blob, const Option&amp; opt) const;
+        #endif
+    };
+    
+} // namespace ncnn </code></pre>
+<p>然后在 <code>yourlayer_riscv.cpp</code> 和
+<code>yourlayer_riscv_zfh.cpp</code> 里分别实现 fp32 和 fp16
+的版本：</p>
+<pre><code>
+namespace ncnn {
+    
+    BNLL_riscv::BNLL_riscv()
+    {
+        #if __riscv_vector
+        support_packing = true;
+        #endif // __riscv_vector
+        #if NCNN_ZFH
+        #if __riscv_vector
+        support_fp16_storage = cpu_support_riscv_zvfh();
+        #else
+        support_fp16_storage = cpu_support_riscv_zfh();
+        #endif
+        #endif
+    }
+    
+    int BNLL_riscv::forward_inplace(Mat&amp; bottom_top_blob, const Option&amp; opt) const
+    {
+        #if NCNN_ZFH
+        int elembits = bottom_top_blob.elembits();
+        
+        if (opt.use_fp16_storage &amp;&amp; elembits == 16)
+        {
+            return forward_inplace_fp16s(bottom_top_blob, opt);
+        }
+        #endif
+        
+        int w = bottom_top_blob.w;
+        int h = bottom_top_blob.h;
+        int d = bottom_top_blob.d;
+        int channels = bottom_top_blob.c;
+        int elempack = bottom_top_blob.elempack;
+        int size = w * h * d * elempack;
+        
+        #pragma omp parallel for num_threads(opt.num_threads)
+        for (int q = 0; q &lt; channels; q++)
+        {
+            float* ptr = bottom_top_blob.channel(q);
+            
+            #if __riscv_vector // 判断是否启用了 v 拓展
+            int n = size;
+            while (n &gt; 0)
+            {
+                size_t vl = __riscv_vsetvl_e32m8(n);
+                
+                vfloat32m8_t _p = __riscv_vle32_v_f32m8(ptr, vl);
+                vbool4_t _mask = __riscv_vmfgt_vf_f32m8_b4(_p, 0.f, vl);
+                
+                #if __riscv_xtheadvector // 判断是否为 xtheadvector
+                vfloat32m8_t _comm = __riscv_vfsgnjx_vv_f32m8(_p, _p, vl);
+                _comm = __riscv_vfsgnjn_vv_f32m8(_comm, _comm, vl);
+                #else
+                vfloat32m8_t _comm = __riscv_vfsgnjn_vv_f32m8_mu(_mask, _p, _p, _p, vl);  // 这条指令在 xtheadvector 里不存在
+                #endif
+                _comm = exp_ps(_comm, vl);
+                _comm = __riscv_vfadd_vf_f32m8(_comm, 1.f, vl);
+                _comm = log_ps(_comm, vl);
+                
+                #if __riscv_xtheadvector // 判断是否为 xtheadvector
+                vfloat32m8_t _res = __riscv_vfadd_vv_f32m8(_comm, _p, vl);
+                _res = __riscv_vmerge_vvm_f32m8(_comm, _res, _mask, vl);
+                #else
+                vfloat32m8_t _res = __riscv_vfadd_vv_f32m8_mu(_mask, _comm, _comm, _p, vl); // 这条指令在 xtheadvector 里不存在
+                #endif
+                __riscv_vse32_v_f32m8(ptr, _res, vl);
+                
+                ptr += vl;
+                n -= vl;
+            }
+            #else  // __riscv_vector 
+            // 标量版本
+            for (int i = 0; i &lt; size; i++)
+            {
+                if (*ptr &gt; 0)
+                *ptr = *ptr + logf(1.f + expf(-*ptr));
+                else
+                *ptr = logf(1.f + expf(*ptr));
+                ++ptr;
+            }
+            #endif // __riscv_vector
+        }
+        
+        return 0;
+    }
+}</code></pre>
+<h2 id="玄铁你真的是">玄铁你真的是</h2>
+<p>然后我们需要测试这些代码是否在玄铁的各个设备上能够正常运行。为什么？因为用它的板子太多了。而且
+ncnn ci 也测了（什么</p>
+<p>首先我们要再下一份玄铁家的 toolchain 和 qeum。你可以从<a
+href="https://www.xrvm.cn/community/download">这里</a>找到形如
+<code>Xuantie-900-gcc-linux-6.6.0-glibc-x86_64-V3.1.0-20250522.tar.gz</code>
+的东西和
+<code>Xuantie-qemu-x86_64-Ubuntu-20.04-V5.2.6-B20250415-1115.tar.gz</code>
+这种东西。你看到这里的时候可能会有更新的版本。</p>
+<p>不知道为什么玄铁的工具链还要手机登录才能下载。好抽象。不懂哦。</p>
+<p>然后你会在 ncnn/toolchains 下找到
+<code>{c906, c908, c910}-v310.toolchain.cmake</code>
+这种文件（你看到这里的时候可能会有更新的版本。）我们像刚刚一样进行编译和测试，但是这次要把
+<code>riscv-root-path</code> 改成玄铁的路径。</p>
+<pre><code>export RISCV_ROOT_PATH=&lt;your_xuantie_toolchain_path&gt;
+mkdir build &amp;&amp; cd build
+  cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/c906-v301.toolchain.cmake -DCMAKE_BUILD_TYPE=release \
+    -DNCNN_OPENMP=OFF -DNCNN_THREADS=OFF \
+    -DNCNN_RUNTIME_CPU=OFF \
+    -DNCNN_RVV=OFF \
+    -DNCNN_XTHEADVECTOR=ON \
+    -DNCNN_ZFH=ON \
+    -DNCNN_ZVFH=OFF \
+    -DNCNN_SIMPLEOCV=ON -DNCNN_BUILD_EXAMPLES=ON -DNCNN_BUILD_TESTS=ON ..
+cmake --build . -j 8
+    TESTS_EXECUTABLE_LOADER=&lt;path_to_your_xuantie_qemu&gt; TESTS_EXECUTABLE_LOADER_ARGUMENTS=&quot;-cpu;c906fdv&quot; ctest --output-on-failure -j 8</code></pre>
+<p>然后玄铁有一堆奇奇怪怪的上游 bug。<a
+href="https://github.com/XUANTIE-RV/xuantie-gnu-toolchain/issues">点击即看</a>。包括但不限于尾部不打扰不生效啊，fp16
+和 fp32 互转会段错误啊。被创了很多次，无力吐槽了。</p>
+</body>
