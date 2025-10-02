@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang = "zh_cn">
+
+<head>
+	<meta charset = "utf-8"/>
+		<meta name = "author" content = "AtomAlpaca">
+		<title>「数学」遥远的记忆：CF1707E 的答案上界及其证明</title>
+	<link rel = "stylesheet" href = "./style.css" type = "text/css"/>
+	<link rel="stylesheet"
+      href="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/panda-syntax-dark.min.css">
+	<script src="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/highlight.min.js"></script>
+
+</head>
+
+<body>
+	<header>
+				<p>
+			<h1>
+				「数学」遥远的记忆：CF1707E 的答案上界及其证明
+			</h1>
+		</p>
+		<p style = "text-align: center">
+						AtomAlpaca
+								</p>
+				
+			</header>
+	<script>hljs.highlightAll();</script>
+		<h2>
+		Table of contents
+	</h2>
+	<ul>
+<li><a href="#前言" id="toc-前言">前言</a></li>
+<li><a href="#证明" id="toc-证明">证明</a></li>
+</ul>
+	
+	<h2 id="前言">前言</h2>
+<p>当成北京集训讲这道题的时候也有人问了答案上界的问题，当时一时间没能答上来，趁着同学讲题的时间想出了证明，于是返场讲了一下，掌声雷动。两年后的今天因为<a
+href="https://www.luogu.com.cn/discuss/1117450">这篇帖子</a>再次尝试寻找答案的上界，曾经能被我十分钟想出来的证明现在花了我将近一个小时，令人感叹。想念那年北京的第一场雪。</p>
+<p>题面及其解法请移步<a
+href="./CF1707E-solution.html">这篇博客</a>。</p>
+<h2 id="证明">证明</h2>
+<p>设一共有
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>S</mi><annotation encoding="application/x-tex">S</annotation></semantics></math>
+次操作</p>
+<p>我们把操作分为两个 stage，第二个 stage 满足：</p>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∃</mo><mi>k</mi><mo>&lt;</mo><mi>S</mi><mo>,</mo><mo>∀</mo><mi>S</mi><mo>&gt;</mo><mi>i</mi><mo>&gt;</mo><mi>k</mi><mo>,</mo><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>l</mi><mi>i</mi></msub><mo>,</mo><msub><mi>r</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">]</mo></mrow><mo>⊂</mo><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>l</mi><mrow><mi>i</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>,</mo><msub><mi>r</mi><mrow><mi>i</mi><mo>+</mo><mn>1</mn></mrow></msub><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\exists k &lt; S, \forall S &gt; i &gt; k, [l_{i}, r_{i}] \subset [l_{i + 1}, r_{i + 1}]</annotation></semantics></math></p>
+<p>不难看出这个 stage 一定存在。我们把剩下的操作全划分进 stage
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math></p>
+<p>首先几个 observision:</p>
+<p>Observision
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">1.</annotation></semantics></math>
+任何时间，如果区间长度为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>1</mn><annotation encoding="application/x-tex">1</annotation></semantics></math>，则一定无解</p>
+<p>Proof: 显然。</p>
+<p>Observision
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">2.</annotation></semantics></math>
+任何时间，如果一个区间是之前到过某个区间的子区间，则无解。形式化地说，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>l</mi><mrow><mi>k</mi><mo>+</mo><mn>1</mn></mrow></msub><mo>,</mo><msub><mi>r</mi><mrow><mi>k</mi><mo>+</mo><mn>1</mn></mrow></msub><mo stretchy="true" form="postfix">]</mo></mrow><mo>⊆</mo><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>l</mi><mi>k</mi></msub><mo>,</mo><msub><mi>r</mi><mi>k</mi></msub><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">[l_{k + 1}, r_{k + 1}] \subseteq [l_k, r_k]</annotation></semantics></math>
+时一定无解。</p>
+<p>Proof. 产生循环。</p>
+<p>得到推论，stage 2 从长度为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>2</mn><annotation encoding="application/x-tex">2</annotation></semantics></math>
+的区间开始，最多经过
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">n - 2</annotation></semantics></math>
+次操作得到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">[</mo><mn>1</mn><mo>,</mo><mi>n</mi><mo stretchy="true" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">[1, n]</annotation></semantics></math>。</p>
+<p>Observision
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3</mn><mi>.</mi></mrow><annotation encoding="application/x-tex">3.</annotation></semantics></math>，如果
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∃</mo><mi>k</mi><mspace width="0.222em"></mspace><mi>s</mi><mi>.</mi><mi>t</mi><mi>.</mi><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>l</mi><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>,</mo><mi>r</mi><mo>−</mo><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow><mo stretchy="true" form="postfix">]</mo></mrow><mo>⊆</mo><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>l</mi><mi>k</mi></msub><mo>,</mo><msub><mi>r</mi><mi>k</mi></msub><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\exists k\ s.t. [l_{k - 1}, r-{k - 1}] \subseteq [l_k, r_k]</annotation></semantics></math>，则有
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∀</mo><mi>S</mi><mo>&gt;</mo><mi>i</mi><mo>&gt;</mo><mi>k</mi><mo>,</mo><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>l</mi><mi>i</mi></msub><mo>,</mo><msub><mi>r</mi><mi>i</mi></msub><mo stretchy="true" form="postfix">]</mo></mrow><mo>⊆</mo><mrow><mo stretchy="true" form="prefix">[</mo><msub><mi>l</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>,</mo><msub><mi>r</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">\forall S &gt; i &gt; k, [l_i, r_i] \subseteq [l_{i - 1}, r_{i - 1}]</annotation></semantics></math>，也即一个区间开始向两侧“扩张”，就会一直扩张下去。</p>
+<p>Proof. 扩张之后最小值不增最大值不减。</p>
+<p>也就是说一旦产生了一次“扩张”就会直接进入 stage2</p>
+<p>接下来再考虑 stage 1。这时我们得到了一个问题：给出一个长度为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+的线段，让你往上面不断放区间，要求不能是之前放过区间的子集，也不能是之前放过区间的超集，问最多能放下多少个（我们不考虑能不能构造出对应的
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
+数组，因为我不会。）。</p>
+<p>显然最优解是一直放长度为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mn>2</mn><annotation encoding="application/x-tex">2</annotation></semantics></math>
+的区间，一共能放
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n - 1</annotation></semantics></math>
+次，然后一定会产生“扩张”进入 stage
+2。我们放的第一个区间是题目给出的，放的最后一个区间就是 stage2
+的第一个区间，因此最大操作次数为
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mi>n</mi><mo>−</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">2n - 4</annotation></semantics></math>
+次。</p>
+<p>当
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>=</mo><mn>3</mn><mo>,</mo><mi>a</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">[</mo><mn>2</mn><mo>,</mo><mn>3</mn><mo>,</mo><mn>1</mn><mo stretchy="true" form="postfix">]</mo></mrow><mo>,</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>,</mo><mn>2</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">n=3,a=[2,3,1],f(1,2)</annotation></semantics></math>
+就能卡到上界，因此该结果无法继续改进。</p>
+</body>
