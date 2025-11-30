@@ -68,6 +68,57 @@
 次更优，因此加入白边后的权值增量不增，故该问题有凸性，可以用 wqs
 二分解决。</p>
 <p>于是二分一个增量，每次将所有白边权值加上这个增量，再和黑边一起跑最小生成树，根据最小生成树中白边的数量调整增量即可。</p>
+<p>2025/11/20 补：经 <a
+href="https://www.luogu.com/user/223298/">@do_while_true</a>
+老师提醒补充一下增量构造的正确性，也即我们总能通过删除一条黑边加入一条白边得到从
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(k - 1)</annotation></semantics></math>
+得到
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">f(k)</annotation></semantics></math>
+的答案</p>
+<p>设图拟阵
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ℳ</mi><mo>=</mo><mrow><mo stretchy="true" form="prefix">⟨</mo><mi>E</mi><mo>,</mo><mi>ℐ</mi><mo stretchy="true" form="postfix">⟩</mo></mrow></mrow><annotation encoding="application/x-tex">\mathcal M = {\left \langle E, \mathcal I \right \rangle}</annotation></semantics></math>，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>T</mi><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></msub><annotation encoding="application/x-tex">T_{k - 1}</annotation></semantics></math>
+是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">k - 1</annotation></semantics></math>
+时的一个最优生成树，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>T</mi><mi>k</mi></msub><annotation encoding="application/x-tex">T_{k}</annotation></semantics></math>
+同理。二者都是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ℳ</mi><annotation encoding="application/x-tex">\mathcal M</annotation></semantics></math>
+的一个基，由强基交换定理我们总有一个完美匹配
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">{</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>e</mi><mo>,</mo><mi>f</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\{(e, f)\}</annotation></semantics></math>
+其中
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>e</mi><mi>i</mi></msub><mo>∈</mo><msub><mi>T</mi><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>,</mo><msub><mi>f</mi><mi>i</mi></msub><mo>∈</mo><msub><mi>T</mi><mi>k</mi></msub></mrow><annotation encoding="application/x-tex">e_i \in T_{k - 1}, f_i \in T_{k}</annotation></semantics></math>
+满足
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>∀</mo><mi>i</mi><mo>,</mo><msub><mi>T</mi><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>∪</mo><mo stretchy="false" form="prefix">{</mo><msub><mi>f</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">}</mo><mo>∖</mo><mo stretchy="false" form="prefix">{</mo><msub><mi>e</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">\forall i, T_{k - 1} \cup \{f_i\} \backslash \{e_i\}</annotation></semantics></math>
+和
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>T</mi><mi>k</mi></msub><mo>∪</mo><mo stretchy="false" form="prefix">{</mo><msub><mi>e</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">}</mo><mo>∖</mo><mo stretchy="false" form="prefix">{</mo><msub><mi>f</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">}</mo></mrow><annotation encoding="application/x-tex">T_{k} \cup \{e_i\} \backslash \{f_i\}</annotation></semantics></math>
+也是
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ℳ</mi><annotation encoding="application/x-tex">\mathcal M</annotation></semantics></math>
+的基。其中一定存在一对边
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mi>f</mi><mo>,</mo><mi>g</mi><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(f, g)</annotation></semantics></math>
+满足
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>f</mi><annotation encoding="application/x-tex">f</annotation></semantics></math>
+是白边，<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>e</mi><annotation encoding="application/x-tex">e</annotation></semantics></math>
+是黑边，交换这对边也即删除一条黑边加入一条白边。</p>
+<p>设
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>T</mi><mi>α</mi></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msub><mi>T</mi><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>∪</mo><mo stretchy="false" form="prefix">{</mo><mi>f</mi><mo stretchy="false" form="postfix">}</mo><mo>∖</mo><mo stretchy="false" form="prefix">{</mo><mi>e</mi><mo stretchy="false" form="postfix">}</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>T</mi><mi>β</mi></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msub><mi>T</mi><mi>k</mi></msub><mo>∪</mo><mo stretchy="false" form="prefix">{</mo><mi>e</mi><mo stretchy="false" form="postfix">}</mo><mo>∖</mo><mo stretchy="false" form="prefix">{</mo><mi>f</mi><mo stretchy="false" form="postfix">}</mo></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+    T_{\alpha} &amp;= T_{k - 1} \cup \{ f \} \backslash \{ e \} \\
+    T_{\beta} &amp;= T_{k} \cup \{ e \} \backslash \{ f \}
+\end{aligned}</annotation></semantics></math> 则
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>w</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>T</mi><mi>α</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mi>w</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>T</mi><mrow><mi>k</mi><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mi>w</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>f</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mi>w</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>e</mi><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><mi>w</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>f</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mi>w</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>e</mi><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+    w(T_{\alpha}) &amp;= w(T_{k - 1}) + w(f) - w(e)
+    \\
+    &amp;=f(k - 1) + w(f) - w(e)
+\end{aligned}</annotation></semantics></math></p>
+<p>同理有
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>T</mi><mi>β</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>w</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>f</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mi>w</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>e</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">w(T_{\beta}) = f(k) - (w(f) - w(e))</annotation></semantics></math></p>
+<p>由于
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>T</mi><mi>α</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>≥</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>,</mo><mi>w</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>T</mi><mi>β</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>≥</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">w(T_{\alpha}) \ge f(k), w(T_{\beta}) \ge f(k - 1)</annotation></semantics></math>，带入</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mtd><mtd columnalign="left" style="text-align: left"><mo>≤</mo><mi>w</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>f</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mi>w</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>e</mi><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mi>f</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>k</mi><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow></mtd><mtd columnalign="left" style="text-align: left"><mo>≤</mo><mi>−</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>w</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>f</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mi>w</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>e</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned}
+    f(k) - f(k - 1) &amp;\le w(f) - w(e)
+    \\
+    f(k) - f(k - 1) &amp;\le -(w(f) - w(e))
+\end{aligned}</annotation></semantics></math>
+取等，故仅交换这一组边能达到最优，证毕</p>
+<p>上高三好累，我想睡觉。</p>
 <h2 id="代码">代码</h2>
 <pre><code>#include &lt;bits/stdc++.h&gt;
 
