@@ -1,0 +1,157 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{hyperref}
+
+\author {AtomAlpaca}
+\title  {「题解」 P2022 有趣的数}
+\begin{document}
+	\tableofcontents
+	\par
+	逝去的从容逝去，重温的依然重温，在沧桑的枝叶间，折取一朵明媚，簪进岁月肌里，让它疼痛又甜蜜，让它流去又流回。 ——汪曾祺《人间草木》
+	\subsection {题目}
+	\par
+	\href {https://www.luogu.com.cn/problem/P2022} {link}
+	\subsection {分析}
+	\par
+	
+	这道题目要求我们做这样几件事:
+	
+	\begin{enumerate}
+		\item 判断是否存在 $N$ 使得 $Q \left( N,K \right)=M$;
+		\item 如果存在，求出 $N$ 的最小值;
+		\item 如果不存在，输出 $0$.
+	\end{enumerate}
+	
+	\par
+	通过分析 \href {https://zh.wikipedia.org/zh-cn/字典序} {字典序} 的定义,我们知道:
+	$$
+		Q \left( I, K \right) \ge Q \left( N, K \right), I > N
+	$$
+	
+	\par
+	这是显然的, 因为随着 $I$ 的增大, $K$ 字典序前面的数字绝对不会跑到它后面去. 对于不是 $10^n$ 的形式的数字, 它前面的数字显然会可能增加. 这就意味着, $K$ 一定时, 随着 $M$ 的增大, $ Q \left( M, K \right) $ 单调递增.
+	
+	\par
+	由于 $K$ 必须要出现在字典序列中, $M$ 的最小值为 $K$. 此时$ Q \left( M, K \right) $也最小. 因此我们知道:
+	\begin{enumerate}
+		\item 如果 $ Q \left( K, K \right) > M$ , 那么一定不存在 $N$ 使 $ Q \left( N, K \right)=M$;
+		\item 如果 $ Q \left( K, K \right) = M$ , 那么所求 $ N = K $.
+	\end{enumerate}
+
+	\par
+	对于形如 $ 10 ^ {n} $ 的 $K$, 显然 $ Q \left( K, K \right) = n + 1$. 但对于一般数字, 我们首先需要设法求 $ Q \left( K, K \right) $
+
+	\par
+	如果我们求出在 $k$ 前的数字的数量，加 $1$ 便是 $ Q \left( K, K \right)$. 我们从位数从小到大的角度讨论在其字典序前的数字.
+
+	\par
+	根据字典序的定义, 对于位数为 $l_n$ 的数字 $n$, 我们只需要与 $K$ 的前 $l_n$ 位进行比较. 我们预先处理出 $K$ 的前 $l$ 位 $K_l$, 此时不难发现当且仅当 $ n \le K_l $ 时, $n$ 在 $K$ 前, 或 $n$ 就是 $K$ 本身. 又考虑到任意数字开头不为零, 因此, 在所有位数为 $l$ 的数字中, 排在 $K$ 前或与 $K$ 相等的有 $ K_{l} - 10 ^ {l - 1} + 1 $ 个.
+
+	\par
+	因此我们得到:
+	$$
+		Q \left( K, K \right) = \sum_{ l = 1 } ^ { L }  {{K_l} - 10 ^ {l - 1} + 1}
+	$$
+	其中 $L$ 是 $K$ 的位数.
+	
+	\par
+	注意这里其实算进来了一个等于 $K$ 的数, 但是因为最后要加 $1$, 所以二者可相互抵消.
+
+	\par
+	当 $ Q \left( K, K \right) < M $ 时, 我们还要求出 $N$ 令 $ Q \left( N, K \right) = M$. 考虑到对于任意 $L$ 位数 $n$, 若 $n > K$, $n$ 一定排在 $K$ 的字典序后, 因此我们直接讨论 $L + 1$位数.
+
+	\par
+	我们发现，所有小于 $K$ 的 $L$ 位数, 在后面加上一个数字后, 得到的数字的字典序一定还在 $K$ 的字典序之后,因此每增加一位,  $K$ 字典序前的数字增加的量就等于上一位数 $K$  字典序前的数字增加的量的 $10$ 倍. 由此我们得到, 将序列增加到 $L + i$ 位数时, $K$ 字典序前的数字会增加 $ K_{l} \times 10 ^ {i} - 10 ^ {l + i - 1} $ 个.
+
+	\par
+	令 $ P = M - Q \left( K, K \right) $， 我们不断枚举 $i$ ，让 $P$ 每次减 $ K_{l} \times 10 ^ {i} - 10 ^ {l + i - 1} $, 当第 $r$ 次减去后 $ P < 0 $ 时, 记录 $r - 1$ 及当时的 $P$, 则答案为
+	$$
+		10^{r - 1} + P - 1
+	$$
+
+	\par
+	这是因为, 当枚举到 $r - 1$ 时, 我们距离目标 $M$ 还有 $P$ 个数字, 这时我们加上这 $P$ 个 $r$ 位数, 在减去与 $K$ 相等的那个数, 我们就能得到答案.
+
+	\subsection{代码}
+	\begin{verbatim}
+#include <iostream>
+
+using std::cin;
+using std::cout;
+
+long long k, m, min, now, len;
+long long power[20],  nums[20];
+int main()
+{
+	cin >> k >> m;
+	power[0] = 1;
+
+	for (int i = 1; i <= 20; ++i)
+	{
+		power[i] = power[i - 1] * 10;
+	}
+
+	for (int i = 0; i <= 20; ++i)
+	{
+		if (k == power[i] and m != i + 1)
+		{
+			cout << 0;
+			return 0;
+		}
+	}
+
+	std::string str;
+	str = std::to_string(k);
+	len = str.length();
+
+	for (int i = 1; i < len; ++i)
+	{
+		nums[i] = k / power[(len - i)];
+	}
+
+	nums[0] = 0;
+	nums[len] = k;
+
+	for (int i = 1; i < 11; ++i)
+	{
+		if (k < power[i - 1])
+		{
+			break;
+		}
+		min += nums[i] - power[i - 1] + 1;
+	}
+
+	if (min > m)
+	{
+		cout << 0;
+	}
+	else if (min == m)
+	{
+		cout << k;
+	}
+	else
+	{
+		m -= min;
+		long long ans = power[len];
+		int i = 1;
+		while (true)
+		{
+			long long tmp = k * power[i] - power[len + i - 1];
+			if (m > tmp)
+			{
+				m -= tmp;
+				ans *= 10;
+				++i;
+			}
+			else
+			{
+				break;
+			}
+		}
+		ans += m - 1;
+		cout << ans;
+	}
+	return 0;
+}
+	\end{verbatim}
+\end{document}

@@ -1,0 +1,178 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{hyperref}
+\usepackage{fancyvrb}
+\hypersetup {
+	colorlinks = true,
+	linkcolor  = black,
+}
+
+\author {AtomAlpaca}
+\title  {「题解」Loj 6807 最小公倍树 }
+
+\begin{document}
+	\tableofcontents
+	\par
+	\subsection {题目}
+	\par
+	\herf {https://loj.ac/p/6807} {LibreOJ}
+	\herf {https://luogu.com.cn/problem/P8207} {Luogu}
+	
+	\subsection {分析}
+
+	\par
+	容易看出这是一道最小生成树问题, 给出编号从 $L$ 到 $R$ 的若干个点, 定义从 $u$ 到 $v$ 的边的边权为 $lcm\left( u, v \right)$ , 求最小生成树.
+
+	\par
+	由于 $R - L$ 最大能到 $10^5$, 那么最多会有 $5 \times 10 ^ 9$ 条边, 直接跑最小生成树肯定会 TLE, 我们需要减少边的数量.
+
+	\par
+	考虑到 $lcm\left( u, v \right) = \dfrac {u \cdot v}{ gcd\left( u,v \right) }$ , 当 $u$ 和 $v$ 有公因数的时候, 这些边显然是比 $u$ 和 $v$ 互素时更优的.
+
+	\par
+	为了表述方便, 我们约定: 当 $u$ 和 $v$ 有公因数的时候, 从 $u$ 到 $v$ 的边叫做优秀边, 其余的叫做平凡边.
+
+	\par
+	不难想象, 几乎全部最小生成树中都即含有优秀边也含有平凡边, 我们需要建立一个边的集合, 使这个集合包含了最优解中的所有边, 并且足够小到能快速得出结果.
+
+	\subsection {正文}
+
+	\par
+	我们首先建立所有优秀边. 由于用每个点都和其余的点判断是否互素是在复杂度太高, 我们考虑直接枚举公因数进行建边. 显然要从 $2$ 开始枚举, 但是到哪里结束呢?
+
+	\par
+	我们想到, 要枚举到在区间内不可能存在两个数满足这两个数都是这个数的倍数为止, 这个数应当是 $ {\dfrac{R}{2}} + 1 $.
+
+	\par
+	我们还需要建立平凡边. 想象我们先用优秀边跑完最小生成树, 就可以得到若干个联通块(当然也有只有一个块的情况, 但是跑最小生成树的时候会直接 break, 这里不考虑, 毕竟明明就没什么影响嘛).
+
+	\par
+	我们想到, 连接两个联通块时的最小边权是这两个联通块中编号最小点的乘积. 把联通块, 都向编号最小点的编号最小的那个联通块建边, 构成一个"联通块菊花图", 此时的代价最小. 这时我们就能得到我们想要的边集合去跑最小生成树了.
+
+	\par
+	由于判断联通块最小值实在太麻烦, 我们直接将每个编号与最小编号的点互素的点, 都与编号最小的点建立一条边即可.
+
+	\par
+	自己造的数据中最多只需要对 $10 ^ 4$ 条边跑最小生成树(当然可能是我数据太弱), 过这道题应当是绰绰有余了.
+
+	\subsection {代码}
+	\begin{Verbatim}[tabsize=4]
+#include <algorithm>
+#include <iostream>
+
+using std::cin;
+using std::cout;
+
+long long ans;
+int p; // Edge num
+int k;
+int L, R;
+
+int father[1000005];
+
+struct Edge
+{
+	int u, v;
+	long long c;
+} edge[5000005];
+
+inline long long gcd(long long x, long long y)
+{
+	if (y == 0)
+	{
+		return x;
+	}
+	else
+	{
+		return gcd(y, x % y);
+	}
+}
+
+inline long long lcm(long long x, long long y)
+{
+	if (x < y)
+	{
+		std::swap(x, y);
+	}
+	return (x / gcd(x, y)) * y;
+}
+
+int find(int x)
+{
+	if (father[x] == x)
+	{
+		return father[x];
+	}
+	else
+	{
+		return father[x] = find(father[x]);
+	}
+}
+
+bool cmp(Edge edge1, Edge edge2)
+{
+	return edge1.c < edge2.c;
+}
+
+void build(int u, int v)
+{
+	edge[p].u = u;
+	edge[p].v = v;
+	edge[p].c = lcm(u, v);
+	++p;
+}
+
+int main()
+{
+	cin >> L >> R;
+
+	/* Init */
+	for (int i = L; i <= R; ++i)
+	{
+		father[i] = i;
+	}
+
+	/* Build */
+
+	for (int i = 2; i < (R / 2) + 1; ++i)
+	{
+		int t = L / i;
+		if (L % i != 0)
+		{
+			++t;
+		}
+		int n = t * i;
+		while (i * t <= R)
+		{
+			build(n, i * t);
+			++t;
+		}
+	}
+
+	for (int i = L; i <= R; ++i)
+	{
+		if (gcd(i, L) == 1)
+		{
+			build(L, i);
+		}
+	}
+
+	std::sort(edge, edge + p, cmp);
+
+	for (int i = 0; i < p and k != R - L; ++i)
+	{
+		int fatherU = find(edge[i].u);
+		int fatherV = find(edge[i].v);
+		if (fatherU != fatherV)
+		{
+			ans += edge[i].c;
+			father[fatherV] = fatherU;
+			++k;
+		}
+	}
+
+	cout << ans;
+	return 0;
+}
+	\end{Verbatim}
+\end{document}

@@ -1,0 +1,138 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{hyperref}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+\hypersetup {
+	colorlinks = true,
+	linkcolor  = black,
+}
+
+\newcommand{\[}{\begin{align*}}
+\newcommand{\]}{\end{align*}}
+\renewcommand{\par}[1]{\paragraph{#1}}
+
+
+\author {AtomAlpaca}
+\title {「题解」CF1823F Random Walk}
+\begin{document}
+
+\subsection{题目}
+
+简述题意：给定一棵树和两个节点 \(S, T\)，从 \(S\)
+出发，在树上随机游走直到走到 \(T\) 为止，求出每个节点的期望经过次数。
+
+感觉树上做法很奇妙，于是写一篇题解！
+
+\subsection{题解}\label{ux9898ux89e3}
+
+令 \(d_u\) 为节点 \(u\) 的度数，\(f_u\) 为节点 \(u\)
+的期望经过次数。每次移动时，会从当前节点的所有节点中等概率选择一个节点，因此到达每个相邻节点的概率都是
+\(\dfrac{1}{d_u}\)；从被到达节点的角度考虑，就有
+\(f_u = \sum_{(u, v)\in E} { \dfrac{f_v}{d_v} }\)。
+
+特别地，节点不能从 \(T\) 转移过来，因为到达 \(T\) 后游走就会停止；因为从
+\(S\) 节点出发，\(f_S\) 初始值为 \(1\)。整理一下：
+
+\[
+f_u =
+\left\{ 
+\begin{aligned} 
+& 1, &if \ u=T 
+\\
+&[u=S] + \sum_{(u, v)\in E,v\ne T} { \dfrac{f_v}{d_v} }, &otherwise
+\end{aligned}
+\right.
+\]
+
+然而我们发现转移是有环的，不能直接
+dp。我们固然可以使用高斯消元解决这个方程组，这也是\href{https://www.luogu.com.cn/problem/P3232}{有环图上随机游走问题}的最好解决办法，但是
+\(O(n^3)\) 的复杂度无法通过此题。
+
+考虑到这道题的图是一棵树，我们可以考虑把式子化成 \(f_u=g_u f_{fa} +c_u\)
+的形式。由于树根是没有父亲的，我们能够直接求出树根的期望经过次数，然后
+dfs 下去求得每个节点的经过次数。
+
+\[
+\begin{aligned} 
+f_u &= [u=S] + \sum_{(u, v)\in E,v\ne T} { \dfrac{f_v}{d_v} } \\
+&= [u=S] + \dfrac{f_{fa}}{d_{fa}} + \sum_{(u, v)\in E,v\ne T,fa} { \dfrac{f_v}{d_v}} \\
+&= [u=S] + \dfrac{f_{fa}}{d_{fa}} + \sum_{(u, v)\in E,v\ne T,fa} { \dfrac{g_v f_u + c_v}{d_v}} \\
+&= [u=S] + \dfrac{f_{fa}}{d_{fa}} + \sum_{(u, v)\in E,v\ne T,a} { \dfrac{g_v f_u}{d_v}} + \sum_{(u, v)\in E,v\ne T,fa} { \dfrac{c_v}{d_v}}\\
+\end{aligned}
+\] 移项得到： \[
+\begin{aligned} 
+(1-\sum_{(u, v)\in E,v\ne T,fa}{\dfrac{g_v}{d_v}}) f_u &= [u=S] + \dfrac{f_{fa}}{d_{fa}} + \sum_{(u, v)\in E,v\ne T, fa} { \dfrac{c_v}{d_v}}
+\end{aligned}
+\]
+
+\[
+  f_u &= \dfrac{1}{d_{fa}(1-\sum_{(u, v)\in E,v\ne T,fa}{\dfrac{g_v}{d_v}})} f_{fa} + \dfrac{[u=S]+\sum_{(u, v)\in E,v\ne T,fa} { \dfrac{c_v}{d_v}}}{(1-\sum_{(u, v)\in E,v\ne T, fa}{\dfrac{g_v}{d_v}})}
+  \\
+f_u &= g_u f_{fa} + c_u
+\]
+
+于是我们得到了 \(g, c\)
+的转移方程，而且这个转移是仅依赖自己的子节点的！于是我们可以先一遍 dfs
+求出每个节点的 \(g, c\)，再求出 \(f\)。
+
+\subsection{代码}
+
+\begin{verbatim}
+#include <bits/stdc++.h>
+
+typedef long long ll;
+
+const int MOD = 998244353;
+const int MAX = 2e5 + 5;
+
+int n, S, T, u, v, tot;
+int h[MAX], f[MAX], c[MAX], g[MAX], d[MAX];
+
+struct E { int v, x; } e[MAX << 2];
+void add(int u, int v) { e[++tot] = {v, h[u]}; h[u] = tot; e[++tot] = {u, h[v]}; h[v] = tot; }
+
+inline int qp(int a, int x)
+{
+	int res = 1;
+	while (x) { if (x & 1) { res = 1ll * res * a % MOD; } a = 1ll * a * a % MOD; x >>= 1; }
+	return res;
+}
+
+void dfs(int u, int fa)
+{
+	int _g = 0, _c = (u == S);
+	for (int i = h[u]; i; i = e[i].x)
+	{
+		int v = e[i].v; if (v == fa) { continue; }
+		dfs(v, u);
+		_g = (_g + 1ll * g[v] * qp(d[v], MOD - 2) % MOD) % MOD;
+		_c = (_c + 1ll * c[v] * qp(d[v], MOD - 2) % MOD) % MOD;
+	}
+	_g = qp((1 - _g + MOD), MOD - 2);
+	_c = 1ll * _c * _g % MOD;
+	_g = 1ll * _g * qp(d[fa], MOD - 2) % MOD;
+	g[u] = _g; c[u] = _c;
+}
+
+void _dfs(int u, int fa)
+{
+	f[u] = (1ll * g[u] * f[fa] % MOD + c[u]) % MOD;
+	for (int i = h[u]; i; i = e[i].x)
+	{
+		int v = e[i].v; if (v == fa) { continue; }
+		_dfs(v, u);
+	}
+}
+
+int main()
+{
+	scanf("%d%d%d", &n, &S, &T);
+	for (int i = 1; i < n; ++i) { scanf("%d%d", &u, &v); add(u, v); ++d[u]; ++d[v]; }
+	dfs(T, 0); f[T] = 1; _dfs(T, 0); f[T] = 1;
+	for (int i = 1; i <= n; ++i) { printf("%d ", f[i]); }
+	return 0;
+}
+\end{verbatim}
+
+\end{document}

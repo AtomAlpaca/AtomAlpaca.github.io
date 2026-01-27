@@ -1,0 +1,99 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{hyperref}
+
+\author {AtomAlpaca}
+\title  {「题解」集训模拟赛的一道题目的另类解法}
+\begin{document}
+\tableofcontents
+\subsection {题目}
+
+在一个长度无穷的数轴上，维护下列两种操作共 $n$ 次
+1. 给定 $x$，$\forall i > x,a[i]\leftarrow a[i]+\lfloor \log(i - x) \rfloor$
+2. 给定 $x$，查询 $a[x]$
+
+不要求强制在线，$n \le 5e4, x \le1e18$.
+\subsection {分析}
+
+由于 $x$ 非常大而 $n$ 十分小，考虑在 $n$ 上做一些手脚。
+
+对所有操作进行离线，对所有修改操作进行分块，块长为 $B$。每次询问可以视作在 $[l, r]$ 上查询。
+
+两边的散块直接暴力即可。复杂度 $O(B)$。考虑如何快速查询整块。
+
+容易发现每个操作对答案对贡献是十分小的，考虑枚举贡献，并查询区间内有多少个操作的贡献是当前枚举的贡献。
+
+考虑当前查询的数是 $x$，枚举的贡献是 $y$, 则我们发现操作 $z$ 有贡献当且仅当 $2^{y} \le x - z \le 2^{y+1} - 1$。发现贡献随操作大小显然有单调性，可以在每个快内进行排序，从从大到小枚举贡献二分查找边界即可。复杂度为$O(\dfrac{n}{B} \log x \log B)$
+
+这个算法可以很方便地支持在线。没有填满的块视作散块处理，填满再进行块内排序即可。
+
+复杂度在 $B=\dfrac{n}{B} \log x \log B$ 时达到最佳。实际表现跑得飞快。代码实现的复杂度并不是最优的。
+
+\subsection{代码}
+\begin{verbatim}
+#include <bits/stdc++.h>
+ 
+using std::upper_bound;
+ 
+typedef long long ll;
+ 
+const int MAX = 5e4 + 5;
+const int SZ =  2e3 + 5;
+int n, op, t, tot, sz;
+ll k;
+ll c[MAX], d[MAX];
+int pos[MAX], st[SZ], ed[SZ], bl[MAX];
+ 
+struct B
+{
+  int sz;
+  ll b[SZ];
+} b[SZ];
+ 
+void build()
+{
+  sz = 100;
+  for (int i = 1; i <= sz; ++i) { st[i] = (t / sz) * (i - 1) + 1; ed[i] = (t / sz) * i; } ed[sz] = t;
+  for (int i = 1; i <= sz; ++i)
+  {
+    b[i].sz = ed[i] - st[i] + 1;
+    for (int j = st[i]; j <= ed[i]; ++j) { bl[j] = i; b[i].b[j - st[i] + 1] = c[j]; }
+    std::sort(b[i].b + 1, b[i].b + b[i].sz + 1);
+  }
+}
+ 
+inline int qur(int l, int r, ll x)
+{
+  int L = bl[l], R = bl[r], res = 0;
+  if (L == R)
+  {
+    for (int i = l; i <= r; ++i) { if (c[i] < x) { res += log2(x - c[i]); } }
+    return res;
+  }
+  for (int i = st[R]; i <= r; ++i) { if (c[i] < x) { res += log2(x - c[i]); } }
+  for (int i = L; i < R; ++i)
+  {
+    int lst = 1;
+    for (int j = log2(x); j >= 1; --j)
+    {
+      int p = upper_bound(b[i].b + 1, b[i].b + b[i].sz + 1, x - (1ll << j)) - b[i].b;
+      res += (p - lst) * j; lst = p; 
+    }
+  }
+  return res;
+}
+ 
+int main()
+{
+  scanf("%d", &n);
+  for (int i = 1; i <= n; ++i)
+  {
+    scanf("%d%lld", &op, &k);
+    if (op ^ 2) { c[++t] = k; } else { d[++tot] = k, pos[tot] = t; }
+  }
+  build(); int i = 1;
+  while (!pos[i]) { printf("0\n"); ++i; }
+  for ( ; i <= tot; ++i) { printf("%d\n", qur(1, pos[i], d[i])); }
+}
+\end{verbatim}
+\end{document}

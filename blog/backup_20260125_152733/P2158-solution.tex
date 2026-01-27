@@ -1,0 +1,47 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{hyperref}
+
+\author {AtomAlpaca}
+\title  {「题解」 P8474 立春}
+\begin{document}
+
+\tableofcontents
+
+\par
+不知道为什么题解区都是用欧拉函数做的，个人感觉完全用不到啊。
+
+\par
+考虑将观测点作为原点，向右为 $x$ 轴 正方向，向上为 $y$ 轴正方向，那么所求即为 $2 +\sum_{i = 1}^{n-1}{\sum_{j = 1}^{n - 1} [ \gcd(i, j)=1 ]}$。
+
+\par
+考虑如何求最大公倍数为 $k$ 的数对数。考虑容斥，即为约数中含 $k$ 的数对数量，减去约数中含 $k$ 的倍数的数对数量。我们设最大公倍数为 $k$ 的数对为 $f(k)$，则有：
+$$f(x) = (\lfloor \frac{n}{x}\rfloor)^2 - \sum_{i = 2}^{ix \le n} { f(ix) }$$
+
+\par
+答案即为 $f(1) + 2$，代码非常好写。
+\subsection{代码}
+
+\begin{verbatim}
+#include <bits/stdc++.h>
+
+using std::cin;
+using std::cout;
+
+typedef long long ll;
+const ll MAX = 4e4 + 5;
+ll n, f[MAX];
+
+int main()
+{
+	cin >> n; --n; if (!n) { cout << 0; return 0; }
+	for (ll i = n; i >= 1; --i)
+	{
+		f[i] = (n / i) * (n / i);
+		for (ll j = 2; j * i <= n; ++j) { f[i] -= f[i * j]; }
+	}
+	cout << f[1] + 2;
+	return 0;
+}
+\end{verbatim}
+\end{document}

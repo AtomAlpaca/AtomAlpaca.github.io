@@ -1,0 +1,93 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+\author {AtomAlpaca}
+\title  {「题解」UVA754 Treasure Hunt}
+\begin{document}
+    \tableofcontents
+    \subsection {题目}
+    \href {https://www.luogu.com.cn/problem/UVA754} {link}
+    \subsection {分析}
+		首先考虑证明这样一个事实：在终点相同的时候，仅为一条直线的路线一定不劣于多条直线拼接成的路线。
+
+\par
+我们将一条多条直线拼接成的路线视作多个不同方向的凸包的拼接。将这些包的首尾点相连，如图：
+\par
+\includegraphics[width=0.80\textwidth]{https://cdn.luogu.com.cn/upload/image_hosting/kks2v25n.png}
+
+\par
+然后我们发现一个显然的结论：和凸包相交但是和直线不相交的直线是存在的；而和直线相交而和凸包不相交的直线不存在。
+
+\par
+因此我们考虑反复用直线替换凸包直至路线变为一条直线，这样的方案一定是不劣于原方案的。
+
+\par
+\includegraphics[width=0.80\textwidth]{https://cdn.luogu.com.cn/upload/image_hosting/9hw3k6vz.png}
+
+\par
+有了这个结论，我们就可以考虑枚举边界上的点，和目标节点连接得到路线。
+\par
+考虑到答案变化当且仅当这条直线在“旋转”的时候“扫过”了一个墙壁的某个端点，边界上的端点之间的所有点的答案是相同的，因此我们只需要枚举墙壁的端点即可。
+
+	\subsection{代码}
+	\begin{verbatim}
+#include <bits/stdc++.h>
+
+using std::cin;
+using std::cout;
+
+typedef double db;
+const db eps = 1e-8;
+const int MAX = 35;
+int cmp(db x) { if (fabs(x) <= eps) { return 0; } if (x > eps) { return 1; } return -1; }
+struct P
+{
+  db x, y;
+} p, p1[MAX], p2[MAX];
+const int INF = 0x3f3f3f3f;
+int ans, T, n;
+
+typedef P V;
+inline P operator + (P a, P b) { return {a.x + b.x, a.y + b.y}; }
+inline P operator - (P a, P b) { return {a.x - b.x, a.y - b.y}; }
+inline db dot(P a, P b) { return a.x * b.x + a.y * b.y; }
+inline db cro(P a, P b) { return a.x * b.y - a.y * b.x; }
+bool cross(P a, P b, P c, P d)
+{
+  db c1 = cro(b - a, c - a), c2 = cro(b - a, d - a);
+  db d1 = cro(d - c, a - c), d2 = cro(d - c, b - c);
+  return (cmp(c1) * cmp(c2) < 0) and (cmp(d1) * cmp(d2) < 0);
+}
+
+void solve()
+{
+  ans = INF;
+  cin >> n; 
+  for (int i = 1; i <= n; ++i) { cin >> p1[i].x >> p1[i].y >> p2[i].x >> p2[i].y; }
+  cin >> p.x >> p.y;
+  for (int i = 1; i <= n; ++i)
+  {
+    int ans1 = 0, ans2 = 0;
+    for (int j = 1; j <= n; ++j)
+	{
+	  if (cross(p, p1[i], p1[j], p2[j])) { ++ans1; }
+	  if (cross(p, p2[i], p1[j], p2[j])) { ++ans2; }
+	}
+	ans = std::min(ans, ans1);
+	ans = std::min(ans, ans2);
+  }
+  if (!n) { cout << "Number of doors = 1\n"; }
+  else { cout << "Number of doors = " << ans + 1 << '\n'; }
+  if (T) { cout << '\n'; }
+}
+
+int main()
+{
+  cin >> T;
+  while (T--) { solve(); }
+  return 0;
+}
+	\end{verbatim}
+\end{document}

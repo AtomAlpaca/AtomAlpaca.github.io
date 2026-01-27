@@ -1,0 +1,345 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{hyperref}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+\hypersetup {
+	colorlinks = true,
+	linkcolor  = black,
+}
+
+\newcommand{\[}{\begin{align*}}
+	\newcommand{\]}{\end{align*}}
+\renewcommand{\par}[1]{\paragraph{#1}}
+
+\author {AtomAlpaca}
+\title {「信创」如何给 ncnn 做 riscv 优化}
+
+\begin{document}
+	\tableofcontents
+	\section{起因}
+	起因是我参加了前段时间的\href{Riscv 黑客松}[https://www.bilibili.com/video/BV1NpdeYHETU/]，入门了 RISC-V。然后突然有一天 mizu-bai 找到我发了一段聊天记录。
+	\begin{verbatim}
+		nihui：github.com/atomalpaca
+		nihui：这头像怎么和 mizu 这么像
+		小小跑：这头像怎么和 mizu 这么像
+	\end{verbatim}
+	
+	然后我问这是什么群，mizu 姐姐说是 ncnn 的开发者群，给 ncnn 交个 pr 就能进，快来玩。
+	
+	然后我看了一圈 issues，看了一圈代码，我说我不知道干什么啊，mizu 姐姐说有很多算子在 riscv 上没有优化你可以折腾一下。
+	
+	\section{配置环境}
+	\subsection{交叉编译工具链}
+	首先我们需要一套 Riscv 的交叉编译工具链。riscv 给出的构建默认不包含 v 拓展，于是我们需要自己编译一份出来。
+	
+	另外我们还需要支持 xtheadvector，这在 toolchain 中默认的 gcc 14 中是不支持的，所以我们要手动拉一份 gcc 15。
+	
+	P.S. 写这篇文章的时候 gcc16 出来了，读者可以尝试一下（）
+	
+	\begin{verbatim}	
+git clone https://github.com/riscv-collab/riscv-gnu-toolchain
+cd riscv-gnu-toolchain
+git submodule update --init
+rm -rf ./gcc
+git clone https://gcc.gnu.org/git/gcc.git
+cd gcc
+git branch -r
+git checkout releases/gcc-15
+cd ..
+mkdir build && cd build
+# --prefix    指定的是工具链要放在的地方，注意要有写权限
+# --with-arch 指定的是拓展，默认是 rv64gc
+# 无需 make install，make 后会直接放到指定的目录
+# 编译可能非常非常慢
+../configure --prefix=/home/atal/riscv-toolchain/ --with-arch=rv64gcv --enable-multilib
+make -j4
+	\end{verbatim}
+
+为了方便我们可以把工具链的目录加到 \texttt{PATH} 变量里，这样就可以直接调用。
+
+	\begin{verbatim}
+export PATH=$PATH:/home/atal/riscv-toolchain/bin
+	\end{verbatim}
+
+	\subsection{pk 和 spike}
+	\texttt{spike} 是 \texttt{riscv} 自行开发的一个模拟器
+	
+	首先编译 pk（proxy kernel）
+	\begin{verbatim}
+git clone https://github.com/riscv/riscv-pk.git
+cd riscv-pk
+		
+mkdir build && cd build
+../configure --prefix=/home/atal/riscv-toolchain/ --host=riscv64-unknown-elf --with-arch=rv64gcv
+make -j4
+make install
+	\end{verbatim}
+	
+	然后是 spike 本身
+	
+	\begin{verbatim}
+git clone https://github.com/riscv/riscv-isa-sim.git
+cd riscv-isa-sim
+	
+mkdir build && cd build
+../configure --prefix=/opt/riscv
+make -j4
+make install
+	\end{verbatim}
+	
+	老版本的 \texttt{spike} 编译的时候需要加上 \texttt{--with-isa=rv64gcv} 来启用 \texttt{v} 拓展，但现在这个选项已经删掉了，现在我们只需要在运行的时候加上 \texttt{--isa=rv64gcv} 来指定运行时的架构。
+	
+	使用方式是这样的：
+	\begin{verbatim}
+riscv64-unknown-elf-gcc ./test.c -o test
+spike --isa=rv64gcv pk ./test
+	\end{verbatim}
+	\subsection{qemu for riscv}
+	同时我们可以用 \texttt{qemu} 进行模拟，这两个选其中一个用就好。
+	
+	\begin{verbatim}
+git clone https://github.com/qemu/qemu
+cd qemu
+mkdir build && cd build
+../configure --target-list=riscv64-softmmu,riscv64-linux-user --prefix=/home/atal/riscv-toolchain/qemu
+make -j4 
+make install
+	\end{verbatim}
+	\section{ncnn 代码浅析}
+	TODO，内容有点多可能会单独开一系列文章。
+	\section{Riscv v 拓展浅析}
+	\subsection{Riscv v 拓展大致模式}
+	和 \texttt{x86} 选用的 \texttt{SIMD} 不同，\texttt{Riscv} 使用向量指令集来进行并行优化。
+	
+	\texttt{v} 拓展新增了若干名称以 \texttt{v} 开头的“向量寄存器”（对 RV32V 来说，一般是 $32$ 个），这些寄存器的长度由处理器分配的向量寄存器堆大小决定，处理器会把堆均匀地划分给各个启用的向量寄存器，并且把向量寄存器能够使用的最大长度存储在寄存器 \texttt{mvl} 中。能存储的元素数进一步由存储的元素长度决定。
+	
+	我们可以选择性地启用或禁用部分向量寄存器，处理器会动态调整向量寄存器的长度。如假设我们有 $1024$ 字节的堆空间，并且启用全部 $32$ 个 寄存器，每个寄存器都会分配到 $32$ 字节的长度；如果我们仅启用其中两个，则每个寄存器都会变成 $512$ 字节长，并且 \texttt{mvl} 将会随之动态变化。但 \texttt{mvl} 的值只能由处理器设置，软件层面无法直接修改 \texttt{mvl} 的值。
+	
+	同时 \texttt{v} 拓展新增了 $7$ 个非特权 \texttt{CSR} 寄存器：\texttt{vstart}，\texttt{vxsat}，\texttt{vxrm}，\texttt{vcsr}，\texttt{vl}，\texttt{vtype}，\texttt{vlenb}。
+	
+	\texttt{vxrm} 和 \texttt{vxsat} 分别是 Vector Fixed-Point Saturation Flag vxsat 和 Vector Fixed-Point Saturation Flag，他们都是 \texttt{vcsr} 中对应位的镜像。这些暂且掠过。
+	
+	\texttt{vl} 设定了每次向量操作所操作的元素数量，我们只会操作从开头开始 \texttt{vl} 个元素，可以通过 \texttt{setvl} 指令设定。\texttt{vstart} 则进一步设置了向量操作会从哪一个元素开始进行操作（注意不会向后顺延），注意每次向量操作之后 \texttt{vstart} 都会被清零。
+	
+	\texttt{vlenb} 是以字节为单位的向量寄存器长度。
+	
+	\texttt{vtype} 中包含 \texttt{vill}，\texttt{vma}，\texttt{vta}，\texttt{vsew} 和 \texttt{vlmul} 五个字段。\texttt{vsew} 代表了每个元素的长度，\texttt{vlmul} 涉及到 \texttt{v} 拓展的另一个机制，多个向量寄存器可以进行拼接组合获取更长的向量，\texttt{vlmul} 则是寄存器拼接的数量。
+	
+	\texttt{vma} 和 \texttt{vta} 分别指示了被 \texttt{mask} 的（之后会提到）元素和不在操作范围内的元素会被如何处理，分为“undisturbed” 和 “agnostic”。值为 $0$ 代表 “undisturbed” 会全部保持原值，而 值为 $1$ 代表 “agnostic” 既可能保持原值也可能全部写 $1$。
+	\subsection{常用指令}
+	\includegraphics[width=0.80\textwidth]{https://cdn.luogu.com.cn/upload/image_hosting/jh7douvh.png}
+	\subsubsection{存取}
+	我们使用 \texttt{vld} 从内存中读取连续的一段进入向量寄存器。如当 \texttt{vsew} 为 $32$ 时，\texttt{vld v0, 0(a0)} 会从 \texttt{a0} 指向的地址开始，读取 \texttt{a0，a0 + 4, a0 + 8...} 直至 \texttt{vl} 设置的上限。
+	
+	同时我们可以稀疏地读取数据，\texttt{vlds v0, 0(a0), a1} 会读取 \texttt{a0, a0 + a1, a0 + 2a1} 直至上限。或者将 $offset$ 存入另一向量寄存器，通过 \texttt{vldx v0, a0, v1} 读取。
+	
+	存入内存只需将 \texttt{vld} 改为 \texttt{vst}。
+	\subsubsection{操作}
+	操作的格式基本是 \texttt{v + 操作名 + 操作种类后缀}。操作分为向量与向量操作（\texttt{.vv} 后缀）和向量与标量（\texttt{.vs} 后缀）操作两种。
+	
+	\subsection{Mask}
+	向量架构通过掩码（Mask）的方式来实现一些分支操作。RVV 拓展提供了 $8$ 个向量谓词寄存器 \texttt{vp\{$i$\}}，我们可以将其视作一列 bool 值。我们可以在他们之间进行逻辑运算（\texttt{vp\{and, or, xor, etc.\}}），也可以将向量寄存器进行比较等操作的结果存入。我们在进行向量寄存器之间的操作时可以额外一共一个谓词寄存器，当谓词寄存器一个位置的值为 $1$ 时这个位置不会进行操作，而是会根据 \texttt{vma} 位置的值来选择保持原值还是置 $1$。
+	
+	\subsection{Intrinsic}
+	简单来说就是给编程语言提供了一个便于调用和管理的接口，让你不用在项目里写大量的内联汇编。
+	
+	文档主要在 \href{https://github.com/riscv-non-isa/rvv-intrinsic-doc/}{这}，另外有个\href{https://dzaima.github.io/intrinsics-viewer/}{超好用的网站}可以帮你快速搜索以及熟悉用途，向 Github 用户 dzaima 致敬。
+	
+	\subsection{类型系统}
+	\texttt{Intrinsic} 最方便的一点就是提供了类型系统，使得我们能像操作变量一样操作向量寄存器，而不是把自己训练成寄存器管理大师。 一个寄存器的大概格式为 \texttt{v<type><vlmul>_t}。
+	
+	其中 \texttt{type} 可以取 \texttt{int\{8/16/32/64\} | uint\{8/16/32/64\} | float\{16/32/64\} | bool\{1/2/4/8/16/32/64\}}，一看就知道什么意思！
+	
+	\texttt{vlmul} 就是多少个寄存器拼在一起，大于一用 \texttt{m\{1/2/4/8\}} 来表示，小于的用 \texttt{mf\{2/4/8\}} 来表示拆成 \texttt{2/4/8} 份。注意 \texttt{bool} 类型不能拼，也不需要写 \texttt{<vlmul>} 这项，举个例子你应该写 \texttt{vbool1_t}。
+	
+	另外你还可以在 \texttt{<vlmul>} 后面加个 \texttt{x2/4/8} 来构成元组类型，但是似乎没什么用。
+	
+	\subsection{指令}
+	指令的基本格式 \texttt{__riscv_<instruction>_<operand>_<return_type>_<policy>}。举个例子 \texttt{vint32m1_t __riscv_vadd_vv_i32m1_m(vbool32_t vm, vint32m1_t vs2, vint32m1_t vs1,
+		size_t vl);}
+	
+	\texttt{instruction} 就是指令名。\texttt{operand} 代表操作类型，如 \texttt{vv}。
+	
+	这里的 \texttt{return_type} 采用简写，即 \texttt{<i\{8, 16, 32, 64\} | u\{8, 16, 32, 64\} | f\{16, 32, 64\}><m\{1, 2, 4, 8\} | mf\{2, 4, 8\}>}。
+	
+	\texttt{policy} 用来表示 \texttt{vta} 和 \texttt{vma} 这两个寄存器，决定被 \texttt{mask} 和尾部的位置该怎么处理。
+	\begin{itemize}
+		\item 留空：不使用 mask，\texttt{vta = 1}
+		\item \texttt{_tu}：不使用 mask，\texttt{vta = 0}
+		\item \texttt{_m} 使用 mask，\texttt{vta = 1}，\texttt{vma = 1}
+		\item \texttt{_tum} 使用 mask，\texttt{vta = 0}，\texttt{vma = 1}
+		\item \texttt{_mu} 使用 mask，\texttt{vta = 1}，\texttt{vma = 0}
+		\item \texttt{_tumu} 使用 mask，\texttt{vta = 0}，\texttt{vma = 0}
+	\end{itemize}
+	\subsection{有关 vl}
+	\texttt{Intrinsic} 提供了 \texttt{__riscv_vsetvl_*}，将可用的 \texttt{vl} 和你提供的要计算的长度取 $min$，确保得到的始终是合法的 vl。
+	\section{实际开发、测试}
+	\subsection{为 RISC-V 编译}
+	我们先来讲讲怎么编译以及怎么跑测试。在 \texttt{ncnn/toolchains} 下有若干个针对不同平台进行设置的 \texttt{cmake} 文件，比如 \texttt{riscv64-unknown-linux-gnu.toolchain.cmake}。和 RISCV 有关的这几个基本只有选用的编译器不同。首先确保你设置里 \texttt{RISCV_ROOT_PATH} 这个环境变量。
+	\begin{verbatim}
+export RISCV_ROOT_PATH=<path_to_your_riscv_toolchain>
+mkdir build && cd build
+cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/riscv64-unknown-linux-gnu.toolchain.cmake -DCMAKE_BUILD_TYPE=debug -DNCNN_COVERAGE=ON -DNCNN_RUNTIME_CPU=OFF -DNCNN_RVV=ON -DNCNN_ZFH=ON -DNCNN_ZVFH=ON -DNCNN_OPENMP=ON -DNCNN_BUILD_TOOLS=OFF -DNCNN_BUILD_EXAMPLES=OFF -DNCNN_BUILD_TESTS=ON ..
+// 我们这里把 CMAKE_BUILD_TYPE 设置为 debug 是为了方便调试，如果要跑 benchmark 建议切换到 release
+cmake --build . -j 8
+TESTS_EXECUTABLE_LOADER=qemu-riscv64 TESTS_EXECUTABLE_LOADER_ARGUMENTS="-cpu;rv64,v=true,zfh=true,zvfh=true,vlen=256,elen=64,vext_spec=v1.0;-L;<path_to_your_riscv_toolchain>/sysroot" ctest --output-on-failure -j 8
+	\end{verbatim}
+	\subsection{优化算子}
+	如果你想添加一个全新的算子你需要先阅读 \href{https://github.com/Tencent/ncnn/wiki/add-custom-layer.zh}{这两篇}\href{https://github.com/Tencent/ncnn/wiki/how-to-implement-custom-layer-step-by-step}{文档}，简而言之你要先实现一份 native 的版本并且在 \texttt{CMakeList} 里注册。
+	
+	\subsubsection{以防你不知道 v, zfh, zvfh 和 xtheadvector 的故事}
+	\texttt{v}, \texttt{zfh}, \texttt{zvfh} 和 \texttt{xtheadvector} 是 RISC-V 的四个拓展，简单介绍一下：
+	\begin{itemize}
+		\item \texttt{v}：上面提到的向量拓展
+		\item \texttt{zfh} 半精度浮点数拓展，支持 16bit 的浮点数
+		\item \texttt{zvfh} 半精度浮点数的向量拓展
+		\item \texttt{xtheadvector} 其实就是 rvv-0.7.1 指令集，虽然已经被弃用但是作为曾经常用的标准，现在还有很多设备在用这套指令，于是给它塞到了 \texttt{xthead} 里。有 \texttt{zfh} 的功能和 \texttt{v} 拓展和 \texttt{zvfh} 的大部分功能。
+	\end{itemize}
+	也就是说 \texttt{xtheadvector} 不支持一些现在的 \texttt{v} 拓展的 \texttt{Intrinsic}。\href{https://github.com/XUANTIE-RV/thead-extension-spec/blob/master/xtheadvector/intrinsics.adoc}{点击这里看更多}。
+	
+	各个厂商的各个设备都有可能随机地实现了其中几个拓展，因此我们编译的时候会把代码复制出好几份用不同的参数分别编译。
+	
+	我们需要分别实现单精浮点数和半精浮点数的代码（\texttt{layer_riscv.cpp} 和 \texttt{layer_riscv_zfh.cpp}），前者会编译成\texttt{rv64gc}，\texttt{rv64gcv}，\texttt{rv64gc_xtheadvector} 三个版本，后者会编译成 \texttt{rv64gc_zfh}，\texttt{rv64gcv_zfh_zvfh}，\texttt{rv64gc_zfh_xtheadvector}。
+	
+	你的代码需要同时支持这几种情况。我们需要通过 \texttt{__riscv_vector}、\texttt{__riscv_xtheadvector} 和 \texttt{__riscv_zvfh} 这几个宏来判断各个拓展是否开启，然后写出对应的正确代码。
+	
+	\subsubsection{你具体要做的}
+	首先我们在 src/layer/riscv 下，先建立 \texttt{yourlayer_riscv.h}。在 ncnn namesoace 里面新建一个 \texttt{Yourlayer_riscv} 继承自 native 版本的 Yourlayer 类。然后实现你要优化的函数。
+	
+	例如
+	\begin{verbatim}
+namespace ncnn {
+	
+	class BNLL_riscv : public BNLL
+	{
+		public:
+		BNLL_riscv();
+		
+		virtual int forward_inplace(Mat& bottom_top_blob, const Option& opt) const;
+		
+		protected:
+		#if NCNN_ZFH
+		int forward_inplace_fp16s(Mat& bottom_top_blob, const Option& opt) const;
+		#endif
+	};
+	
+} // namespace ncnn	
+	\end{verbatim}
+	
+	然后在 \texttt{yourlayer_riscv.cpp} 和 \texttt{yourlayer_riscv_zfh.cpp} 里分别实现 fp32 和 fp16 的版本：
+	
+\begin{verbatim}
+
+namespace ncnn {
+	
+	BNLL_riscv::BNLL_riscv()
+	{
+		#if __riscv_vector
+		support_packing = true;
+		#endif // __riscv_vector
+		#if NCNN_ZFH
+		#if __riscv_vector
+		support_fp16_storage = cpu_support_riscv_zvfh();
+		#else
+		support_fp16_storage = cpu_support_riscv_zfh();
+		#endif
+		#endif
+	}
+	
+	int BNLL_riscv::forward_inplace(Mat& bottom_top_blob, const Option& opt) const
+	{
+		#if NCNN_ZFH
+		int elembits = bottom_top_blob.elembits();
+		
+		if (opt.use_fp16_storage && elembits == 16)
+		{
+			return forward_inplace_fp16s(bottom_top_blob, opt);
+		}
+		#endif
+		
+		int w = bottom_top_blob.w;
+		int h = bottom_top_blob.h;
+		int d = bottom_top_blob.d;
+		int channels = bottom_top_blob.c;
+		int elempack = bottom_top_blob.elempack;
+		int size = w * h * d * elempack;
+		
+		#pragma omp parallel for num_threads(opt.num_threads)
+		for (int q = 0; q < channels; q++)
+		{
+			float* ptr = bottom_top_blob.channel(q);
+			
+			#if __riscv_vector // 判断是否启用了 v 拓展
+			int n = size;
+			while (n > 0)
+			{
+				size_t vl = __riscv_vsetvl_e32m8(n);
+				
+				vfloat32m8_t _p = __riscv_vle32_v_f32m8(ptr, vl);
+				vbool4_t _mask = __riscv_vmfgt_vf_f32m8_b4(_p, 0.f, vl);
+				
+				#if __riscv_xtheadvector // 判断是否为 xtheadvector
+				vfloat32m8_t _comm = __riscv_vfsgnjx_vv_f32m8(_p, _p, vl);
+				_comm = __riscv_vfsgnjn_vv_f32m8(_comm, _comm, vl);
+				#else
+				vfloat32m8_t _comm = __riscv_vfsgnjn_vv_f32m8_mu(_mask, _p, _p, _p, vl);  // 这条指令在 xtheadvector 里不存在
+				#endif
+				_comm = exp_ps(_comm, vl);
+				_comm = __riscv_vfadd_vf_f32m8(_comm, 1.f, vl);
+				_comm = log_ps(_comm, vl);
+				
+				#if __riscv_xtheadvector // 判断是否为 xtheadvector
+				vfloat32m8_t _res = __riscv_vfadd_vv_f32m8(_comm, _p, vl);
+				_res = __riscv_vmerge_vvm_f32m8(_comm, _res, _mask, vl);
+				#else
+				vfloat32m8_t _res = __riscv_vfadd_vv_f32m8_mu(_mask, _comm, _comm, _p, vl); // 这条指令在 xtheadvector 里不存在
+				#endif
+				__riscv_vse32_v_f32m8(ptr, _res, vl);
+				
+				ptr += vl;
+				n -= vl;
+			}
+			#else  // __riscv_vector 
+			// 标量版本
+			for (int i = 0; i < size; i++)
+			{
+				if (*ptr > 0)
+				*ptr = *ptr + logf(1.f + expf(-*ptr));
+				else
+				*ptr = logf(1.f + expf(*ptr));
+				++ptr;
+			}
+			#endif // __riscv_vector
+		}
+		
+		return 0;
+	}
+}
+\end{verbatim}
+	
+	\subsection{玄铁你真的是}
+	然后我们需要测试这些代码是否在玄铁的各个设备上能够正常运行。为什么？因为用它的板子太多了。而且 ncnn ci 也测了（什么
+	
+	首先我们要再下一份玄铁家的 toolchain 和 qeum。你可以从\href{https://www.xrvm.cn/community/download}{这里}找到形如 \texttt{Xuantie-900-gcc-linux-6.6.0-glibc-x86_64-V3.1.0-20250522.tar.gz} 的东西和 \texttt{Xuantie-qemu-x86_64-Ubuntu-20.04-V5.2.6-B20250415-1115.tar.gz} 这种东西。你看到这里的时候可能会有更新的版本。
+	
+	不知道为什么玄铁的工具链还要手机登录才能下载。好抽象。不懂哦。
+	
+	然后你会在 ncnn/toolchains 下找到 \texttt{\{c906, c908, c910\}-v310.toolchain.cmake} 这种文件（你看到这里的时候可能会有更新的版本。）我们像刚刚一样进行编译和测试，但是这次要把 \texttt{riscv-root-path} 改成玄铁的路径。
+	\begin{verbatim}
+export RISCV_ROOT_PATH=<your_xuantie_toolchain_path>
+mkdir build && cd build
+  cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/c906-v301.toolchain.cmake -DCMAKE_BUILD_TYPE=release \
+	-DNCNN_OPENMP=OFF -DNCNN_THREADS=OFF \
+	-DNCNN_RUNTIME_CPU=OFF \
+	-DNCNN_RVV=OFF \
+	-DNCNN_XTHEADVECTOR=ON \
+	-DNCNN_ZFH=ON \
+	-DNCNN_ZVFH=OFF \
+	-DNCNN_SIMPLEOCV=ON -DNCNN_BUILD_EXAMPLES=ON -DNCNN_BUILD_TESTS=ON ..
+cmake --build . -j 8
+	TESTS_EXECUTABLE_LOADER=<path_to_your_xuantie_qemu> TESTS_EXECUTABLE_LOADER_ARGUMENTS="-cpu;c906fdv" ctest --output-on-failure -j 8
+\end{verbatim}
+
+	然后玄铁有一堆奇奇怪怪的上游 bug。\href{https://github.com/XUANTIE-RV/xuantie-gnu-toolchain/issues}{点击即看}。包括但不限于尾部不打扰不生效啊，fp16 和 fp32 互转会段错误啊。被创了很多次，无力吐槽了。
+\end{document}

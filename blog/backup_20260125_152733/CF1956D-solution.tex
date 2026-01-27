@@ -1,0 +1,68 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+\author {AtomAlpaca}
+\title  {「题解」 CF1956D Nene and the Mex Operator}
+\begin{document}
+\subsection{题意}
+给定一个长度为 $n$ 的序列，你可以进行若干次操作，一次操作可以将一个区间内的数全都变成这个区间内所有数的 $\operatorname{mex}$。
+
+要求构造一种方案，使得操作之后序列和最大。
+
+$n \le 18$。
+
+\subsection{题解}
+不难发现，如果一个长度为 $n$ 的区间内出现了从 $0$ 到 $n - 1$ 的所有数字，操作后这个区间全都变成了 $n$——这也是通过操作能达到的上界。
+
+我们考虑如何把一个长度为 $n$ 的区间变成$0$ 到 $n - 1$ 的一个排列。考虑递归下去，对前 $n - 1$ 个数，让其成为一个 $0$ 到 $n - 2$ 的排列，这时如果最后一个数恰好是 $n - 1$ 就做完了，否则整体做一次操作可以使得区间全部变成 $n - 1$，再对前 $n - 1$ 个数做操作即可。并且 $n = 1$ 的情况是显然的，于是就做完了。不难发现 $n$ 每增加 $1$ 操作数最多变为原来的两部加一，操作数是 $O(2^n)$ 的。
+
+然后我们考虑求出哪些区间应当被做以上操作。当然可以进行 dp 记下转移点，但出题人只给了 $n \le 18$，因此无脑暴力枚举也是可行的。至此，我们在 $O(n2^n)$ 的复杂度内完成此题。
+
+\subsection{代码}
+\begin{verbatim}
+#include <bits/stdc++.h>
+
+const int MAX = 25;
+
+std::vector <std::pair <int, int>> res, g;
+int n, sum, mx; bool b[MAX];
+int a[MAX];
+
+void f(int l, int r)
+{
+	if (l == r) { if (a[l] != 0) { a[l] = 0; res.push_back({l, l}); } return ; }
+	if (a[r] == r - l) { f(l, r - 1); return ; }
+	f(l, r - 1);
+	res.push_back({l, r}); for (int i = l; i <= r; ++i) { a[i] = r - l; }
+	f(l, r - 1);
+}
+
+int main()
+{
+	scanf("%d", &n);
+	for (int i = 1; i <= n; ++i) { scanf("%d", &a[i]); }
+	for (int S = 0; S < (1 << n); ++S)
+	{
+		for (int i = 1; i <= n; ++i) { b[i] = (S >> (i - 1)) & 1; }
+		int l = 0, r = -1, sm = 0; std::vector <std::pair <int, int>> p;
+		for (int i = 1; i <= n; ++i)
+		{
+			if (b[i]) { if (b[i - 1]) { r = i; } else { l = r = i; } }
+			else
+			{
+				sm += (r - l + 1) * (r - l + 1);
+				if (l != 0) { p.push_back({l, r}); }
+				l = 0; r = -1; sm += a[i];
+			}
+		}
+		if (b[n] == 1 and l != 0) { p.push_back({l, r}); sm += (r - l + 1) * (r - l + 1); }
+		if (sm > mx) { mx = sm; g = p; }
+	}
+	for (auto [l, r] : g) { f(l, r); res.push_back({l, r}); }
+	printf("%d %ld\n", mx, res.size());
+	for (auto [l, r] : res) { printf("%d %d\n", l, r); }
+}
+\end{verbatim}
+\end{document} 

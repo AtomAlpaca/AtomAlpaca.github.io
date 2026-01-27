@@ -1,0 +1,90 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{hyperref}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+\hypersetup {
+    colorlinks = true,
+    linkcolor  = black,
+}
+
+\newcommand{\[}{\begin{align*}}
+\newcommand{\]}{\end{align*}}
+\renewcommand{\par}[1]{\paragraph{#1}}
+
+\author {AtomAlpaca}
+\title  {数学分析学习笔记}
+
+\begin{document}
+	\tableofcontents
+	\section{极限}
+	\subsection{实数}
+	\subsubsection{自然数和整数}
+	自然数是指集合 $ \mathbb{N} = \{ 1, 2, 3, \cdots \} $, 满足以下性质：
+	\begin{enumerate}[1)]
+	\item 可以进行加法与减法运算;
+	\item 有序;
+	\item 满足归纳公理.
+	\end{enumerate}
+	归纳公理是指若 \( S \subset \mathbb{N} \) 满足:
+	\[
+		&1 \in S \\
+		&n \in S \Rightarrow n + 1 \in S
+	\]
+	则 \(S = \mathbb{N}\).
+	
+	\par{最小数原理.}
+	\(S \subset \mathbb{N}, S \not= \emptyset \), 则 \(S\) 中一定存在最小数.
+	\par{证明:} 因为 \( S \not= \emptyset\), \(\exists n \in S\) \\
+	则 \(S \cup \{1, 2, 3, \cdots\}\) 有限非空, 原命题成立. \\
+	由此我们可以得到一个重要的数学方法: 数学归纳法
+	
+	\par{数学归纳法.} 设有命题 \( A_n \), \(n \in \mathbb{N}\)满足:
+	\begin{enumerate}[1)]
+		\item \( A_1 \) 成立
+		\item \( A_n \) 成立 \(\Rightarrow A_{n+1}\) 成立
+	\end{enumerate}
+	则 \( \forall n \in \mathbb{N}, A_n\) 成立.
+	\par{证明:} 若存在 \( S \not= \emptyset \) 使 \( \forall m \in S \) 都使得 \(A_m\) 不成立. \\
+	由最小数原理, 存在最小数 \(r \in S\) 使 \(A_r\) 不成立.\\
+	由于 \(A_1\) 成立, \(r \not= 1\), 因此\(A_{r - 1}\) 成立, 得到 \(A_{r}\) 成立, 即 \(r \notin S\), 矛盾.
+
+	\subsubsection{无限集合}
+	\par{有关定义}
+	存在映射 \(f: A \rightarrow B\), \(\forall a, a^{'} \in A\).\\
+	如果 \(a \not= a^{'}\), 则 \(f(a) \not= f(b)\), 则称之为\textmd{单射}; \\
+	如果 \( \forall b \in B, \exists a \in A \) 使得 \(f(a) = b\), 则称之为\textmd{满射}; \\
+	如果 一个映射既使单射也是满射, 则称之为\textmd{一一映射}, 也称\textmd{双射}. \\
+	\\
+
+	设有集合 \(A, B\),
+	若 \(A, B\) 之间存在双射, 则称二者拥有相同的基数, \\
+	若 \(A, B\) 之间存在从 \(A\) 到 \(B\) 的非单射的的满射, 则称 \(A\) 的基数大于 \(B\) 的基数, \\
+	称 \mathbb{N} 的基数是 "可数的", 若 \(A\) 与 \mathbb{N} 之间存在从 \(A\) 到 \(\mathbb{N}\)的满射, 则称\(A\)是无限集合, 其基数也是"可数的",
+	若 \(A\) 与 \( \{1, 2, 3, \cdots\}\) 之间存在双射, 则称 \(A\) 为有限集合, 基数为 \(N\).
+	\par{性质}
+	若存在双射 \(f: \mathbb{N} \rightarrow U \), 则 \(U\) 一定可数; \\
+	有限集与可数集的并一定可数;\\
+	可数集与可数集的并一定可数;\\
+	可数个可数集的并一定可数.\\
+	因此我们知道,
+	\(\mathbb{Z} = \mathbb{N} \cup {0} \cup \mathbb{Z}_{-}\) 可数. \\
+
+	\\
+
+	定义运算 \(A \times B = \{(a, b) | a \in A, b \in B\}\), 若 \(A, B\) 都可数, 则 \(A \times B\) 可数. \\
+	定义一个集合 \(A\) 的幂集 \(2^{A}\) 为由该集合全部子集为元素构成的集合, 则若 \(A\)基数为 \(n\), 则\(2^{A}\) 的基数为 \(2^n\).
+	定义 \(2^{\mathbb{N}}\) 的基数为 "不可数的".
+
+	\subsubsection{有理数}
+	定义有理数 \(\mathbb{Q} = \{ \dfrac {p}{q} | p, q \in \mathbb{Z}, q \not= 0 \}\).
+	有理数满足以下性质:
+	\begin{enumerate}[1)]
+	\item 可以进行加法、减法、乘法和除法运算;
+	\item 有序;
+	\item 基数可数;
+	\item 与实轴上的点一一对应;
+	\item 具有稠密性, 即\(\forall a < b, a, b \in \mathbb{Q}, c = \dfrac{a+b}{2} \in \mathbb{Q}, a < c < b\).
+	\end{enumerate}
+
+\end{document}

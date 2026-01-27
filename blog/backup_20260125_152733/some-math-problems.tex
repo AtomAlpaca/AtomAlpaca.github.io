@@ -1,0 +1,67 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{hyperref}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\hypersetup {
+	colorlinks = true,
+	linkcolor  = black,
+}
+
+\newcommand{\[}{\begin{align*}}
+\newcommand{\]}{\end{align*}}
+\newcommand{\iff}{\Leftrightarrow}	
+\renewcommand{\par}[1]{\paragraph{#1}}
+
+\newtheorem{theorem}{Theorem}
+
+
+\author {AtomAlpaca}
+\title {「数学」高中导数杂题选讲}
+
+\begin{document}
+	\tableofcontents
+	\section{符号约定}
+	\begin{enumerate}
+		\item $f_{min}(x)$ 代表函数 $f(x)$ 的最小值；
+		\item $f_{max}(x)$ 代表函数 $f(x)$ 的最大值；
+	\end{enumerate}
+	
+	\section{第一题}
+	\subsection{题目}
+	\begin{theorem}
+	求证：$(x+1) \cdot \frac{1-x(\ln x - 1)}{e^x} < e^x + e^{x-2}$
+	\end{theorem}
+	\subsection{解答}
+	\begin{proof}
+	\[
+		 & 1 - x\ln x - x < \frac{2(x+1)}{x+1} < \frac{e^{x+1} + e^{x - 1}}{x + 1} \\
+		\iff & x + x \ln x +1 > 0
+	\]
+	令 $f(x) = x + x \ln x +1$，$f'(x) = \ln x+2$
+	
+	$f_{min}(x) = f(e^{-2}) = 1 - e^{-2} > 0$，故 $f(x) > 0$
+	\end{proof}
+	\section{第二题}
+	\subsection{题目}
+	\begin{theorem}
+		$f(x) = 2\ln(x + 1) - \frac{a}{(x + 1)^2}$ 有两个不同零点 $x_1, x_2$
+		\begin{enumerate}
+			\item 当 $-1 < x < -\frac{1}{2}$ 时，求证：$2 \ln(x+1) > - \frac{1}{x+1}$
+			\item 求 $a$ 的取值范围
+		\end{enumerate}
+	\end{theorem}
+	\subsection{解答}
+	\begin{proof}
+		1. 令 $t = x + 1$，即证 $t \in (o, \frac{1}{2})$ 时有 $2 \ln t > -\frac{1}{t}$
+		令 $g(t) = 2 \ln t + \frac{1}{t}$，$g'(t) = \frac{2t - 1}{t^2}$
+		$g_{\min}(t) = g(\frac{1}{2}) = 2 - 2 \ln 2 > 0$
+	\end{proof}
+	2. 令 $t = x + 1$，$f'(t) = \frac{2}{t} + \frac{2a}{t^2} = \frac{2(t^2 + a)}{t^3}$
+	\begin{enumerate}
+		\item $a \ge 0$，$f(t)$ 单增，无解
+		\item $a < 0$，$f_min(t) = f(\sqrt{-a}) < 0 \iff 2ln \sqrt{-a} + 1 < 0$ \\
+		$a \in (-e^{-1}, 0)$
+	\end{enumerate}
+\end{document}

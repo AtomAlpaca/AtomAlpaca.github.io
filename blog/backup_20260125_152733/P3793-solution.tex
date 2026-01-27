@@ -1,0 +1,107 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{hyperref}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+\hypersetup {
+	colorlinks = true,
+	linkcolor  = black,
+}
+
+\newcommand{\[}{\begin{align*}}
+	\newcommand{\]}{\end{align*}}
+\renewcommand{\par}[1]{\paragraph{#1}}
+
+
+\author {AtomAlpaca}
+\title { 「奇怪科技」P3793 O(n)-期望 O(1) 最坏 O(log n) 静态 rmq }
+
+\begin{document}
+	
+	{
+		\setcounter{tocdepth}{3}
+		\tableofcontents
+	}
+	感觉很好玩记录一下。
+	
+	首先将原序列进行分块。块内维护前缀、后缀最大值，对块维护一个 st 表。
+	
+	查询的时候在同一个块暴力，不在一个块求左端点所在块一段后缀、右端点所在块一段前缀、中间块在 st 表上的最大值即可。
+	
+	块数取 \(\dfrac{n}{\log n}\) 预处理就能做到 \(O(n)\) 了。但是因为 st 表常数略大块数要适当取少几倍。
+	
+	扔个代码。
+	
+	\begin{verbatim}
+#include <bits/stdc++.h>
+
+namespace GenHelper
+{
+	unsigned z1,z2,z3,z4,b;
+	unsigned rand_()
+	{
+		b=((z1<<6)^z1)>>13;
+		z1=((z1&4294967294U)<<18)^b;
+		b=((z2<<2)^z2)>>27;
+		z2=((z2&4294967288U)<<2)^b;
+		b=((z3<<13)^z3)>>21;
+		z3=((z3&4294967280U)<<7)^b;
+		b=((z4<<3)^z4)>>12;
+		z4=((z4&4294967168U)<<13)^b;
+		return (z1^z2^z3^z4);
+	}
+}
+void srand(unsigned x)
+{using namespace GenHelper;
+	z1=x; z2=(~x)^0x233333333U; z3=x^0x1234598766U; z4=(~x)+51;}
+int read()
+{
+	using namespace GenHelper;
+	int a=rand_()&32767;
+	int b=rand_()&32767;
+	return a*32768+b;
+}
+const int MAX = 2e7 + 5;
+const int MAXX = 1e6 + 5;
+const int MAXXX = 25;
+
+int n, m, s, sz, l, r;
+int a[MAX], bl[MAX], lg[MAX], st[MAXX], ed[MAXX], lm[MAX], rm[MAX], mx[MAXXX][MAXX];
+unsigned long long ans;
+inline void init()
+{
+	for (int i = 2; i <= sz; ++i) { lg[i] = lg[i >> 1] + 1; }
+	for (int i = 1; i <= sz; ++i) { st[i] = (n / sz) * (i - 1) + 1; ed[i] = (n / sz) * i; } ed[sz] = n;
+	for (int i = 1; i <= sz; ++i) { for (int j = st[i]; j <= ed[i]; ++j) { bl[j] = i; } }
+	for (int i = 1; i <= sz; ++i) { for (int j = ed[i]; j >= st[i]; --j) { rm[j] = std::max(rm[j + 1], a[j]); } }
+	for (int i = sz; i >= 1; --i) { for (int j = st[i]; j <= ed[i]; ++j) { lm[j] = std::max(lm[j - 1], a[j]); } }
+	for (int i = 1; i <= sz; ++i) { mx[0][i] = rm[st[i]]; }
+	for (int i = 1; (1 << i) <= sz; ++i)
+	{
+		for (int j = 1; j + (1 << i) - 1 <= sz; ++j) { mx[i][j] = std::max(mx[i - 1][j], mx[i - 1][j + (1 << (i - 1))]); }
+	}
+}
+
+inline int qry(int l, int r)
+{
+	int res = 0, L = bl[l], R = bl[r];
+	if (L + 1 < R)
+	{
+		int LG = lg[--R - ++L + 1];
+		return std::max(std::max(lm[r], rm[l]), std::max(mx[LG][L], mx[LG][R - (1 << LG) + 1]));
+	}
+	else if (L + 1 == R) { return std::max(lm[r], rm[l]); }
+	else { for (int i = l; i <= r; ++i) { res = std::max(res, a[i]); } return res; }
+}
+
+int main()
+{
+	scanf("%d%d%d", &n, &m, &s); srand(s); sz = n / (16 * log2(n));
+	for (int i = 1; i <= n; ++i) { a[i] = read(); } init();
+	for (int i = 1; i <= m; ++i) { l = read() % n + 1; r = read() % n + 1; if (l > r) { std::swap(l, r); } ans += qry(l, r); }
+	printf("%lld", ans);
+	return 0;
+}
+	\end{verbatim}
+	
+\end{document}

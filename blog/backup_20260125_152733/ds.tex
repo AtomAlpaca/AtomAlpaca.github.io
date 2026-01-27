@@ -1,0 +1,263 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{hyperref}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+
+\author {AtomAlpaca}
+\title {「数据结构」魔导绪论：数据结构概述}
+\renewcommand{\par}[1]{\paragraph{#1}}
+
+\begin{document}
+\tableofcontents
+少女填坑中。
+
+\section{写在前面}
+
+这篇文章主要记录学习数据结构过程中想到或学到的一些内容。内容排序与具体内容的选择十分感性。
+
+这篇文章并非数据结构入门文章，而更像笔记或日记。
+
+请注意，目前（2024 赛季）CNOI 对高级数据结构的考察较少，而更多侧重对 trick 和思维的考察，因此请诸位读者根据自身情况考虑是否有必要在数据结构上投入大量时间。
+
+\section{树状数组}
+
+树状数组可以维护一段序列前/后缀关于某一运算的结果。其中运算 $\times$ 满足：
+\begin{enumerate}
+\item 存在幺元。
+\item 满足结合律。即 $A \times B \times C = A \times (B \times C)$；
+\item 若支持查询任意区间，要满足可差分性，即 $\times$ 存在逆运算。
+\end{enumerate}
+
+
+我们维护这样一个长度为 $n$ 的序列 $t$，其中 $t_x$ 代表从 $x$ 这个位置向前长度为 $\operatorname {lowbit}(x)$ 元素在 $\times$ 运算下的结果。查询/修改的时候不断向前/向后跳 $\operatorname {lowbit}(x)$
+即可。
+
+扔一份参考实现。
+
+\begin{verbatim}
+struct BIT
+{
+	ll t[MAX];
+	int lbt(int x) { return x & -x; }
+	void mdf(int x, ll c) { while (x <= n) { t[x] += v; x += lbt(x); } }
+	ll qry(int x) { ll res = 0; while (x) { res += t[x]; x -= lbt(x); } return res; }
+}
+\end{verbatim}
+
+下面我们证明一下这个东西的正确性。首先查询的正确性是显然的：我们每次把 $p$ 减去了 $\operatorname{lowbit}(p)$，又正好加上了这 $\operatorname{lowbit}(p)$ 长度区间内的信息，最后总能将 $p$ 归零得到前缀信息。我们主要来证明修改操作的正确性，也就是不断 $p \leftarrow p + \operatorname{lowbit}(p)$ 恰好可以遍历到所有包含位置 $p$ 的节点。
+
+我们不妨设 $l(p)$ 是 $p$ 这个节点管辖范围的左端点，也即 $l(p) = p - \operatorname{lowbit}(p) + 1$。
+
+\subsubsection{引理 1}
+$\forall x \le y$ ，要么有 $[l(x), x]$ 与 $[l(y), y]$ 不交，要么有  $[l(x), x]$ 包含于 $[l(y), y]$。
+
+\par{证明}
+若 $[l(x), x]$ 与 $[l(y), y]$ 有交，则 $l(y) \le x \le y$。
+
+设 $y = s \times 2^{k + 1} + 2 ^ k$，$x = s \times 2 ^{k + 1} + b$，其中 $1 \le x < 2 ^ {k + 1}$。
+
+则 $l(x) = s \times 2^{k +1} + b - \operatorname{lowbit}(b) +1 \ge s \times 2^{k +1} + 1 = l(y)$ ，即 $l(y) \le l(x) \le x \le y$。证毕。
+
+\subsubsection{引理 2}
+对于 $x < y < x + \operatorname{lowbit}(x)$，$[l(x), x]$ 和 $[l(y), y]$ 不交。
+
+\par{证明}
+
+设 $x = s \times 2^{k + 1} + 2^k$，$y = s \times 2^{k + 1} + 2^k + b$ ，其中 $1 \le b < 2^k]$。
+
+则 $l(y) = y - \operatorname{lowbit}(y) + 1 = x + b - \operatorname{lowbit}(b) + 1 > x$ ，证毕。
+
+（这中间应当有未写完的内容，但是某些意外导致的失忆使得我忘记了当时的行文思路，等想起来再补）
+
+最开始学习树状数组的时候不能理解 $\operatorname {lowbit}(x)$ 是如何构造出来的，导致很长一段时间内十分抗拒使用这一数据结构。
+
+其实中心思想是要把 $[1, x]$ 这一区间拆分成 $O(\log x)$ 个区间进行合并，这里使用 $\operatorname {lowbit}(x)$ 是考虑从低位到高每次消掉一个 $1$。其实使用 $\operatorname {hightbit}$ 甚至三进制下的 $\operatorname {lowbit}$ 都能达到对应的效果，不过更新起来会不太一样。
+
+拿 $\operatorname {hightbit}$ 举例。我们考虑修改 $t_p$ 会影响的节点是所有 $q$ 满足 $q <= p , q + \operatorname{highbit}(q) >= p$，然而这个东西没什么好的性质。$\operatorname{lowbit}$ 被广泛使用的原因主要是可以 $O(1)$ 快速求得且在 $p$ 这个位置不断 $p \leftarrow p + \operatorname{lowbit}(p)$ 恰好可以遍历到所有会影响的节点。
+
+
+\section{堆}
+\subsection{斜堆}
+
+斜堆（skew heap）是一种可并堆，\texttt{push}、\texttt{merge}、\texttt{decrease-key} 和 \texttt{erase} 都是 $O(\log n)$ 的。但由于斜堆维护的信息极少，使得在算法竞赛涉及的数据范围内运行速度极快（与 fibonacci 堆相当），且实现非常便捷。
+
+缺点是复杂度是均摊的不能持久化，且树高没有保证。
+
+一个斜堆是一个二叉树，其中一个节点的任意儿子都比自己大。初次之外没有多余的性质。
+
+\subsubsection{merge}
+对两个斜堆，其中一个或两个为空直接返回非空的堆，否则不妨设其根节点分别编号为 $x, y$ 且 $v_x < v_y$，将 $x$ 右儿子 $r_x$ 与 $y$ 递归合并，作为 $x$ 新的右儿子，然后将 $x$ 的左右儿子交换。不难发现不会破坏斜堆的性质。
+
+\subsubsection{decrease-key}
+
+把这一节点和父亲断开，然后直接修改节点权值，再将拆下来的这个堆 \texttt{merge} 回原来的堆。
+
+\subsubsection{pop}
+
+把左右儿子节点合并直接作为新的根。
+
+\subsubsection{erase}
+把节点用 \texttt{decrease-key} 将权值降到 $-INF$，此时节点到堆的根节点位置，然后执行 \texttt{pop} 操作。
+
+\subsubsection{top}
+返回根节点。
+
+\subsubsection{push}
+新建一个节点，把这个节点 \texttt{merge} 进去。
+
+\subsubsection{复杂度证明}
+
+发现复杂度其实都在 \texttt{merge} 上。只需要证明 \texttt{merge} 的复杂度就好。
+
+我们称右子树 \texttt{size} 大于左子树的节点为“重节点”，否则为轻节点。我们称在一个堆上一直向右儿子走的最长路径为右路径；对于一个斜堆 $x$ ，我们设 $l_x$ 是右路径上轻节点的数量，$h_x$ 是重节点的数量。
+
+我们发现再右路径上，每次经过一个重节点，就一定会把它变轻；而一个轻节点不一定会变重。我们设一个堆的势能是这个堆的重节点数量，势能的上限是 $n$。
+
+合并两个斜堆 $x, y$ 一共要走 $l_x + l_y + r_x + r_y$ 个节点。最坏的情况下，所有轻节点都变成重节点，则势能增加量是 $l_x + l_y - r_x - r_y$，故一次的均摊开销是最坏 $2(l_x + l_y)$，而每次走到一个轻节点至少会让树的大小折半，因此单次均摊复杂度是 $O(\log n)$ 的。
+
+\subsubsection{代码}
+\href{https://www.luogu.com.cn/problem/P11266}{这是模板题}，代码非常好写，还跑得飞快。
+
+\begin{verbatim}
+	#include <bits/stdc++.h>
+
+typedef long long ll;
+
+const ll INF = 0x7fffffff;
+const int MAX = 1e6 + 5;
+
+ll n, m, x, y, z, op;
+ll f[MAX], v[MAX], l[MAX], r[MAX], s[MAX];
+
+ll top(ll x) { return v[s[x]]; }
+
+ll merge(ll x, ll y)
+{
+	if (!x or !y) { return x | y; }
+	if (v[x] > v[y]) { std::swap(x, y); }
+	r[x] = merge(r[x], y); f[r[x]] = x;
+	std::swap(l[x], r[x]); return x;
+}
+
+void dec(ll h, ll p, ll x)
+{
+	if (!f[p]) { s[h] = 0; }
+	else { if (l[f[p]] == p) { l[f[p]] = 0; } else { r[f[p]] = 0; } }
+	f[p] = 0; v[p] = x; s[h] = merge(s[h], p);
+}
+
+void ers(ll h, ll p)
+{
+	dec(h, p, -INF); ll t = v[p];
+	s[h] = merge(l[s[h]], r[s[h]]);
+	f[s[h]] = 0; v[p] = t;
+}
+
+int main()
+{
+	scanf("%lld%lld", &n, &m);
+	for (int i = 1; i <= n; ++i) { scanf("%lld", &v[i]); s[i] = i; }
+	for (int i = 1; i <= m; ++i)
+	{
+		scanf("%lld", &op);
+		if (op == 0) { scanf("%lld%lld", &x, &y); ers(x, y); }
+		else if (op == 1) { scanf("%lld", &x); printf("%lld\n", top(x)); }
+		else if (op == 2) { scanf("%lld%lld", &x, &y); s[x] = merge(s[x], s[y]); }
+		else if (op == 3) { scanf("%lld%lld%lld", &x, &y, &z); dec(x, y, z); }
+	}
+}
+\end{verbatim}
+
+\section{线段树}
+
+对朴素的线段树没啥特别的理解，暂时跳过。
+
+\subsection{猫树}
+
+猫树可以看作是一种线段树的拓展。
+
+朴素的线段树建树需要进行 $O(n)$ 次合并，而每次进行查询需要进行 $O(\log n)$ 次合并操作。而猫树可以以 $O(n \log n)$ 次合并建树、不支持快速修改为代价，实现单次查询 $O(1)$ 次合并的查询。
+
+我们考虑线段树的结构：每一层都把父亲的一个区间“均匀划分”成了两个区间。对于任意一个区间 $[l, r]$，我们在线段树上找到维护 $[l, l]$ 信息和 $[r, r]$ 信息的节点，找到它们在线段树上的 LCA 结点 $p$，不妨设其维护 $[L, R]$ 的信息，这时我们会发现一些有趣且显然的性质：
+
+\begin{enumerate}
+\item $[L, R]$ 是线段树上包含 $[l, r]$ 的最深的节点
+\item $[l, r]$ 一定包含 $p$ 的“中点”
+\end{enumerate}
+
+换句话说，$[l, r]$ 一定能被 $[L, mid]$ 的一段后缀和 $(mid, R]$ 的一段前缀拼出来。
+
+因此，我们在朴素线段树的基础上，在每个节点，我们维护 $[l, mid]$ 的后缀信息和 $(mid, r]$ 的前缀信息，然后一次合并就能解决询问。
+
+除了最深一层之外，每个位置的信息都在每层最多被包含进去一次，因此建树需要 $O(n \log n)$ 次合并。或者利用主定理，$T(n) = T(\frac{n}{2}) + O(n)$，得到 $T(n) = O(n \log n)$。
+
+现在的性能瓶颈在于找到两个节点的 LCA 上。虽然 $O(1)$ LCA 的算法早已广为人知，但是还是过于麻烦。这时我们考虑把序列长度 n 拓展到 $2$ 的整数幂的形式，这时线段树具有类似堆式的结构，此时有经典结论：结点 $x, y$ 的 LCA 为其二进制下的 LCP，又有经典位运算技巧 \texttt{LCP(x,y)=x>>log(x ^ y)}，因此我们能够在常数时间内求得 LCA。
+
+\subsubsection{性能优化}
+
+首先我们发现在每个线段树节点上开个动态数组之类的东西存前后缀信息过于低效，并且也没有什么实际意义——我们其实不是很在乎我们的信息究竟在哪个节点上，因此我们可以用一个数组 $f_{d, x}$ 来表示，在深度为 $d$ 的这一层，$x$ 这个位置，到这层管辖这个位置的线段树节点上的对应的这一段前/后缀信息。这段用语言不太好描述，可以看代码理解。
+
+其次我们发现，把序列长度补到 $2^k$ 的形式之后，每层的节点管辖的区间长度都是固定的，这使得我们甚至没必要通过递归来建树，只需要枚举深度得到对应的区间长度即可。
+
+\subsubsection{代码}
+\href{https://www.luogu.com.cn/problem/SP1043}{link}。
+
+\begin{verbatim}
+	#include <bits/stdc++.h>
+
+typedef long long ll;
+
+const int MAX = 5e5 + 5;
+
+ll n, q, l, r, a[MAX], lg[MAX];
+
+struct N { ll mx, lm, rm, sm; N(){} N(ll x) { mx = lm = rm = sm = x; } } f[25][MAX];
+
+N merge(N a, N b)
+{
+	N res;
+	res.mx = std::max(std::max(a.mx, b.mx), a.rm + b.lm);
+	res.lm = std::max(a.lm, a.sm + b.lm);
+	res.rm = std::max(a.rm + b.sm, b.rm);
+	res.sm = a.sm + b.sm;
+	return res;
+}
+
+void build()
+{
+	for (int d = 1, l = 1; l <= n; ++d, l <<= 1)
+	{
+		for (int i = l; i <= n; i += 2 * l)
+		{
+			f[d][i] = N(a[i]);
+			for (int j = i - 1; j >  i - l and j >= 1; --j) { f[d][j] = merge(N(a[j]), f[d][j + 1]); }
+			if (i == n) { continue; }
+			f[d][i + 1] = N(a[i + 1]);
+			for (int j = i + 2; j <= i + l and j <= n; ++j) { f[d][j] = merge(f[d][j - 1], N(a[j])); }
+		}
+	}
+}
+
+ll qry(ll l, ll r)
+{
+	if (l == r) { return a[l]; }
+	ll p = lg[(l + n - 1) ^ (r + n - 1)];
+	return merge(f[p][l], f[p][r]).mx;
+}
+
+int main()
+{
+	scanf("%lld", &n);
+	for (int i = 1; i <= n; ++i) { scanf("%lld", &a[i]); }
+	ll _n = 1; while (_n < n) { _n <<= 1; } n = _n;
+	for (int i = 1; i <= 2 * n; ++i) { lg[i] = lg[i >> 1] + 1; }
+	build();
+	scanf("%lld", &q);
+	
+	while (q--) { scanf("%lld%lld", &l, &r); printf("%lld\n", qry(l, r)); }
+	return 0;
+}
+\end{verbatim}
+
+\end{document}

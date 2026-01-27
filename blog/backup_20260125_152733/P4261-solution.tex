@@ -1,0 +1,118 @@
+\documentclass{article}
+
+\usepackage[UTF8][ctex]
+\usepackage{hyperref}
+\usepackage{fancyvrb}
+\hypersetup{
+  colorlinks = true;
+  linkcolor = black;
+}
+
+\author {AtomAlpaca}
+\title {「题解」 P4261 白金元首与克劳德斯}
+
+\begin{document}
+\tableofcontents
+\subsection{题目}
+\herf {https://www.luogu.com.cn/problem/P4261} {link}
+\subsection{正文}
+\par
+首先证明, 任意时刻不可能有一个点被三个及以上个云朵覆盖.
+\par
+考虑反证法, 假设有一点会被三个覆盖, 则必有至少两个云朵有重合部分且运动方向相同. 因为所有云朵都运动速度都相等, 这两个云朵在任意时刻都重合, 而这和题目中的 $0$ 时刻没有重合的云朵矛盾.
+\par
+因此答案只可能是 $1$ 或 $2$. 我们只需要考虑是否有某一时刻存在两朵重合都云朵即可.
+\par
+考虑到运动方向相同的云朵不可能重合, 我们只需要选取某一方向的云朵和另一方向的云朵逐个比较即可, 最坏复杂度是 $ O(N^2) $.
+\par
+考虑如何判断. 由于只需要判断是否重合, 这两个云朵的具体坐标并不重要, 我们要考虑的是云朵的相对位置. 两个云朵都运动的情况难以处理, 因此我们给每一个云朵都加上一个方向为 x 轴负方向的速度, 这样对两者的相对位置不会产生影响, 但我们横向的云朵转化为了静止的状态, 而竖直方向都运动变为了向左上方斜 $ 45 $ 度的运动.
+\par
+因为时间是任意的, 任意运动云朵 $ i $ 覆盖过的位置就是其左下角和右上角的轨迹围成的平行四边形. 这两点的坐标分别为 $ (x_i, y_i) $ 和 $ (x_i + w_i, y_i + h_i) $, 因此这两个轨迹的方程分别为 $ y_1 = -x + (y_i + x_i)$ 和 $ y_2 = -x + (y_i + h_i + x_i + w_i) $.
+\par
+如果 $y_1$ 在静止云朵 $j$ 的右上角上方穿过, 或者 $y_2$ 在其左下角的下方穿过, 那么这两个云朵不能够重合. 也即
+\par
+$$ 
+	-x_j - w_j + y_i + x_i \ge  y_j + h_j
+$$
+\par
+或
+\par
+$$ 
+	-x_j + x_i + w_i + y_i + h_i \le  y_j
+$$
+时不能重合.
+\par
+整理可得, $i$ 和 $j$ 能够重合都充要条件为:
+\par
+\begin{aligned}
+	 x_i + y_i &<  x_j + w_j + y_j + h_j \\
+     x_j + y_j &<  x_i + w_i + y_i + h_i
+\end{aligned}
+\par
+逐个判断即可. 但这样交上去会 TLE 一个点, 考虑优化.
+\par
+将所有静止节点按照 $ x_j +y_j $ 从小到大排序, 假如一个移动节点枚举到某一静止节点时满足 $ x_j + y_j \ge x_i + w_i + y_i + h_i $, 则不需要继续向下枚举, 放弃这个移动节点即可.
+
+\subsection{代码}
+
+\begin{Verbatim}[tabsize=4]
+#include <bits/stdc++.h>
+
+using std::cin;
+using std::cout;
+using std::vector;
+
+int T, n, x, y, w, h, d;
+
+struct Node
+{
+    int a, b;
+};
+
+vector <Node> a, b;
+
+bool cmp(Node n1, Node n2)
+{
+	return n1.a < n2.a;
+}
+
+void clear()
+{
+	a.clear(); b.clear();
+}
+
+void solve()
+{
+	clear();
+	cin >> n;
+	for (int i = 1; i <= n; ++i)
+	{
+		cin >> x >> y >> w >> h >> d;
+		if (d) { a.push_back(Node{x + y, x + y + w + h}); }
+		else   { b.push_back(Node{x + y, x + y + w + h}); }
+	}
+
+	std::sort(b.begin(), b.end(), cmp);
+
+	for (Node i : a)
+	{
+		for (Node j : b)
+		{
+			if (i.a < j.b and j.a < i.b) { cout << "2\n"; return; }
+			if (i.b <= j.a)      		 { break; }
+		}
+	}
+	cout << 1 << '\n';
+}
+
+int main()
+{
+	cin.tie(NULL);
+	cout.tie(NULL);
+	std::ios::sync_with_stdio(false);
+	cin >> T;
+	while (T--) { solve(); }
+} 
+\end{Verbatim}
+
+\end{document}

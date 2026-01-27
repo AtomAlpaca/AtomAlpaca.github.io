@@ -1,0 +1,71 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+\author {AtomAlpaca}
+\title  {「题解」P6514 [QkOI#R1] Quark and Strings} 
+\begin{document}
+\subsection{题意}
+
+维护一个字符串序列 $\{S_n\}$，有两种操作共 $q$ 次，设当前为第 $i$ 次操作。
+
+`1 l r`，表示在所有编号在 $[l,r]$ 内的字符串末尾添加字符 $i$。
+
+`2 l r`，表示询问所有编号在 $[l,r]$ 内的字符串的最长公共子序列长度。
+
+$1\le n,q\le 10^5$
+
+\subsection{题解}
+发现每次往后面加的都是一个独一无二的字符，我们其实要求的就是 $[l, r]$ 内都含有的字符种类。
+
+考虑用一个 $(t, l, r)$ 三元组来描述一个操作，分别表示操作的时间、左端点、右端点，那么对于一个询问操作 $x$，我们其实就是要求 $t_y < t_x, l_y \le l_x, r_y \ge r_x$ 的修改操作 $y$ 的数量，这就是一个三维偏序的形式，我们用 CDQ 分治做一下就好了。复杂度 $O(n \log^2{n})$。代码相当简洁。
+
+\subsection{代码}
+
+\begin{verbatim}
+#include <bits/stdc++.h>
+
+const int MAX = 1e5 + 5;
+int n, q, op, l, r, t;
+int ans[MAX];
+struct N { int t, l, r, x; } a[MAX];
+
+bool cmpl(N a, N b) { return a.l == b.l ? a.r > b.r  : a.l < b.l; }
+bool cmpt(N a, N b) { return a.t == b.t ? cmpl(a, b) : a.t < b.t; }
+
+struct BIT
+{
+	int t[MAX];
+	int lbt(int x) { return x & -x; }
+	void add(int x) { if (!x) { return ; } while (x <= n) { ++t[x]; x += lbt(x); } }
+	int qry(int x) { int res = 0; while (x) { res += t[x]; x -= lbt(x); } return res; }
+	void clear() { for (int i = 1; i <= n; ++i) { t[i] = 0; } }
+} st;
+
+void solve(int l, int r)
+{
+	if (l == r) { return ; }
+	int k = l + ((r - l) >> 1); solve(l, k); solve(k + 1, r);
+	std::sort(a + l, a + k + 1, cmpl); std::sort(a + k + 1, a + r + 1, cmpl);
+	int L = l, R = k + 1; st.clear();
+	for (; R <= r; ++R)
+	{
+		while (L <= k and a[L].l <= a[R].l) { if (!a[L].x) { st.add(a[L].r); } ++L; }
+		if (a[R].x) { ans[a[R].x] += st.qry(n) - st.qry(a[R].r - 1); }
+	}
+}
+
+int main()
+{
+	scanf("%d%d", &n, &q);
+	for (int i = 1; i <= q; ++i)
+	{
+		scanf("%d%d%d", &op, &l, &r);
+		a[i] = {i, l, r, (op == 2 ? ++t : 0)};
+	}
+	solve(1, q);
+	for (int i = 1; i <= t; ++i) { printf("%d\n", ans[i]); }
+}
+\end{verbatim}
+\end{document}

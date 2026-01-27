@@ -1,0 +1,197 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{hyperref}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{mathrsfs} 
+\hypersetup {
+	colorlinks = true,
+	linkcolor  = black,
+}
+
+
+\author {AtomAlpaca}
+\title  {类型论学习笔记}
+
+\begin{document}
+	\tableofcontents
+	\section{前言}
+	是个人学习笔记，会有很多自己的理解和想法，可能有不准确甚至错误的地方。如有发现可以来嘲讽笔者！
+	
+	由于类型论相关的术语翻译混乱或者难以翻译，有些术语会附上英文原文或直接使用英文。
+	
+	尝试把笔记写成一篇浅显易懂的入门读物，因此可能很多在诸位认为不重要的地方会花很多笔墨详细解释，以帮助新人理解。
+	
+	主要是一些入门的内容，以后可能会有类型论进阶学习笔记
+	\section{前置知识}
+	\subsection{元语言和形式语言}
+	……
+	\subsection{相继演算}
+	相继演算是一种形如
+	$$
+		\frac{Premise_1, Premise_2 \cdots Premise_n}{Conclusion}(Name)
+	$$
+	的记号，其中分子上是若干条条件（Premise），分母上是结论（Conclusion），旁边是这个演算的名字。它代表的含义是，当分子上的所有条件都成立的时候，分母上的结论成立。
+	
+	这种记号在类型论的研究中被大量使用。
+	\subsection{柯里化}
+	……？
+	\section{简单类型}
+	\subsection{无类型 $\lambda$ 演算}
+	为什么会产生类型？
+	
+	为了回答这个问题，我们现看看没有类型会发生什么。接下来我们会介绍无类型的 $\lambda$ 演算。说它没有类型也不准确，我们也可以看作它所有的东西共用一个类型。
+	
+	$\lambda$ 演算中一个项（term）定义为 $term := x | t_1t_2 | \lambda x.t$，这是说一个项要么是一个单独的变量 $x$，要么是两个项的拼接 $t_1 t_2$，要么是形如 $\lambda x.t$ 的形式。
+	
+	拼接两个项被称为应用（application），它是左结合的，也就是说 $t_1\ t_2\ t_3\cdots t_n$ 代表 $(\cdots (t_1\ t_2)t_3 \cdots )t_n$
+	
+	$\lambda x.t$ 这种形式被称为抽象（abstrcation）,其中 $x$ 是一个变量，$t$ 是一个项。抽象和我们中学时期理解的函数很像，比如我们定义一个函数 $f(x) = x^2$，我们传入一个参数 $y$ 得到的 $f(y) = y^2$ 其实就是把 $f(x)$ 中的所有 $x$ 换成了 $y$；而 $(\lambda x.t) y$，也就是把 $y$ 应用到这个项上，代表把项 $t$ 中所有 $x$ 都替换成 $y$。注意我们一般规定抽象的优先级比应用要高，也就是 $\lambda x.t_1t_2$ 说的是 $\lambda x.(t_1t_2)$ 而不是 $(\lambda x.t_1)t_2$。
+	
+	我们把 $M$ 中的 $x$ 全部替换成 $y$ 的结果写成 $M[x \mapsto y]$。
+	
+	\subsubsection{$\alpha$-转换}
+	
+	我们刚刚知道了 $\lambda$ 演算的基本规则，那么请思考一个问题：$(\lambda y.\lambda x.y)xz$ 该怎么算？最后得到的是 $x$ 还是 $z$？换言之我们第一步应用得到的 $(\lambda x.x)z$ 中的两个 $x$ 是不是同一个 $x$？
+	
+	其实如果我们换一个变量名 $(\lambda y.\lambda t.y)xz$ 就很清晰了。这个项毫无疑问等于 $z$，而我们直觉上认为，$\lambda t.y$ 和 $\lambda x.y$ 是等价的东西，就像 $f(x) = \sin x $ 和 $f(y) = \sin y$ 没什么区别一样。事实上在 $\lambda$ 演算中也是这样规定的。我们接下来形式化地描述一下这种”重命名“的过程。
+	
+	在一个项 $M$ 中，只要不是在 $\lambda x.$ 的位置使用了一个变量 $x$，我们就称这个变量 $x$ 在项 $M$ 中出现（occurence）了。对于一个项 $\lambda x.M$，如果 $M$ 这个项中出现了 $x$，那么这个项中的 $x$ 就是一个绑定变量（bounded variable），否则是一个自由变量（bounded variable）。我们之前说的 $t[x \mapsto y]$ 严格定义是将 $t$ 中所有自由的 $x$ 换成 $y$。
+	
+	同时，我们认为将 $\lambda x.M$ 中的 $x$ 和 $M$ 共同换成一个 $M$ 中自由的变量，变换后的项和原来是等价的。这就是 $\alpha$-转换（$\alpha$-conversion）。显然地，我们可以把一个项的所有变量都转化为两两不同的变量，这样就不会出现我们上面草歧义。
+	
+	而之所以我们出现了上面的歧义，是因为我们采用了字符串来代指数学对象，因此我们即使用着同样的名字 $x$，两个 $x$ 想表达的意思却是不一样的，就会造成一些混淆。
+	
+	\subsubsection{规约和暨约形式}
+	归约 (reduction) 主要描述了一个项怎么化简, 或者说计算。而暨约形式（normal form）则是经过化简得到的所谓“最简形式”。在基础的 $\lambda$ 演算中主要有两条规则：
+	
+	$$
+		\frac{}{(\lambda x.M)y \equiv M[x \mapsto y]} \beta rule
+	$$
+	
+	这条规则告诉我们如何使用一个函数，正向使用这个规则叫做 $\beta$-规约。
+	
+	$$
+		\frac{}{(\lambda x.f x) \equiv f} \eta rule
+	$$
+	
+	正向使用这个规则叫做 $\eta$-展开，反向使用则叫 $\eta$-规约。
+	
+	这个规则看起来没什么必要，但是它其实向我们展示了函数的外延性：因为 $f$ 和 $\lambda x.f x$ 无论应用上什么参数都是相同的，因此这两个函数也是等价的。
+
+	当一个项没法继续使用 $beta$-规约，我们就称这个项是 $\beta$-范式。
+	
+	当一个项没法使用上述任意一条规则，且被完全应用（也就是每个抽象都有一个对应的应用）我们就称这个项是 $\beta \eta$-既约的, 简称既约的 (normalized)。
+	
+	这时我们就会发现无类型 $\lambda$ 演算的第一个毒点：不是所有的项都能化成 $\beta$ 范式，或者说 $\lambda$ 演算并不是停机的。比如我们考虑以下的项：
+	
+	$$
+	\begin{aligned}
+		 & (\lambda x.x x) (\lambda x.x x) \\
+		=& (x x) [x \mapsto \lambda x.x x] \\
+		=& (\lambda x.x x) (\lambda x.x x) \\
+	\end{aligned}
+	$$
+	
+	我们发现无论如何这个函数都没法被完全规约，它最后总会回到最开始的形式。
+	
+	\subsubsection{邱奇编码}
+	邱奇编码使得 $\lambda$ 演算具有了更多实用意义。通过邱奇编码，我们能将很多东西，比如自然数、布尔值、有序对等等，映射到一个 $\lambda$ 中的项。
+	
+	如邱奇数能让我们用 $\lambda$ 演算编码自然数。邱奇编码将自然数 $n$，表示为任意函数 $f$ 映射到它自身的 $n$ 重函数复合的一个函数，换言之 $n$ 是一个接受一个函数 $f$ 和一个参数 $x$ 的函数，返回的是把 $f$ 应用到 $x$ 上 $n$ 次的结果。直观理解一下：
+	$$
+	\begin{aligned}
+		0\ f\ x &= x &= \lambda f.\lambda x.x \\
+		1\ f\ x &= f\ x &= \lambda f.\lambda x.f\ x \\
+		2\ f\ x &= f\ (f\ x) &= \lambda f.\lambda x.f\ (f\ x) \\
+		&\cdots& \\
+		n\ f\ x &= f^n\ x &= \lambda f.\lambda x.f^n\ x
+	\end{aligned}
+	$$
+	
+	类似地我们能定义加法：$plus := λm.λn.λf.λx. m\ f(n\ f\ x)$，这是我们由定义可以得来的。
+	
+	类似地我们还可以做很多有趣的东西。但是对类型论这不太重要。有时间可能会回来补。
+	
+	重要的是，我们不得不开始考虑 $plus\ n\ \lambda x.x$ 或者类似东西的意义——它的确是一个合法的 $\lambda$ 项，我们也可以用规则去化简它，但是它和意义很混乱—— $n$ 加上一个函数是什么？我们没法解释。这就是无类型 $\lambda$ 演算的另一个弊端：虽然我们能表示不同“种类”的东西，但是我们没有手段来确保函数或是其它东西按照我们预想的方式使用它——毕竟不论什么含义最终都是 $\lambda$项，无论多么胡闹的用法都是合法的。这就需要我们用类型来规范函数的行为。
+	\subsection{简单类型 $\lambda$ 演算}
+	\subsubsection{类型论和一个类型论}
+	正如集合论根据承认的公理不同有许多分支，类型论也有许多不同的“版本”，如上面提到的无类型 $\lambda$ 演算，和接下来要讲的简单 $\lambda$ 演算，这些都可以叫做是“一个类型论”，而“类型论”是研究“这些类型论”的学科。
+	\subsubsection{定义类型}
+	我们不妨用 $\mathbb{T}$ 表示所有简单类型的集合，用 $A \in \mathbb{T}$ 来表示 “$A$ 是一个类型”。对于简单类型 $\lambda$ 演算，类型是从一个基本集合开始递归定义出来的。首先我们先选定一个基本类型的集合 $\mathbb{V} = {\alpha \ \beta \cdots}$，这些都是基本类型（Type Varibles）：
+	$$	
+		\frac{A \in \mathbb{V}}{A \in \mathbb{T}}
+	$$
+	在此之上，我们可以递归定义 Arrow Types（我放弃翻译了）
+	$$
+		\frac{A, B \in \mathbb{T}}{A \rightarrow B \in \mathbb{T}}
+	$$
+	或者抽象一点的形式，我们可以写成 $\mathbb{T} = \mathbb{V} | \mathbb{T} \rightarrow \mathbb{T}$。
+	\subsubsection{语境}
+	类型论中的语境（context）是用来记录在当前，有哪些项存在，它们又拥有哪些类型的，类似列表状物。
+	
+	语境的定义也是递归的——这和一些函数式语言定义列表的方式相似。首先不包含任何信息的“空列表”是一个语境，我们称其为“空语境”：
+	
+	$$
+		\frac{}{\emptyset\ is\ context}
+	$$
+	
+	在此之上，我们可以追加一个新的陈述，构成一个新的语境：
+	
+	$$
+		\frac{\Gamma\ is\ context}{\Gamma, x:A\ is\ context}
+	$$
+	
+	我们用记号 $x:A$ 来代表 $x$ 是一个合法的，具有 $A$ 类型的项，这被称为是一个陈述（statement）。而对一个语境 $\Gamma$ 中，我们用 $\Gamma \vdash x:A$ 来表示“在 $\Gamma$ 这个语境下，$x$ 是一个合法的项，且具有 $A$ 类型”，这被称为是一个 判断（judgement）。
+	
+	\subsubsection{项}
+	在简单类型 $\lambda$ 演算中，每个项（Term）都必须有其对应的类型，我们在讨论一个项时不能脱离其类型和所在的语境，这使得我们对项的定义略微复杂一些，其包含四个规则。
+	
+	首先我们指定一个常量集合 $\mathcal{C}$，并给定一个映射 $type : \mathcal{C} \rightarrow \mathbb{V}$，为每个常量指定一个类型（映射到 $\mathbb{T}$ 应当也没问题，但我们希望这些常量基础一些），这些是我们指定的基础的项：
+	
+	$$
+		\frac{c \in \mathcal{C}}{\Gamma \vdash c : type(c)}\ Const
+	$$
+	
+	同时我们还希望能从语境中提取信息得到一个合法的项：
+	
+	$$
+		\frac{x:A \in \Gamma}{\Gamma \vdash x:A}\ Var
+	$$
+	
+	另外我们还希望引入 $\lambda$ 演算来构建项，这时的 $\lambda$ 演算要时刻记得考虑类型：
+	
+	$$
+		\frac
+		{\Gamma \vdash M : B, \Gamma \vdash x : A}
+		{\lambda (x : A).M:A \rightarrow B} Lam
+	$$
+	
+	$$
+		\frac
+		{\Gamma \vdash f : A \rightarrow B, \Gamma \vdash x : A}
+		{\Gamma \vdash f\ x : B} App
+	$$
+	\subsubsection{$\alpha$ 转换}
+	在简单类型 $\lambda$ 演算中我们仍然可以使用 $\alpha$ 转换。这里我们略去。
+	
+	\subsubsection{规约}
+	同样我们可以在简单类型 $\lambda$ 演算中对项进行规约。这些规则在学习了无类型 $\lambda$ 演算之后应该能比较自然地猜出来：
+	
+	$$
+	\frac
+	{\Gamma \vdash x : A, y : A, M : B}
+	{(\lambda x : A.M)\ y : B \equiv M[x \mapsto y] : B} \beta-rule
+	$$
+	$$
+	\frac
+	{\Gamma \vdash f : A \rightarrow B}
+	{\lambda x. f x \equiv f : A \rightarrow} \beta-rule
+	$$
+	
+	加入了类型之后规约有了一些更好的性质，我们来简单讨论一下。
+	
+	首先我们定义符号 $M \rightarrow_{\beta} N$ 代表 $M$ 经过一步 $\beta$ 规约得到了 $N$，$M \twoheadrightarrow_{\beta} N$ 代表 $M$ 经过多步 $\beta$ 规约得到了 $N$
+\end{document}

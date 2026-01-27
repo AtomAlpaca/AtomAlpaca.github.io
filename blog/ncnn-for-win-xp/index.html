@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Blog</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tufte-css/1.8.0/tufte.min.css">
+    <link rel="stylesheet" href="/assets/tufted.css">
+    <link rel="stylesheet" href="/assets/custom.css">
+  </head>
+  <body>
+    <header>
+      <nav>
+        <div><a href="/">Home</a><a href="/blog/">Blog</a><a href="/friends/">Friends</a><a href="/cv/">CV</a></div>
+        <div></div>
+        <div></div>
+      </nav>
+    </header>
+    <article>
+      <section>
+        <h3>前前言</h3>
+        <p>本文所写的与最终合并进 <code>ncnn</code> 仓库的代码有所出入，切后续可能进行更改，本文内容仅供参考，以实际代码为准。</p>
+        <h3>前言</h3>
+        <p>笔者很菜，第一次做类似的工作，求轻点喷。</p>
+        <p>首先几个主要的难点：</p>
+        <ol>
+          <li>
+            <p>32 位的 Windows XP 很常见，我们不得不考虑编译成 32 位程序</p>
+          </li>
+          <li>
+            <p>现代的某些 Windows 系统函数在 Windows XP 时代不存在</p>
+          </li>
+        </ol>
+        <p>也有好消息：Windows XP 从系统内核层面上不支持 AVX 指令集，否则不知道又要多出多少个坑。</p>
+        <h3>使用 mingw 构建</h3>
+        <p>首先我们需要一个能编译至 32 位的版本。我们来到 mingw-w64 的 sourceforge，一路找到 <code>oolchains targetting Win32/Personal Builds/mingw-builds/8.1.0/threads-posix/dwarf/i686-8.1.0-release-posix-dwarf-rt_v6-rev0.7z</code></p>
+        <p>这里的 <code>threads</code> 必须位 posix 而不是 win32，不然会无法使用 <code>std::thread</code>。</p>
+        <p>为了方便找到特定的工具链我们不妨设置一个环境变量 <code>MINGW32_ROOT_PATH</code> 到这个工具链的根文件夹，然后在 <code>toolchains</code> 下创建一个 cmake 文件</p>
+        <pre><code>set(CMAKE_SYSTEM_NAME Windows)<br>set(CMAKE_SYSTEM_PROCESSOR x86_64)<br><br>if(DEFINED ENV{MINGW32_ROOT_PATH})<br>file(TO_CMAKE_PATH $ENV{MINGW32_ROOT_PATH} MINGW32_ROOT_PATH)<br>else()<br>message(FATAL_ERROR "MINGW32_ROOT_PATH env must be defined")<br>endif()<br><br>if(DEFINED ENV{OPENCV_MINGW_DIR})<br>file(TO_CMAKE_PATH $ENV{OPENCV_MINGW_DIR} OpenCV_DIR)<br>endif()<br><br>set(MINGW32_ROOT_PATH ${MINGW32_ROOT_PATH} CACHE STRING "root path to mingw toolchain")<br><br>set(CMAKE_C_COMPILER "${MINGW32_ROOT_PATH}/bin/i686-w64-mingw32-gcc.exe")<br>set(CMAKE_CXX_COMPILER "${MINGW32_ROOT_PATH}/bin/i686-w64-mingw32-g++.exe")<br><br>set(CMAKE_FIND_ROOT_PATH "${MINGW32_ROOT_PATH}/i686-w64-mingw32")<br><br>if(NOT CMAKE_FIND_ROOT_PATH_MODE_PROGRAM)<br>set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)<br>endif()<br>if(NOT CMAKE_FIND_ROOT_PATH_MODE_LIBRARY)<br>set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)<br>endif()<br>if(NOT CMAKE_FIND_ROOT_PATH_MODE_INCLUDE)<br>set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)<br>endif()<br>if(NOT CMAKE_FIND_ROOT_PATH_MODE_PACKAGE)<br>set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)<br>endif()</code></pre>
+        <p>对于 Windows XP，我们需要指定几个比较关键的编译参数：</p>
+        <ol>
+          <li>
+            <p><code>-D_WIN32_WINNT=0x0501</code>，<code>_WIN32_WINNT</code> 指定了所使用的最晚 Windows SDK 版本，<code>0x0501</code> 是 Windows XP 的代码，这个参数能禁用所有 Windows XP 不支持的 Windows 提供的函数。<a href="https://learn.microsoft.com/zh-cn/cpp/porting/modifying-winver-and-win32-winnt?view=msvc-170">Content</a>。</p>
+          </li>
+          <li>
+            <p><code>-march=i686</code> 指定编译的目标架构为 <code>i686</code>（即 32 位平台）。</p>
+          </li>
+          <li>
+            <p><code>-static</code> 尽量静态编译减少对第三方库的依赖</p>
+          </li>
+        </ol>
+        <p>其次链接的时候要加上 <code>-static -fopenmp</code>，否则会报找不到 <code>libgomp-1.dll</code>。</p>
+        <p>其次是代码中几处需要调整的地方： platform.h.in 中的 <code>Mutex</code> 和 <code>ConditionVariable</code> 分别封装了 <code>SRWLOCK</code> 和 <code>CONDITION_VARIABLE</code>，而这两个东西到 Windows 7 才出现。于是我们需要替代一下。直接替换成空实现不太道德，我们使用 <code>CRITICAL_SECTION</code> 和事件简单实现一下：</p>
+        <pre><code>class NCNN_EXPORT Mutex<br>{<br>    public:<br>    Mutex() { InitializeCriticalSection(&amp;cs); }<br>    ~Mutex() { DeleteCriticalSection(&amp;cs); }<br>    void lock() { EnterCriticalSection(&amp;cs); }<br>    void unlock() { LeaveCriticalSection(&amp;cs); }<br>    private:<br>    friend class ConditionVariable;<br>    CRITICAL_SECTION cs;<br>};<br><br>class NCNN_EXPORT ConditionVariable<br>{<br>    public:<br>    ConditionVariable() { event = CreateEvent(0, FALSE, FALSE, 0); }<br>    ~ConditionVariable() { CloseHandle(event); }<br>    void wait(Mutex&amp; mutex)<br>    {<br>        mutex.unlock();<br>        WaitForSingleObject(event, INFINITE);<br>        mutex.lock();<br>    }<br>    void broadcast() { SetEvent(event); }<br>    void signal() { SetEvent(event); }<br>    private:<br>    HANDLE event;<br>};</code></pre>
+        <p>再改一下宏的判断就行了，应该没什么问题。</p>
+        <p><code>test_cpu.cpp</code> 里，原本写得是 <code>#if _WIN32_WINNT >= _WIN32_WINNT_WIN7‘</code>，但是似乎没有用到 Windows XP 不支持的操作，直接改掉就好了。 3. 如果你还想用 vlukan 的话，<code>glslang</code> 里用到了 <code>_itoa_s</code> 和 <code>_vsnprintf_s</code>，这些是 Windows XP 下没有的、后增加的安全版本的函数。我们注意到这里是否使用安全函数是一个宏 <code>MINGW_HAS_SECURE_API</code> 控制的，一般来讲这个宏又会被 <code>_CRT_SECURE_NO_DEPRECATE</code> 控制，但是不知道为什么我们这里的 <code>MINGW_HAS_SECURE_API</code> 被写死成了 1，我们可以稍微修改一下这里的判断，改成类似 <code>#if !(defined(_WIN32_WINNT) &amp;&amp; _WIN32_WINNT &lt;= 0x0501) &amp;&amp; (defined(MINGW_HAS_SECURE_API) &amp;&amp; MINGW_HAS_SECURE_API)</code>。感觉这个很 dirty，但是他工作了。</p>
+        <p>似乎也没改什么东西。</p>
+        <p>至此我们可以开始着手编译了。注意虽然 Windows XP 是不支持 <code>avx</code> 的但是我们选择的编译器支持，于是我们要手动把 <code>-DNCNN_AVX</code> 和 <code>-DNCNN_AVX</code> 设置为 <code>OFF</code>。</p>
+        <pre><code>cmake -DCMAKE_TOOLCHAIN_FILE="../toolchains/windows-xp-mingw.toolchain.cmake" -DCMAKE_BUILD_TYPE=debug -DNCNN_RUNTIME_CPU=OFF -DNCNN_BUILD_BENCHMARK=ON -DNCNN_BUILD_EXAMPLES=OFF -DNCNN_BUILD_TESTS=OFF -DNCNN_SIMPLEOCV=ON -DNCNN_AVX2=OFF -DNCNN_AVX=OFF -DNCNN_VULKAN=ON .. -G "MinGW Makefiles"<br>cmake --build . -j 4</code></pre>
+        <p>这里直接使用了 <code>-DNCNN_SIMPLEOCV</code>，就不用在 Windows XP 上配置 <code>OpenCV</code> 了，我们之后也会使用这个编译选项。</p>
+        <h4>我就想在 Windows XP 上配 OpenCV</h4>
+        <p>别吧。</p>
+        <p>笔者折腾了半天没折腾出来，决定放一放。折腾出来了再补。</p>
+        <h3>用 Clang 构建</h3>
+        <p>其实不建议这么做。Clang 发行时默认不包含 C 运行时库，也不包含构建 Windows XP 应用程序所需的头文件和库，我们需要借用 Mingw 的 32 位库进行构建。因此其实直接用 mingw 构建更为方便。</p>
+        <p>官方明确了最后一个支持 Windows XP 的版本是 3.7.0，详见 <a href="(https://releases.llvm.org/3.7.0/tools/clang/docs/ReleaseNotes.html#last-release-which-will-run-on-windows-xp-and-windows-vista">Release Note</a>。我们下载这个版本，安装并且添加环境变量。 （后记：后面证实了其实更晚一些的版本仍然能正常工作）</p>
+        <p>和 mingw 不同的几个点：</p>
+        <ol>
+          <li>
+            <p><code>target</code> 选项改成 <code>–target=i686-pc-windows-gnu</code></p>
+          </li>
+          <li>
+            <p>添加 <code>–sysroot=${MINGW32_ROOT_PATH}</code> 强制使用 Mingw32 的库</p>
+          </li>
+          <li>
+            <p>由于不支持 <code>__float128‘，需要加上 ‘-D__STRICT_ANSI__‘</code></p>
+          </li>
+          <li>
+            <p>由于这个版本下 openmp 实在无法正常工作，不得不使用 SAMPLEOMP，将 <code>-fopenmp</code> 移除。</p>
+          </li>
+          <li>
+            <p>这个版本的 clang 不支持 <code>const T t;</code>这种写法，必须提供一个构造器如 <code>const T t = ;</code>。这部分问题出在 <code>src/layer/binaryop.cpp</code> 和 <code>src/layer/x86/binaryop_x86.cpp</code> 两个文件中，把这里的 <code>const Op op;</code> 改成 <code>const Op op = ;</code>。虽然这样做会多出两条指令，但是开启优化之后能够优化掉。你可以试试 <a href="https://godbolt.org/z/5796bWW9G">上手玩玩</a>。</p>
+          </li>
+        </ol>
+        <p>之后就可以正常编译了：</p>
+        <p>“‘bash</p>
+        <pre><code>cmake -DCMAKE_TOOLCHAIN_FILE="../toolchains/windows-xp-clang.toolchain.cmake" -DCMAKE_BUILD_TYPE=debug -DNCNN_RUNTIME_CPU=OFF -DNCNN_BUILD_BENCHMARK=ON -DNCNN_BUILD_EXAMPLES=ON -DNCNN_BUILD_TESTS=ON -DNCNN_SIMPLEOCV=ON -DNCNN_SIMPLEOMP=ON -DNCNN_SSE2=OFF -DNCNN_AVX2=OFF -DNCNN_AVX=OFF .. -G "MinGW Makefiles"<br>cmake --build . -j 4</code></pre>
+        <p>编译出的 example 和 benchmark 应当都能在 Windows XP 上正常运行了。</p>
+        <h3>用 VS2017 构建</h3>
+        <p>官方给出的最后一个支持 Windows 开发的版本时 VS2017，<a href="https://learn.microsoft.com/en-us/cpp/porting/features-deprecated-in-visual-studio?view=msvc-170">详情点击即看</a>。此外我们还需要<a href="https://stackoverflow.com/questions/49516896/how-to-install-build-tools-for-v141-xp-for-vc-2017">额外安装 <code>v141_xp</code> 工具集</a>才能正常构建。</p>
+        <p>几个要注意的点：</p>
+        <ol>
+          <li>
+            <p>MSVC 传入参数的方式不同，应该使用 <code>/D_WIN32_WINNT=0x0501</code> 这种形式；</p>
+          </li>
+          <li>
+            <p>一个可有可无的点：MSVC 会觉得你没有正常处理异常，于是会报很多 warning。我们用 <code>/EHsc</code> 钦定异常只在 throw 语句或函数调用处发生他就安静了。</p>
+          </li>
+          <li>
+            <p>需要静态链接运行时库，可以直接传一个 <code>/MT</code>（或者 debug 版本 <code>MTd</code>），或者 NCNN 也提供了 <code>DNCNN_BUILD_WITH_STATIC_CRT</code> cmake 选项。</p>
+          </li>
+          <li>
+            <p>要用 <code>-A WIN32</code> 指定生成平台</p>
+          </li>
+        </ol>
+        <p>然后就能正常编译了：</p>
+        <pre><code>mkdir build<br>cd build<br>cmake -A WIN32 -G "Visual Studio 15 2017" -T v141_xp -DNCNN_SIMPLEOCV=ON -DNCNN_OPENMP=OFF -DNCNN_AVX2=OFF -DNCNN_AVX=OFF -DNCNN_BUILD_WITH_STATIC_CRT=ON -DCMAKE_TOOLCHAIN_FILE="../toolchains/windows-xp-msvc.toolchain.cmake" ..<br>cmake --build . --config Release -j 2<br>cmake --build . --config Release --target install</code></pre>
+        <p>速度比 mingw 快多了。</p>
+      </section>
+    </article>
+  </body>
+</html>

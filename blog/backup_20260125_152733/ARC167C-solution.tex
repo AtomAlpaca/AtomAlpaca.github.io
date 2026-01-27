@@ -1,0 +1,107 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{hyperref}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+\hypersetup {
+	colorlinks = true,
+	linkcolor  = black,
+}
+
+\newcommand{\[}{\begin{align*}}
+	\newcommand{\]}{\end{align*}}
+\renewcommand{\par}[1]{\paragraph{#1}}
+
+
+\author {AtomAlpaca}
+\title {「题解」ARC167C MST on Line++}
+
+\begin{document}
+	
+	{
+		\setcounter{tocdepth}{3}
+		\tableofcontents
+	}
+	\subsection{题意}
+	
+	给定正整数 \(n,K\) 和一个长度为 \(n\) 的序列 \(A\)。对于一个 \(1\sim n\) 的排列 \(P\)，我们定义 \(f(P)\) 为以下问题的答案：
+	
+	\begin{quote}
+		给一个 \(n\) 个点的无向带权图，对于两点 \(i<j\)，当且仅当 \(j-i\le K\) 时，它们之间有边，边权为 \(\max(A_{P_i},A_{P_j})\)。\\
+		求这个图的最小生成树边权和。
+	\end{quote}
+	
+	对于所有可能的排列 \(P\)，求出它们的 \(f(P)\) 之和，答案对 \(998\,244\,353\) 取模。
+	
+	\(1\le K< N\le 5000\)，\(1\le A_i \le 10^9\)。
+	
+	奇妙深刻数数题。
+	
+	\subsection{题解}
+	
+	首先发现因为要枚举排列，\(A\) 的顺序是无关紧要的，可以升序排序处理。
+	
+	考虑拆贡献，考虑对于每一个 \(A_i\) 计算它在所有情况中被选的次数 \(f_i\)。答案就是 \(\sum_{i}^{n}{f_i  A_i}\)。
+	
+	但是这样还是不好求，我们考虑用小于等于 \(A_i\) 的边权被选的次数减去小于等于 \(A_{i - 1}\) 的边权的被选次数。这相当于构造了这样一个问题：
+	
+	对于两点 \(i<j\)，当且仅当 \(j-i\le K\) 且 \(\max(A_{P_i},A_{P_j}) \le A_x\) 时，它们之间有边。求最多选择多少条边使得构成的图没有环，对于所有排列 \(P\) 求和。
+	
+	因为取 \(\max\)，所有 \(A_{P_i} > x\) 的 \(i\) 都不会被选，被选的只有小于 \(A_x\) 的所有位置。
+	
+	再考虑 \(j - i \le K\) 这个条件怎么做。我们这里不妨对于一个所有选出来的数的集合有序 \(Q\)，考虑钦定 \(Q_j - Q_{j - 1} = K\)，这样的方案一共有 \(\binom{n-k}{x-1}\) 种，小于等于 \(K\) 的情况就有 \(\sum_{i = 1}^{K}{\binom{n-k}{x-1}}\) 种。一共有 \(x-1\) 个这样的位置，那么贡献总和就是 \((x - 1)\sum_{i = 1}^{K}{\binom{n-i}{x-1}}\)
+	
+	又考虑和一个 \(Q\) 对应的排列的排列方式应该是选出来的 \(x\) 个随便排，剩下的 \(n - x\) 个随便排并在一起，方案数应该是 \(x!(n - x)!\)。
+	
+	所以上述问题的答案就是 \(x!(n - x)!(x - 1)\sum_{i = 1}^{K}{\binom{n-i}{x-1}}\)。相邻的两项相减就能得到 \(f\)。
+	
+	\subsection{代码}
+	
+	\begin{verbatim}
+#include <bits/stdc++.h>
+
+typedef long long ll;
+const int MAX = 5005;
+const int MOD = 998244353;
+
+int n, k; ll ans;
+ll frc[MAX], ifrc[MAX], g[MAX], a[MAX];
+
+ll qp(ll a, ll x)
+{
+	ll res = 1;
+	while (x) { if (x & 1) { res = res * a % MOD; } x >>= 1; a = a * a % MOD; }
+	return res;
+}
+
+void init(int x)
+{
+	frc[0] = ifrc[0] = 1;
+	for (int i = 1; i <= x; ++i) { frc[i] = frc[i - 1] * i % MOD; } ifrc[x] = qp(frc[x], MOD - 2);
+	for (int i = x - 1; i >= 1; --i) { ifrc[i] = ifrc[i + 1] * (i + 1) % MOD; }
+}
+
+ll C(ll x, ll y) { if (x < y) { return 0; } return frc[x] * ifrc[y] % MOD * ifrc[x - y] % MOD; }
+
+int main()
+{
+	scanf("%d%d", &n, &k); init(5000);
+	for (int i = 1; i <= n; ++i) { scanf("%lld", &a[i]); }
+	std::sort(a + 1, a + n + 1);
+	for (int i = 1; i <= n; ++i)
+	{
+		ll tmp = 0;
+		g[i] = frc[i] * frc[n - i] % MOD * (i - 1) % MOD;
+		for (int j = 1; j <= k; ++j)
+		{
+			tmp = (tmp + C(n - j, i - 1)) % MOD;
+		}
+		g[i] = g[i] * tmp % MOD;
+	}
+	for (int i = 1; i <= n; ++i) { ans = (ans + (g[i] - g[i - 1] + MOD) % MOD * a[i] % MOD) % MOD; }
+	printf("%lld", ans);
+	return 0;
+}
+	\end{verbatim}
+	
+\end{document}

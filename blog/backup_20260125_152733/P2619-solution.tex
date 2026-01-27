@@ -1,0 +1,112 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{hyperref}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+\hypersetup {
+	colorlinks = true,
+	linkcolor  = black,
+}
+\newcommand{\[}{\begin{align*}}
+\newcommand{\]}{\end{align*}}
+	
+\author {AtomAlpaca}
+\title {「题解」 P2619 [国家集训队] Tree I}
+
+\begin{document}
+	\tableofcontents
+\subsection{题目}
+给出一个无向带权连通图，每条边是黑色或白色。求一棵最小权的恰好有 $need$ 条白色边的生成树。
+
+\href{https://www.luogu.com.cn/problem/P2619}{link}
+
+\subsection{题解}
+
+凸性的证明思路和最小度限制生成树类似。首先对于每个白边 $(u, v, w)$，考虑新增一条黑边 $(u, v, +\infty)$，防止白边过少时无法得到生成树。考虑当前有 $k - 1$ 条白边的生成树，现在要强行加进去一个白边，设其权值为 $w_1$，这使得原来的生成树上多出来一个环，我们选这个环上所有黑边中权值最大的一个删掉，设其权值为 $w_2$。我们每次要选择加入后构成的环中有黑边，且权值增量 $w = w_1 - w_2$ 最小的一个白边。不难发现这两个限制随着白边的加入都是越来越紧的——第 $k$ 次未加入生成树的白边第 $k + 1$ 次可能加入了，第 $k$ 次存在的黑边第 $k + 1$ 次可能不存在。
+
+因此如果第 $k + 1$ 次加入时的增量小于 $k$ 次，那一定可以交换 $k, k + 1$ 次的选边方案使得第 $k$ 次更优，因此加入白边后的权值增量不增，故该问题有凸性，可以用 wqs 二分解决。
+
+于是二分一个增量，每次将所有白边权值加上这个增量，再和黑边一起跑最小生成树，根据最小生成树中白边的数量调整增量即可。
+
+2025/11/20 补：经 \href{https://www.luogu.com/user/223298/}{@do\_while\_true} 老师提醒补充一下增量构造的正确性，也即我们总能通过删除一条黑边加入一条白边得到从 $f(k - 1)$ 得到 $f(k)$ 的答案
+
+设图拟阵 $\mathcal M = {\left \langle E, \mathcal I \right \rangle}$，$T_{k - 1}$ 是 $k - 1$ 时的一个最优生成树，$T_{k}$ 同理。二者都是 $\mathcal M$ 的一个基，由强基交换定理我们总有一个完美匹配 $\{(e, f)\}$ 其中 $e_i \in T_{k - 1}, f_i \in T_{k}$ 满足 $\forall i, T_{k - 1} \cup \{f_i\} \backslash \{e_i\}$ 和 $T_{k} \cup \{e_i\} \backslash \{f_i\}$ 也是 $\mathcal M$ 的基。其中一定存在一对边 $(f, g)$ 满足 $f$ 是白边，$e$ 是黑边，交换这对边也即删除一条黑边加入一条白边。
+
+设
+\[
+	T_{\alpha} &= T_{k - 1} \cup \{ f \} \backslash \{ e \} \\
+	T_{\beta} &= T_{k} \cup \{ e \} \backslash \{ f \}
+\]
+则 
+\[
+	w(T_{\alpha}) &= w(T_{k - 1}) + w(f) - w(e)
+	\\
+	&=f(k - 1) + w(f) - w(e)
+\]
+
+同理有 $w(T_{\beta}) = f(k) - (w(f) - w(e))$
+
+由于 $w(T_{\alpha}) \ge f(k), w(T_{\beta}) \ge f(k - 1)$，带入
+
+\[
+	f(k) - f(k - 1) &\le w(f) - w(e)
+	\\
+	f(k) - f(k - 1) &\le -(w(f) - w(e))
+\]
+取等，故仅交换这一组边能达到最优，证毕
+
+上高三好累，我想睡觉。
+
+\subsection{代码}
+
+\begin{Verbatim}
+#include <bits/stdc++.h>
+
+using std::cin;
+using std::cout;
+
+const int MAX = 1e5 + 5;
+
+int n, m, k, u, v, w, c, cnt, res, ans;
+int f[MAX];
+struct E { int u, v, w, c; } e[MAX];
+
+int find(int x) { if (f[x] == x) { return x; } return f[x] = find(f[x]); }
+bool cmp(E a, E b) { if (a.w == b.w) { return a.c < b.c; } return a.w < b.w; }
+
+void check(int x)
+{
+	res = cnt = 0;
+	for (int i = 1; i <= m; ++i) { if (e[i].c == 0) { e[i].w += x; } }
+	for (int i = 1; i <= n; ++i) { f[i] = i; }
+	std::sort(e + 1, e + m + 1, cmp);
+	for (int i = 1, tmp = 0; i <= m and tmp != n - 1; ++i)
+	{
+		int fu = find(e[i].u), fv = find(e[i].v);
+		if (fu == fv) { continue; }
+		f[fv] = fu; if (e[i].c == 0) { ++cnt; } res += e[i].w; ++tmp;
+	}
+	for (int i = 1; i <= m; ++i) { if (e[i].c == 0) { e[i].w -= x; } }
+}
+
+int main()
+{
+	cin >> n >> m >> k;
+	for (int i = 1; i <= m; ++i)
+	{
+		cin >> u >> v >> w >> c;
+		e[i] = {u + 1, v + 1, w, c};
+	}
+	int l = -111, r = 111, mid = 0;
+	while (l <= r)
+	{
+		mid = (l + r) >> 1;
+		check(mid);
+		if (cnt < k) { r = mid - 1; } else { l = mid + 1; ans = res - k * mid; }
+	}
+	cout << ans;
+	return 0;
+}
+\end{Verbatim}
+
+\end{document}

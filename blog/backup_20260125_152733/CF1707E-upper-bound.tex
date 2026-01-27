@@ -1,0 +1,55 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{hyperref}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+\hypersetup {
+	colorlinks = true,
+}
+
+\newcommand{\[}{\begin{align*}}
+	\newcommand{\]}{\end{align*}}
+\renewcommand{\par}[1]{\paragraph{#1}}
+
+\author {AtomAlpaca}
+\title {「数学」遥远的记忆：CF1707E 的答案上界及其证明}
+
+\begin{document}
+	\tableofcontents
+	\subsection{前言}
+当成北京集训讲这道题的时候也有人问了答案上界的问题，当时一时间没能答上来，趁着同学讲题的时间想出了证明，于是返场讲了一下，掌声雷动。两年后的今天因为\href{https://www.luogu.com.cn/discuss/1117450}{这篇帖子}再次尝试寻找答案的上界，曾经能被我十分钟想出来的证明现在花了我将近一个小时，令人感叹。想念那年北京的第一场雪。
+
+题面及其解法请移步\href{./CF1707E-solution.html}{这篇博客}。
+	\subsection{证明}
+设一共有 $S$ 次操作
+	
+我们把操作分为两个 stage，第二个 stage 满足：
+	
+$\exists k < S, \forall S > i > k, [l_{i}, r_{i}] \subset [l_{i + 1}, r_{i + 1}]$
+	
+不难看出这个 stage 一定存在。我们把剩下的操作全划分进 stage $1$
+
+首先几个 observision:
+	
+Observision $1.$ 任何时间，如果区间长度为 $1$，则一定无解
+	
+Proof: 显然。
+	
+Observision $2.$ 任何时间，如果一个区间是之前到过某个区间的子区间，则无解。形式化地说，$[l_{k + 1}, r_{k + 1}] \subseteq [l_k, r_k]$ 时一定无解。
+	
+Proof. 产生循环。
+	
+得到推论，stage 2 从长度为 $2$ 的区间开始，最多经过 $n - 2$ 次操作得到 $[1, n]$。
+	
+Observision $3.$，如果 $\exists k\ s.t. [l_{k - 1}, r-{k - 1}] \subseteq [l_k, r_k]$，则有 $\forall S > i > k, [l_i, r_i] \subseteq [l_{i - 1}, r_{i - 1}]$，也即一个区间开始向两侧“扩张”，就会一直扩张下去。
+	
+Proof. 扩张之后最小值不增最大值不减。
+	
+也就是说一旦产生了一次“扩张”就会直接进入 stage2
+	
+接下来再考虑 stage 1。这时我们得到了一个问题：给出一个长度为 $n$ 的线段，让你往上面不断放区间，要求不能是之前放过区间的子集，也不能是之前放过区间的超集，问最多能放下多少个（我们不考虑能不能构造出对应的 $a$ 数组，因为我不会。）。
+
+显然最优解是一直放长度为 $2$ 的区间，一共能放 $n - 1$ 次，然后一定会产生“扩张”进入 stage 2。我们放的第一个区间是题目给出的，放的最后一个区间就是 stage2 的第一个区间，因此最大操作次数为 $2n - 4$ 次。
+
+当 $n=3,a=[2,3,1],f(1,2)$ 就能卡到上界，因此该结果无法继续改进。
+\end{document}

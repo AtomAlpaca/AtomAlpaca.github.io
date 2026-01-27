@@ -1,0 +1,163 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{hyperref}
+\usepackage{fancyvrb}
+\usepackage{amsmath}
+\hypersetup {
+	colorlinks = true,
+	linkcolor  = black,
+}
+
+\newcommand{\[}{\begin{align*}}
+\newcommand{\]}{\end{align*}}
+\renewcommand{\par}[1]{\paragraph{#1}}
+
+
+\author {AtomAlpaca}
+\title {「题解」CF331D3 Escaping on Beaveractor}
+
+\begin{document}
+
+\subsection{题意}\label{ux9898ux610f}
+
+\href{https://codeforces.com/contest/331/problem/D3}{link}
+
+题意简述：在坐标系中给定边界和若干有向线段，每次询问从一个点沿某个方向走
+\(t\)
+时间，碰到有向线段就把前进方向改为这个有向线段的方向，时间耗尽或者碰到边界就停，最终会停在哪个位置。
+
+\subsection{题解}\label{ux9898ux89e3}
+
+首先一个朴素的想法是，维护每个格子开始往左/右/上/下跳 \(2^k\)
+步，会跳到那个点上，然后倍增，维护的时候暴力跳，然后查这个点是否在某个有向线段上。
+
+然后我们发现跳到两条线段的交叉点没法判断往哪边走，于是还要维护每个状态是从哪个方向转移来的；然后我们又发现这个办法的复杂度是
+\(O(b^2 \log t \log n)\) 的，只能通过弱化版，于是考虑优化。
+
+然后我们发现，对于每个点维护是不必要的，因为一条有向线段上的所有点的轨迹是相同的，于是我们考虑转而维护线段。
+
+不妨把每个询问点看作一个长度为 \(0\) 的有向线段。维护 \(f_{x, y}\)
+表示从线段 \(x\) 开始，走了除自己之外 \(2^y\)
+条线段，最后到达了哪个线段；\(g_{x,y}\) 表示从线段 \(x\) 开始，走完了
+\(f_{x, y}\) 条线段的路程。
+
+对于 \(y \ge 1\) 的情况，我们可以很容易地倍增求出；对于 \(y = 0\)
+的情况，我们实际上是要求沿着每条线段走，第一个碰到的线段是哪一个。
+
+我们把四个方向上的线段分别求，以向上的线段为例：我们先将所有线段按照两个端点中较小的纵坐标升序排序，依次将每个线段纳入考虑，设这个线段的横坐标范围是
+\(l\sim r\)，则已经纳入考虑的线段中，所有横坐标在此范围内，方向为上，且还没确定答案的线段，碰到的第一个线段一定是当前的这个线段。其余的方向也是类似的求法。
+
+于是我们对每个询问的``线段''不断跳倍增数组，直至没法继续跳。这时还有两种情况：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  沿着最后的线段方向一直走，直到时间耗尽；
+\item
+  沿着最后的线段方向一直走，走到另一条线段上，但是剩余时间不够走到这条线段的末尾，所以倍增时没有跳到这条线段上。
+\end{enumerate}
+
+对于第二种情况，我们判断出来之后``透支''时间，强制跳到另一条线段上，然后再沿着反方向把时间``补回来''即可。
+
+时间复杂度 \(O((n + q)\log t)\)，代码写起来略显繁琐。
+
+\subsection{代码}\label{ux4ee3ux7801}
+
+\begin{verbatim}
+#include <bits/stdc++.h>
+ 
+typedef long long ll;
+const int MAX = 2e5 + 5;
+const int MAXX = 51;
+const ll INF = 1e15 + 5;
+using std::min;
+using std::max;
+typedef std::multimap <ll, ll> MP;
+typedef MP::iterator IT;
+ 
+struct N
+{
+  ll sx, sy, tx, ty, dx = 0, dy = 0;
+} a[MAX];
+ 
+bool cmpx0(ll x, ll y) { return min(a[x].sx, a[x].tx) == min(a[y].sx, a[y].tx) ? x > y : min(a[x].sx, a[x].tx) > min(a[y].sx, a[y].tx); }
+bool cmpx1(ll x, ll y) { return max(a[x].sx, a[x].tx) == max(a[y].sx, a[y].tx) ? x > y : max(a[x].sx, a[x].tx) < max(a[y].sx, a[y].tx); }
+bool cmpy0(ll x, ll y) { return min(a[x].sy, a[x].ty) == min(a[y].sy, a[y].ty) ? x > y : min(a[x].sy, a[x].ty) > min(a[y].sy, a[y].ty); }
+bool cmpy1(ll x, ll y) { return max(a[x].sy, a[x].ty) == max(a[y].sy, a[y].ty) ? x > y : max(a[x].sy, a[x].ty) < max(a[y].sy, a[y].ty); }
+ 
+ll n, b, q;
+char op;
+ll tm[MAX], h[MAX];
+ll f[MAX][MAXX], g[MAX][MAXX];
+ 
+void solve(ll dx, ll dy, bool (*cmp)(ll, ll))
+{
+  for (int i = 1; i <= n + q; ++i) { h[i] = i; }
+  std::sort(h + 1, h + n + q + 1, cmp);
+  MP mp; mp.clear();
+  for (int i = 1; i <= n + q; ++i)
+  {
+    if (h[i] <= n)
+    {
+      ll t1, t2;
+      if (dx != 0) { t1 = a[h[i]].sy, t2 = a[h[i]].ty; } else { t1 = a[h[i]].sx, t2 = a[h[i]].tx; }
+      if (t1 > t2) { std::swap(t1, t2); }
+      IT i1 = mp.lower_bound(t1), i2 = mp.upper_bound(t2);
+      for (IT j = i1; j != i2; mp.erase(j++))
+      {  
+        ll p = j -> second;
+        f[p][0] = h[i]; g[p][0] = abs(a[p].tx - a[h[i]].tx) + abs(a[p].ty - a[h[i]].ty);
+      }
+    }
+    if (a[h[i]].dx == dx and a[h[i]].dy == dy)
+    {
+      mp.insert({dx != 0 ? a[h[i]].ty : a[h[i]].tx, h[i]});
+    }
+  }
+}
+ 
+int main()
+{
+  scanf("%lld%lld", &n, &b);
+  for (int i = 1; i <= n; ++i)
+  {
+    scanf("%lld%lld%lld%lld", &a[i].sx, &a[i].sy, &a[i].tx, &a[i].ty); 
+    a[i].dx = a[i].tx - a[i].sx == 0 ? 0 : a[i].tx - a[i].sx > 0 ? 1 : -1; 
+    a[i].dy = a[i].ty - a[i].sy == 0 ? 0 : a[i].ty - a[i].sy > 0 ? 1 : -1;
+  }
+  scanf("%lld", &q);
+  for (int i = n + 1; i <= n + q; ++i)
+  {
+    scanf("%lld%lld %c %lld", &a[i].sx, &a[i].sy, &op, &tm[i]); a[i].tx = a[i].sx; a[i].ty = a[i].sy;
+    if (op == 'L') { --a[i].dx; } if (op == 'R') { ++a[i].dx; } if (op == 'U') { ++a[i].dy; } if (op == 'D') { --a[i].dy; }
+  }
+  solve(-1, 0, cmpx0); solve(1, 0, cmpx1); solve(0, -1, cmpy0); solve(0, 1, cmpy1);
+  for (int i = 1; i <= MAXX - 1; ++i)
+  {
+    for (int j = 1; j <= n + q; ++j)
+    {
+      f[j][i] = f[f[j][i - 1]][i - 1];
+      g[j][i] = std::min(INF, g[j][i - 1] + g[f[j][i - 1]][i - 1]);
+    }
+  }
+  for (int i = n + 1; i <= n + q; ++i)
+  {
+    int p = i;
+    for (int j = MAXX - 1; j >= 0; --j)
+    {
+      if (!f[p][j]) { continue; }
+      if (g[p][j] <= tm[i]) { tm[i] -= g[p][j]; p = f[p][j]; }
+    }
+    if (f[p][0] and tm[i] >= a[p].dx * (a[f[p][0]].tx - a[p].tx) + a[p].dy * (a[f[p][0]].ty - a[p].ty))
+    {
+      tm[i] -= g[p][0]; p = f[p][0];
+    }
+    printf("%lld %lld\n", std::min(std::max(a[p].tx + a[p].dx * tm[i], 0ll), b),
+                          std::min(std::max(a[p].ty + a[p].dy * tm[i], 0ll), b));
+  }
+  return 0;
+}
+\end{verbatim}
+
+\end{document}

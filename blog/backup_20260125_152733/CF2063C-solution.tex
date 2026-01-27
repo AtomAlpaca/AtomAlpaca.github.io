@@ -1,0 +1,97 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+\author {AtomAlpaca}
+\title  {「题解」CF2063C Remove Exactly Two}
+\begin{document}
+	\tableofcontents
+大家好我不是很有脑子，所以我用 dp 过了这道题
+
+\subsection{题意}
+
+给出一棵树，求删除两个点及其相连的边后最多能产生多少个联通块
+
+$n \le 2 \cdot 10^5$
+
+
+\subsection{题解}
+
+不妨设 $f_{u, \{1, 2\}, \{0, 1\}}$ 是 $u$ 这个节点子树内删除 $1, 2$ 个节点，其中自己不删除/删除所形成的最多的联通块数量。我们依次考虑这四种情况。下面设 $s_u$ 是 $u$ 的儿子组成的集合。
+
+首先 $f_{u, 1, 0}$ 只能从子树内找一个删掉。注意如果删掉的是儿子节点，那么 $u$ 和其余的儿子及其子树会额外形成一个联通块。即 $f_{u, 1, 0} = \max_{v\in s_u)} \max (f_{v, 1, 0}, f_{v, 1, 1} + 1)$。
+
+$f_{u, 1, 1} = |s_u|$，这是显然的。 
+
+$f_{u, 2, 0}$ 略微复杂，要么是一个儿子的子树内删掉两个（如果有两个节点），要么两个子树分别删掉一个（如果有两个子树）。前者和 $f_{u, 1, 0}$ 类似地更新，后者我们维护 $\forall v \in s_u, f_{v,  1, 0} - 1, f_{v, 1, 1}$ 中前两大 $m_1, m_2$，则 $f_{u, 2, 0} = m_1 + m_2 + 1$。
+
+$f_{u, 2, 1}$ 和 $f_{u, 1, 1}$ 类似地，只是其中一个子树也被删除了节点，我们可以想象其删掉了一个联通块又加上若干个，故 $f_{u, 2, 1} = |s_u| - 1 + \max_{v \in s_u} \max (f_{v, 1, 0}, f_{v, 1, 1})$。
+
+总复杂度 $O(n)$，优于官方题解。
+
+具体过程难以用语言描述，建议参考代码理解。
+
+\subsection{代码}
+\begin{verbatim}
+#include <bits/stdc++.h>
+
+const int MAX = 1e6 + 5;
+typedef long long ll;
+const ll INF = 1e16 + 5;
+
+inline ll max(ll a, ll b) { return a > b ? a : b; }
+
+ll T, n, l, r, ans, tot, u, v;
+ll a[MAX], h[MAX], g[MAX], s[MAX];
+ll f[MAX][3][2];
+
+struct E { ll v, x; } e[MAX];
+
+void add(ll u, ll v)
+{
+	e[++tot] = { v, h[u] }; h[u] = tot;
+	e[++tot] = { u, h[v] }; h[v] = tot;
+}
+
+void upd(ll & m1, ll & m2, ll a)
+{
+	if (a > m1) { m2 = m1; m1 = a; }
+	else if (a > m2) { m2 = a; }
+}
+
+void dfs(ll u, ll fa)
+{
+	ll c = 0, m1 = 0, m2 = 0, mx = 0;
+	for (int i = h[u]; i; i = e[i].x)
+	{
+		ll v = e[i].v; if (v == fa) { continue; }
+		dfs(v, u); ++c;
+		f[u][1][0] = max(f[u][1][0], f[v][1][0]); f[u][1][0] = max(f[u][1][0], f[v][1][1] + 1);
+		if (g[v]) { f[u][2][0] = max(f[u][2][0], f[v][2][0]); f[u][2][0] = max(f[u][2][0], f[v][2][1] + 1); }
+		upd(m1, m2, max(f[v][1][0] - 1, f[v][1][1]));
+		mx = max(mx, f[v][1][0]); mx = max(mx, f[v][1][1]);
+	}
+	f[u][1][1] = c;
+	if (!c) { g[u] = 0; }
+	else
+	{
+		g[u] = 1;
+		if (c >= 2) { f[u][2][0] = max(f[u][2][0], m1 + m2 + 1); }
+		f[u][2][1] = c + mx - 1;
+	}
+}
+
+void solve()
+{
+	scanf("%lld", &n);
+	for (int i = 1; i <= n; ++i) { h[i] = g[i] = f[i][1][0] = f[i][1][1] = f[i][2][0] = f[i][2][1] = 0;  }
+	for (int i = 1; i <  n; ++i) { scanf("%lld%lld", &u, &v); add(u, v); }
+	if (n == 2) { printf("0\n"); return ; }
+	dfs(1, 0);
+	printf("%lld\n", max(f[1][2][0], f[1][2][1]));
+}
+
+int main() { scanf("%lld", &T); while (T--) { solve(); } }
+\end{verbatim}
+\end{document}

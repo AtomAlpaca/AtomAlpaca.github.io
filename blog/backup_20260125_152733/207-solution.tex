@@ -1,0 +1,126 @@
+\documentclass{article}
+\usepackage[UTF8]{ctex}
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+\author {AtomAlpaca}
+\title  {「题解」UOJ 207. 共价大爷游长沙} 
+\begin{document}
+\subsection{题意}
+\href{https://uoj.ac/problem/207}{link}
+
+\subsection{题解}
+
+如果一条路径 $u, v$ 在所有路径上，那么我们把 $u$ 当作根拎起来，$v$ 的子树中一定包括且仅包括路径的其中一个顶点。
+
+我们发现这个东西很像异或，于是考虑星战那题的 Trick, 我们给每个路径随机分配一个权值，然后异或到两个顶点上。如果把 $u$ 当作根拎起来之后$v$ 的子树点集异或和等于所有边的异或和，那么我们可以认为它包括且仅包括了所有路径的一个顶点。考虑到加删边，考虑用 LCT 维护这个东西。
+
+然后 LCT 维护子树信息要用点 Trick, 具体来说就是对每个结点都多维护一个虚边连接的“虚子树”的信息，然后在 pushup 和 access、link 这些会改变轻重链信息的操作中更新一下就行了。具体可以看代码。
+
+\begin{verbatim}
+void pu(int x) { t[x].v = t[t[x].c[0]].v ^ t[t[x].c[1]].v ^ t[x].p; }
+
+void acc(int x)
+{
+	int lst = 0;
+	while (x)
+	{
+		splay(x); t[x].p ^= t[lst].v ^ t[t[x].c[1]].v; t[x].c[1] = lst;
+		pu(x); lst = x; x = t[x].f;
+	}
+}
+
+void link(int x, int y) { mkrt(x); acc(y); splay(y); t[x].f = y; t[y].p ^= t[x].v; }
+\end{verbatim}
+
+\subsection{代码}
+
+\begin{verbatim}
+#include <bits/stdc++.h> 
+
+const int MAX = 1e5 + 5;
+const int MAXX = 3e5 + 5;
+std::mt19937_64 rnd(time(0));
+
+int u, v, id, n, m, x, y, typ, tot, ans;
+int a[MAXX], b[MAXX], p[MAXX];
+
+struct N { int v, p, f, c[2]; bool r; } t[MAX];
+
+void pu(int x) { t[x].v = t[t[x].c[0]].v ^ t[t[x].c[1]].v ^ t[x].p; }
+void rv(int x) { std::swap(t[x].c[0], t[x].c[1]); t[x].r ^= 1; }
+void pd(int x) { if (t[x].r) { rv(t[x].c[0]); rv(t[x].c[1]); t[x].r = 0; } }
+bool fx(int x) { return t[t[x].f].c[1] == x; }
+bool isrt(int x) { return (!t[x].f) or (t[t[x].f].c[0] != x and t[t[x].f].c[1] != x); }
+void upd(int x) { if (!isrt(x)) { upd(t[x].f); } pd(x); }
+
+void rot(int x)
+{
+	int y = t[x].f, z = t[y].f, p = fx(x);
+	if (!isrt(y)) { t[z].c[fx(y)] = x; }
+	t[y].c[p] = t[x].c[p ^ 1];
+	if (t[x].c[p ^ 1]) { t[t[x].c[p ^ 1]].f = y; }
+	t[x].c[p ^ 1] = y; t[y].f = x; t[x].f = z;
+	pu(y); pu(x);
+}
+
+void splay(int x)
+{
+	upd(x);
+	while (!isrt(x))
+	{
+		int y = t[x].f;
+		if (!isrt(y)) { if (fx(x) == fx(y)) { rot(y); } else { rot(x); } } rot(x);
+	}
+	pu(x);
+}
+
+void acc(int x)
+{
+	int lst = 0;
+	while (x)
+	{
+		splay(x); t[x].p ^= t[lst].v ^ t[t[x].c[1]].v; t[x].c[1] = lst;
+		pu(x); lst = x; x = t[x].f;
+	}
+}
+
+void mkrt(int x) { acc(x); splay(x); rv(x); }
+void split(int x, int y) { mkrt(x); acc(y); splay(y); }
+void link(int x, int y) { mkrt(x); acc(y); splay(y); t[x].f = y; t[y].p ^= t[x].v; }
+void cut(int x, int y) { mkrt(x); acc(y); splay(y); t[y].c[0] = t[x].f = 0; pu(y); }
+
+int main()
+{
+	scanf("%d%d%d", &id, &n, &m);
+	for (int i = 1; i <  n; ++i) { scanf("%d%d", &u, &v); link(u, v); }
+	for (int i = 1; i <= m; ++i)
+	{
+		scanf("%d", &typ);
+		if (typ == 1)
+		{
+			scanf("%d%d%d%d", &x, &y, &u, &v);
+			cut(x, y); link(u, v);
+		}
+		else if (typ == 2)
+		{
+			scanf("%d%d", &u, &v);
+			p[++tot] = rnd(); a[tot] = u; b[tot] = v; ans ^= p[tot];
+			mkrt(u); t[u].p ^= p[tot]; t[u].v ^= p[tot];
+			mkrt(v); t[v].p ^= p[tot]; t[v].v ^= p[tot];
+		}
+		else if (typ == 3)
+		{
+			scanf("%d", &x); int u = a[x], v = b[x]; ans ^= p[x];
+			mkrt(u); t[u].p ^= p[x]; t[u].v ^= p[x];
+			mkrt(v); t[v].p ^= p[x]; t[v].v ^= p[x];
+		}
+		else
+		{
+			scanf("%d%d", &u, &v);
+			split(u, v); printf(t[v].p == ans ? "YES\n" : "NO\n");
+		}
+	}
+}
+\end{verbatim}
+\end{document}
