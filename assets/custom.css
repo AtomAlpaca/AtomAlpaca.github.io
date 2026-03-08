@@ -14,8 +14,14 @@ article {
     padding: 0 0
 }
 
-section>p {
-    width: 60%;
+section>p,
+section>div{
+    width: 60% !important;
+}
+
+div[style*="border-inline-start"]>p {
+    color: #646464;
+    width: 100%;
 }
 
 @import url('https://fonts.cdnfonts.com/css/latin-modern-math');

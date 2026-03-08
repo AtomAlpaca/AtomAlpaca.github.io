@@ -1,0 +1,109 @@
+/*
+Everforest Theme AtomAlpaca <atal@tuta.io>
+*/
+
+
+.hljs {
+    padding: 0.5em;
+    background: #2D353B;
+    color: #D3C6AA;
+}
+
+.hljs-subst {
+
+}
+
+/*
+fg #D3C6AA
+Default Foreground, Signs, [Treesitter: Constants, Variables, Function Parameters, Properties, Symbol Identifiers]
+*/
+.hljs-punctuation
+.hljs-property,
+.hljs-variable,
+.hljs-params,
+.hljs-attr,
+.hljs-selector-attr,
+.selector-pseudo {
+    color: #D3C6AA;
+}
+/*
+red #E67E80
+Conditional Keywords, Loop Keywords, Exception Keywords, Inclusion Keywords, Uncategorised Keywords, Diff Deleted Signs, Error Messages, Error Signs
+*/
+.hljs-keyword,
+.hljs-meta\ keyword
+.hljs-name {
+    color: #E67E80;
+}
+
+/*
+orange #E69875
+Operator Keywords, Operators, Labels, Storage Classes, Composite Types, Enumerated Types, Tags, Title, Debugging Statements
+*/
+.hljs-operator,
+.hljs-title.class
+.hljs-tag,
+.hljs-selector-class {
+    color: #E69875;
+}
+
+.hljs-type {
+    color: #DBBC7F;
+}
+
+/* 
+green #A7C080
+Function Names, Method Names, Strings, Characters, Hint Messages, Hint Signs, Search Highlights, [Treesitter: Constructors, Function Calls, Built-In Functions, Macro Functions, String Escapes, Regex Literals, Tag Delimiters, Non-Structured Text]
+*/
+.hljs-regexp,
+.hljs-string,
+.hljs-char.escape,
+.hljs-title,
+.hljs-meta\ string
+.hljs-section,
+.hljs-attribute,
+.hljs-link,
+.hljs-quote,
+.hljs-selector-tag {
+    color: #A7C080;
+}
+/*
+aqua #83C092
+Constants, Macros, [Treesitter: Strings, Characters]
+*/
+.hljs-variable.constant {
+    color: #83C092;
+}
+
+/*
+purple #D699B6
+Booleans, Numbers, Preprocessors, [Treesitter: Built-In Constants, Built-In Variables, Macro-Defined Constants, Attributes/Annotations]
+*/
+.hljs-built_in,
+.hljs-literal,
+.hljs-number,
+.hljs-symbol,
+.hljs-variable.language,
+.hljs-bullet,
+.hljs-code,
+.hljs-selector-id {
+    color: #D699B6;
+}
+
+/*
+grey1 #859289
+Comments, Punctuation Delimiters, Closed Folds, Ignored/Disabled, UI Borders, Status Line Text
+*/
+.hljs-comment
+.hljs-doctag {
+    color: #859289;
+}
+
+.hljs-emphasis {
+    font-style: italic;
+}
+  
+.hljs-strong {
+    font-weight: bold;
+}
+  

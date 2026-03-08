@@ -4,9 +4,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>AtomAlpaca 的个人网站</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js">
+    </script>
+    <script>
+      hljs.addPlugin({ "before:highlightElement": ({ el }) => { el.textContent = el.innerText } });
+    </script>
+    <script>
+      hljs.highlightAll();
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tufte-css/1.8.0/tufte.min.css">
     <link rel="stylesheet" href="/assets/tufted.css">
     <link rel="stylesheet" href="/assets/custom.css">
+    <link rel="stylesheet" href="/assets/everforest-dark-medium.css">
   </head>
   <body>
     <header>

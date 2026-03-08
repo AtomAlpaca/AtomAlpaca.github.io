@@ -4,9 +4,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Blog</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js">
+    </script>
+    <script>
+      hljs.addPlugin({ "before:highlightElement": ({ el }) => { el.textContent = el.innerText } });
+    </script>
+    <script>
+      hljs.highlightAll();
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tufte-css/1.8.0/tufte.min.css">
     <link rel="stylesheet" href="/assets/tufted.css">
     <link rel="stylesheet" href="/assets/custom.css">
+    <link rel="stylesheet" href="/assets/everforest-dark-medium.css">
   </head>
   <body>
     <header>
@@ -20,6 +29,7 @@
       <section>
         <h3>算法与工程</h3>
         <ul>
+          <li><a href="moonbit">Moonbit 一本通</a></li>
           <li><a href="ncnn-for-win-xp">如何给在 Windows XP 上玩 ncnn</a></li>
           <li><a href="how-to-opt-ncnn-for-riscv">如何给 ncnn 做 riscv 优化</a></li>
           <li><a href="wqs">wqs 二分略解</a></li>
@@ -74,6 +84,7 @@
         </ul>
         <h3>迷思</h3>
         <ul>
+          <li><a href="de-fa">从夯到拉锐评高考阅读</a></li>
           <li><a href="disappear">2025</a></li>
           <li><a href="about-note">有关“精致笔记”</a></li>
           <li><a href="me-and-self-harm">我与自残</a></li>
